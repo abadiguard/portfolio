@@ -223,9 +223,10 @@ input.form-input.invalid:-webkit-autofill,input.form-input.invalid:-webkit-autof
     width:100%;
     max-width:calc(100vw - 2rem);
     margin-inline:auto;
-    padding-inline:.25rem;
+    padding-inline:0;
     text-align:center;
     text-wrap:balance;
+    overflow-wrap:anywhere;
   }
   h1{font-size:min(var(--type-display),12vw)}
   .dec h2,.dp h2{font-size:min(var(--type-heading),10.5vw)}
