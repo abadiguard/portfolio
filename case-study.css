@@ -110,10 +110,12 @@
   .case-study__image-overlay-copy h2,
   .case-study__quote-section h2{
     box-sizing:border-box;
+    display:block;
     width:100%;
     max-width:calc(100vw - 2rem);
     margin-inline:auto;
     padding-inline:.25rem;
+    text-align:center;
     text-wrap:balance;
   }
   .case-study__hero h1{font-size:min(var(--type-display),12vw)}
