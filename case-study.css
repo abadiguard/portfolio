@@ -134,3 +134,13 @@
   .case-study__hero{padding-top:4.5rem}
   .case-study__client{margin-bottom:4.5rem}
 }
+
+@media(max-width:640px){
+  .case-study__image-section--full-image:not(.case-study__image-section--contained) .case-study__image{
+    width:100%;
+    height:auto;
+    aspect-ratio:auto;
+    object-fit:contain;
+    object-position:center;
+  }
+}
