@@ -98,3 +98,24 @@
   padding-bottom:var(--case-study-copy-image-gap)
 }
 .case-study__photo-credit a{color:inherit;text-decoration:underline;text-underline-offset:.15em}
+
+/* Mobile case-study headings use the same 85% scale as the home page and
+   reserve side gutters so long uppercase words stay centered and visible. */
+@media(max-width:640px){
+  .case-study__hero h1,
+  .case-study__content-section h2,
+  .case-study__feature-section h2,
+  .case-study__calendar-section h2,
+  .case-study__results-section>h2,
+  .case-study__image-overlay-copy h2,
+  .case-study__quote-section h2{
+    box-sizing:border-box;
+    width:100%;
+    max-width:calc(100vw - 2rem);
+    margin-inline:auto;
+    padding-inline:.25rem;
+    text-wrap:balance;
+  }
+  .case-study__hero h1{font-size:min(var(--type-display),12vw)}
+  .case-study__quote-section h2{font-size:min(var(--type-display),11vw)}
+}

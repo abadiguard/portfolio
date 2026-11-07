@@ -207,3 +207,24 @@ input.form-input.invalid:-webkit-autofill,input.form-input.invalid:-webkit-autof
 .scroll-logo-strip.is-visible{visibility:visible}
 .scroll-logo-link{position:absolute;left:50%;display:flex;align-items:center;justify-content:center;width:max-content;height:auto;color:var(--ink);line-height:0;transform:translate(-50%,-50%)}
 .scroll-logo-link .logo-svg{width:132px}
+
+/* Mobile heading scale: keep the desktop type system intact while giving
+   large, uppercase headings room to wrap inside the viewport. */
+@media (max-width:640px){
+  :root{
+    --mobile-heading-scale:.85;
+    --type-display:calc(72px * var(--mobile-heading-scale));
+    --type-heading:calc(48px * var(--mobile-heading-scale));
+    --type-subheading:calc(40px * var(--mobile-heading-scale));
+  }
+  h1,.dec h2{
+    box-sizing:border-box;
+    width:100%;
+    max-width:calc(100vw - 2rem);
+    margin-inline:auto;
+    padding-inline:.25rem;
+    text-wrap:balance;
+  }
+  h1{font-size:min(var(--type-display),12vw)}
+  .dec h2{font-size:min(var(--type-heading),10.5vw)}
+}
