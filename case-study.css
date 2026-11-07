@@ -122,3 +122,13 @@
   .case-study__hero h1{font-size:min(var(--type-display),12vw)}
   .case-study__quote-section h2{font-size:min(var(--type-display),11vw)}
 }
+
+/* Enlarge every client logo by the same factor on mobile, including the
+   Lexense and Landau logos that have custom desktop sizing. */
+@media(max-width:640px){
+  .case-study__client-logo{width:calc(clamp(93px,12.75vw,165px) * 1.5)}
+  .case-study--lexense .case-study__client-logo{width:calc(clamp(74.4px,10.2vw,132px) * 1.5)}
+  .case-study--landau .case-study__client-logo{width:calc(clamp(115.2px,18vw,144px) * 1.5)}
+  .case-study__hero{padding-top:4.5rem}
+  .case-study__client{margin-bottom:4.5rem}
+}
