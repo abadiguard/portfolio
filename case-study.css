@@ -120,6 +120,8 @@
     overflow-wrap:anywhere;
   }
   .case-study__hero h1{font-size:min(var(--type-display),12vw)}
+  .case-study__jpegmini-title{font-size:min(var(--type-display),9vw);overflow-wrap:normal;word-break:normal}
+  .case-study__jpegmini-title span{white-space:nowrap}
   .case-study__quote-section h2{font-size:min(var(--type-display),11vw)}
 }
 
