@@ -4,7 +4,12 @@
   document.querySelectorAll(".site-foot").forEach(function(footer){
     var tools=footer.querySelector(".built-using");
     if(!tools)return;
-    var syncFooterWidth=function(){footer.style.setProperty("--built-using-width",tools.getBoundingClientRect().width+"px")};
+    var qaContent=document.querySelector(".qa-content");
+    var syncFooterWidth=function(){
+      var toolsWidth=tools.getBoundingClientRect().width+"px";
+      footer.style.setProperty("--built-using-width",toolsWidth);
+      if(qaContent)qaContent.style.setProperty("--built-using-width",toolsWidth);
+    };
     syncFooterWidth();
     if("ResizeObserver" in window)new ResizeObserver(syncFooterWidth).observe(tools);
     window.addEventListener("resize",syncFooterWidth,{passive:true});
