@@ -186,8 +186,10 @@ input.form-input.invalid:-webkit-autofill,input.form-input.invalid:-webkit-autof
 @media(max-width:600px){
   .site-foot{padding:3.9rem 1rem 2.6rem}
   .site-foot .about{max-width:32em}
-  .site-foot .built-label{margin-top:3rem}
-  .built-using{gap:15px;margin:1.35rem auto 0;font-size:11pt;align-items:center;justify-content:center}
+  .site-foot .about a{display:block}
+  .site-foot .built-label{margin-top:3rem;font-size:10pt}
+  .built-using{gap:15px;margin:1.35rem auto 0;font-size:10pt;align-items:center;justify-content:center}
+  .site-foot .fine{font-size:10pt}
   .built-using>*{align-self:center}
   .tool-wordmark{display:none!important}
   .built-using .tool-mobile-icon{display:block!important;width:auto;height:auto;max-width:none}
