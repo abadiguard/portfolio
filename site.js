@@ -1,6 +1,15 @@
 (function(){
   "use strict";
 
+  document.querySelectorAll(".site-foot").forEach(function(footer){
+    var tools=footer.querySelector(".built-using");
+    if(!tools)return;
+    var syncFooterWidth=function(){footer.style.setProperty("--built-using-width",tools.getBoundingClientRect().width+"px")};
+    syncFooterWidth();
+    if("ResizeObserver" in window)new ResizeObserver(syncFooterWidth).observe(tools);
+    window.addEventListener("resize",syncFooterWidth,{passive:true});
+  });
+
   var sourceLogo=document.querySelector("a.logo");
   if(!sourceLogo)return;
 
