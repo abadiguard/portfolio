@@ -34,7 +34,7 @@ h1,h2,h3{word-break:normal;overflow-wrap:normal;text-wrap:balance}
 /* ===== Ownership section ===== */
 .own{background:var(--bg);color:var(--ink);display:flex;flex-direction:column;align-items:center;text-align:center;padding:clamp(4rem,9vw,6.5rem) 1.5rem var(--section-media-gap)}
 .own .sub{max-width:37em}
-.cols{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--section-media-gap);width:100%;max-width:1360px;margin-top:var(--section-media-gap)}
+.cols{display:grid;grid-template-columns:repeat(3,1fr);column-gap:calc(var(--section-media-gap)*.2);row-gap:var(--section-media-gap);width:100%;max-width:1360px;margin-top:var(--section-media-gap)}
 .col{display:flex;flex-direction:column;align-items:center;padding:0 1rem}
 .ic{width:108px;height:108px;display:block}
 .ic .r{fill:var(--ink)}
