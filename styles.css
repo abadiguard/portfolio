@@ -29,6 +29,7 @@ h1,h2,h3{word-break:normal;overflow-wrap:normal;text-wrap:balance}
 .js .hero-intro.arrow-reveal .arrow{visibility:visible;opacity:1;transition:opacity .55s ease}
 @media (prefers-reduced-motion:no-preference){.hero > .logo,.dp-head > .logo{animation:logo-arrive .48s cubic-bezier(.22,.61,.36,1) both}@keyframes logo-arrive{from{transform:scale(.9)}to{transform:scale(1)}}.arrow{animation:float 1.7s ease-in-out infinite}.js .arrow.draw-reveal svg path{stroke-dasharray:1;stroke-dashoffset:1}.js .arrow.draw-reveal.in #ar1{animation:draw-curly .8s cubic-bezier(.22,.61,.36,1) var(--d,0s) forwards}.js .arrow.draw-reveal.in #ar2{animation:draw-curly .18s ease calc(var(--d,0s) + .62s) forwards}@keyframes draw-curly{to{stroke-dashoffset:0}}@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}}
 @media (min-width:769px){.hero-intro .mid p{margin-top:calc(clamp(2rem,5.6vw,4.4rem)*.8)}}
+@media (max-width:768px){.hero-intro:not(.intro-ready){background:#fff;overscroll-behavior-y:none}.hero-intro:not(.intro-ready)::after{display:none}}
 
 /* ===== Ownership section ===== */
 .own{background:var(--bg);color:var(--ink);display:flex;flex-direction:column;align-items:center;text-align:center;padding:clamp(4rem,9vw,6.5rem) 1.5rem var(--section-media-gap)}
@@ -75,7 +76,7 @@ h1,h2,h3{word-break:normal;overflow-wrap:normal;text-wrap:balance}
 .portrait{position:relative;grid-column:1;grid-row:2;align-self:end;justify-self:end;width:min(80%,400px);margin:0;line-height:0;z-index:2;transform:none}
 .portrait-base{display:block;width:100%;height:auto}
 .portrait-extension{position:absolute;top:100%;left:0;display:block;width:100%;height:auto}
-.shirt-mark{position:absolute;left:calc(43% - 5px);top:88%;display:block;width:20.625%;height:auto;object-fit:contain;transform:translate(-50%,-50%);opacity:1;transition:opacity .28s ease}
+.shirt-mark{position:absolute;left:calc(43% - 5px);top:88%;display:block;width:20.625%;height:auto;object-fit:contain;transform:translate(-50%,-50%);opacity:1;transition:opacity .4s ease}
 .shirt-mark.fade-out{opacity:0}
 .details{grid-column:2;grid-row:2;width:100%;max-width:none;margin:0;display:flex;flex-direction:column;align-items:flex-start;text-align:left;position:relative;top:-7.2px;transition:opacity .25s,transform .25s}
 @media (prefers-reduced-motion:no-preference){.details{transition:opacity .25s,transform .25s,height .42s cubic-bezier(.22,.61,.36,1)}}

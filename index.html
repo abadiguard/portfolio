@@ -277,7 +277,7 @@ function show(i){
     det.classList.remove("out");
     requestAnimationFrame(function(){det.style.height=nextHeight+"px"});
     detailHeightTimer=setTimeout(function(){det.style.height="auto";det.style.overflow="visible";detailHeightTimer=null},460);
-  },180);
+  },400);
 }
   COMPANIES.forEach(function(c,i){
     var logoClass=c.name==="unomy"?"unomy":c.name==="comedy.com"?"comedy":c.name.toLowerCase();var b=document.createElement("button");b.type="button";b.className="logo-box logo-"+logoClass+(c.name==="unomy"?" unomy-logo":"");b.setAttribute("aria-label",c.name);var mark=document.createElement("img");mark.className="brand-mark";mark.setAttribute("aria-hidden","true");mark.alt="";mark.src=c.nav+(c.name==="unomy"?"?v=20261110-2":"");mark.style.width=c.navWidth+"px";b.appendChild(mark);
