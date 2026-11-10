@@ -21,8 +21,8 @@
 <script>try{if(window.IntersectionObserver&&!matchMedia("(prefers-reduced-motion: reduce)").matches)document.documentElement.className+=" js"}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600&family=Noto+Sans+Hebrew:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="styles.css?v=20261110-1140">
-  <script src="site.js" defer></script>
+<link rel="stylesheet" href="styles.css?v=20261110-1203">
+  <script src="site.js?v=20261110-1207" defer></script>
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-6T641TL5ED"></script>
   <script>
@@ -34,10 +34,10 @@
 </head>
 <body>
 <main id="home">
-<section class="hero">
+<section class="hero hero-intro" data-animated-intro>
   <a class="logo" href="index.html#home" aria-label="Liat Abadi"><img class="logo-svg" src="site-assets/liat-abadi-logo.svg" alt="Liat Abadi"></a>
   <div class="mid">
-    <h1>Design starts with human behavior,<br>not screens</h1>
+    <h1 class="hero-title" aria-label="Design is about shaping behavior"><span class="hero-title-line">DESIGN ISN'T</span><span class="hero-title-line">ABOUT PRETTY</span><span class="hero-title-line">SCREENS</span></h1>
     <p>A polished interface can still solve the wrong problem. I help teams find the real one, then design a product people can use and a business can grow</p>
     <div class="arrow" aria-hidden="true">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="-10 -10 140 240" width="70" height="128" fill="none" stroke="currentColor" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round">
@@ -267,8 +267,6 @@ function show(i){
       el.classList.add(cls||"rv");el.style.setProperty("--d",((base||0)+i*step)+"s");io.observe(el);
     });
   }
-  add(".hero h1,.hero .mid p",.12);
-  add(".hero .arrow",0,"draw-reveal",.12);
 
   add(".proof .pill,.proof h2,.proof .sub",.1);
   add(".proof .grp,.proof .marq",0);

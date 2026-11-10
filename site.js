@@ -1,5 +1,96 @@
 (function(){
   "use strict";
+  var introStateKey="homeHeroIntroComplete";
+  var navEntries=performance.getEntriesByType?performance.getEntriesByType("navigation"):[];
+  if(navEntries.length&&navEntries[0].type==="reload"){
+    try{sessionStorage.removeItem(introStateKey)}catch(e){}
+  }
+  var hero=document.querySelector(".hero[data-animated-intro]");
+  if(!hero)return;
+  var title=hero.querySelector("h1");
+  var lines=title?title.querySelectorAll(".hero-title-line"):[];
+  var paragraph=hero.querySelector(".mid p");
+  var arrow=hero.querySelector(".arrow");
+  if(!title||lines.length!==3||!paragraph||!arrow)return;
+  var reduceMotion=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var started=false;
+  var completed=false;
+  var touchStartY=null;
+  var pendingScroll=0;
+  function saveFinalState(){try{sessionStorage.setItem(introStateKey,"1")}catch(e){}}
+  document.addEventListener("click",function(event){
+    var link=event.target.closest&&event.target.closest("a[href]");
+    if(!link)return;
+    try{var target=new URL(link.href,window.location.href);if(target.origin===window.location.origin&&target.pathname!==window.location.pathname)saveFinalState()}catch(e){}
+  },true);
+  function showFinalState(){
+    lines[0].textContent="DESIGN IS";lines[1].textContent="ABOUT SHAPING";lines[2].textContent="BEHAVIOR";
+    hero.classList.add("copy-reveal","copy-visible","arrow-reveal");
+    completed=true;
+  }
+  try{if(sessionStorage.getItem(introStateKey)==="1"){showFinalState();return}}catch(e){}
+  function revealArrow(){
+    hero.classList.add("arrow-reveal");
+    if(!reduceMotion){
+      arrow.classList.add("draw-reveal");
+      arrow.style.setProperty("--d","0s");
+      requestAnimationFrame(function(){arrow.classList.add("in")});
+    }
+    if(reduceMotion)return;
+  }
+  function finish(){
+    hero.classList.add("copy-reveal");
+    requestAnimationFrame(function(){requestAnimationFrame(function(){hero.classList.add("copy-visible");releaseScroll()})});
+    setTimeout(revealArrow,1050);
+  }
+  function begin(){
+    if(started)return;
+    started=true;
+    saveFinalState();
+    if(reduceMotion){showFinalState();releaseScroll();return}
+    var caret=document.createElement("span");caret.className="hero-caret";caret.setAttribute("aria-hidden","true");title.classList.add("is-typing");
+    var first=lines[0],second=lines[1],third=lines[2];
+    function moveCaret(line){line.appendChild(caret)}
+    function eraseLine(line,stopAt,done){
+      moveCaret(line);var value=line.firstChild?line.firstChild.textContent:"";
+      var timer=setInterval(function(){value=value.slice(0,-1);line.firstChild.textContent=value;if(value.length<=stopAt){clearInterval(timer);done()}},76);
+    }
+    function typeLine(line,value,done){
+      moveCaret(line);line.firstChild.textContent="";var i=0;
+      var timer=setInterval(function(){i++;line.firstChild.textContent=value.slice(0,i);if(i>=value.length){clearInterval(timer);done()}},76);
+    }
+    moveCaret(third);
+    setTimeout(function(){
+      eraseLine(third,0,function(){eraseLine(second,0,function(){eraseLine(first,"DESIGN IS".length,function(){
+        setTimeout(function(){typeLine(second,"ABOUT SHAPING",function(){typeLine(third,"BEHAVIOR",function(){title.classList.remove("is-typing");caret.remove();setTimeout(finish,550)})})},420);
+      })})});
+    },1500);
+  }
+  function releaseScroll(){
+    if(completed)return;completed=true;
+    saveFinalState();
+    window.removeEventListener("wheel",onWheel);window.removeEventListener("touchstart",onTouchStart);window.removeEventListener("touchmove",onTouchMove);window.removeEventListener("keydown",onKey);
+    if(pendingScroll)window.scrollBy({top:pendingScroll,behavior:"smooth"});
+  }
+  function onWheel(event){if(completed)return;event.preventDefault();if(!started)pendingScroll=event.deltaY||120;begin()}
+  function onKey(event){
+    if(["ArrowDown","PageDown"," "].indexOf(event.key)===-1)return;
+    event.preventDefault();if(!started)pendingScroll=event.key==="ArrowDown"?100:Math.round(window.innerHeight*.8);begin();
+  }
+  function onTouchStart(event){touchStartY=event.touches&&event.touches.length?event.touches[0].clientY:null}
+  function onTouchMove(event){
+    if(completed||touchStartY===null||!event.touches||!event.touches.length)return;
+    var delta=event.touches[0].clientY-touchStartY;
+    if(started||Math.abs(delta)>8){event.preventDefault();if(!started)pendingScroll=-delta;begin()}
+  }
+  window.addEventListener("wheel",onWheel,{passive:false});
+  window.addEventListener("touchstart",onTouchStart,{passive:true});
+  window.addEventListener("touchmove",onTouchMove,{passive:false});
+  window.addEventListener("keydown",onKey);
+})();
+
+(function(){
+  "use strict";
 
   document.querySelectorAll(".site-foot").forEach(function(footer){
     var tools=footer.querySelector(".built-using");
