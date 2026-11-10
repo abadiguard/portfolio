@@ -164,3 +164,41 @@
   reveal(".case-study__results-item",.12,.25);
   reveal(".case-study__results-nav-link",.12,.15);
 })();
+
+(function(){
+  "use strict";
+  var rail=document.querySelector("#case-cards");
+  var dots=document.querySelector(".case-dots");
+  if(!rail||!dots)return;
+  var cards=Array.prototype.slice.call(rail.querySelectorAll(".card"));
+  if(!cards.length)return;
+  var buttons=cards.map(function(card,index){
+    var button=document.createElement("button");
+    button.type="button";
+    button.setAttribute("aria-label","Show case study "+(index+1)+" of "+cards.length);
+    button.addEventListener("click",function(){
+      rail.scrollTo({left:card.offsetLeft-cards[0].offsetLeft,behavior:window.matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});
+    });
+    dots.appendChild(button);
+    return button;
+  });
+  dots.hidden=false;
+  var frame=false;
+  function setActive(){
+    frame=false;
+    var railLeft=rail.getBoundingClientRect().left;
+    var activeIndex=0;
+    var nearest=Infinity;
+    cards.forEach(function(card,index){
+      var distance=Math.abs(card.getBoundingClientRect().left-railLeft);
+      if(distance<nearest){nearest=distance;activeIndex=index}
+    });
+    buttons.forEach(function(button,index){
+      if(index===activeIndex)button.setAttribute("aria-current","true");
+      else button.removeAttribute("aria-current");
+    });
+  }
+  rail.addEventListener("scroll",function(){if(frame)return;frame=true;window.requestAnimationFrame(setActive)},{passive:true});
+  window.addEventListener("resize",setActive,{passive:true});
+  setActive();
+})();
