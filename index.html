@@ -230,7 +230,7 @@ COMPANIES.forEach(function(c){var asset=COMPANY_ASSETS[c.name];if(asset){c.nav=a
 (function(){
   var logos=document.getElementById("logos"),det=document.getElementById("details"),track=document.getElementById("track"),shirt=document.getElementById("shirt-mark"),boxes=[];
 var proof=document.querySelector(".proof"),description=document.getElementById("d-desc"),proofLayoutFrame=null;
-var detailSwapTimer=null,detailHeightTimer=null,shirtFadeFrame=null;
+var detailSwapTimer=null,detailHeightTimer=null,shirtFadeFrame=null,shirtFadeToken=0;
 function updateResponsiveProof(){
   if(!proof||!description)return;
   if(window.innerWidth<=768){proof.classList.remove("compact-layout");return}
@@ -252,7 +252,8 @@ function scheduleProofLayout(){
 window.addEventListener("resize",scheduleProofLayout,{passive:true});
 function show(i){
   boxes.forEach(function(b,j){b.setAttribute("aria-pressed",j===i)});
-  if(shirt){if(shirtFadeFrame){cancelAnimationFrame(shirtFadeFrame);shirtFadeFrame=null}shirt.classList.remove("fade-in");shirt.classList.add("fade-out")}
+  var currentShirtToken=++shirtFadeToken;
+  if(shirt){if(shirtFadeFrame){cancelAnimationFrame(shirtFadeFrame);shirtFadeFrame=null}shirt.onload=null;shirt.onerror=null;shirt.classList.remove("fade-in");shirt.classList.add("fade-out")}
   if(detailSwapTimer){clearTimeout(detailSwapTimer);detailSwapTimer=null}
   if(detailHeightTimer){clearTimeout(detailHeightTimer);detailHeightTimer=null}
   var oldHeight=det.getBoundingClientRect().height;
@@ -263,7 +264,26 @@ function show(i){
   detailSwapTimer=setTimeout(function(){
     detailSwapTimer=null;
     var c=COMPANIES[i];
-    if(shirt&&c.shirt){shirt.classList.add("fade-in");shirt.src=c.shirt;shirt.alt="";shirt.style.width=c.shirtWidth;shirt.classList.remove("fade-out");void shirt.offsetWidth;shirtFadeFrame=requestAnimationFrame(function(){shirtFadeFrame=null;shirt.classList.remove("fade-in")})}
+    if(shirt&&c.shirt){
+      var revealed=false;
+      function revealNewShirtLogo(){
+        if(revealed||currentShirtToken!==shirtFadeToken)return;
+        revealed=true;
+        shirt.classList.add("fade-in");
+        void shirt.offsetWidth;
+        shirt.classList.remove("fade-out");
+        shirtFadeFrame=requestAnimationFrame(function(){
+          shirtFadeFrame=null;
+          if(currentShirtToken===shirtFadeToken)shirt.classList.remove("fade-in");
+        });
+      }
+      shirt.onload=revealNewShirtLogo;
+      shirt.onerror=revealNewShirtLogo;
+      shirt.alt="";
+      shirt.style.width=c.shirtWidth;
+      shirt.src=c.shirt;
+      if(shirt.complete&&shirt.naturalWidth)requestAnimationFrame(revealNewShirtLogo);
+    }
     document.getElementById("d-role").textContent=c.role;
     document.getElementById("d-years").textContent=c.years;
     document.getElementById("d-desc").textContent=c.desc;
