@@ -18,6 +18,15 @@ h1,h2,h3{word-break:normal;overflow-wrap:normal;text-wrap:balance}
 .arrow{margin:clamp(2rem,5vw,3.5rem) 0 2rem;padding:15px;display:inline-flex;justify-content:center;align-items:center;overflow:visible;color:var(--ink)}
 .arrow svg{overflow:visible;width:70px;height:128px;opacity:1}
 .hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2.5rem;background:linear-gradient(to bottom,transparent,var(--shade));pointer-events:none}
+.hero-title-line{display:block;min-height:1.12em}
+.hero-title-line:first-child{white-space:nowrap}
+.hero-caret{display:inline-block;height:.82em;margin-left:.08em;border-right:2px solid currentColor;vertical-align:-.06em;animation:hero-caret-blink 1.05s steps(2,start) infinite}
+@keyframes hero-caret-blink{to{visibility:hidden}}
+.js .hero-intro .mid p{visibility:hidden;opacity:0;transform:translateY(12px);transition:opacity .9s cubic-bezier(.22,.61,.36,1),transform .9s cubic-bezier(.22,.61,.36,1)}
+.js .hero-intro.copy-reveal .mid p{visibility:visible}
+.js .hero-intro.copy-visible .mid p{opacity:1;transform:none}
+.js .hero-intro:not(.arrow-reveal) .arrow{visibility:hidden;opacity:0}
+.js .hero-intro.arrow-reveal .arrow{visibility:visible;opacity:1;transition:opacity .55s ease}
 @media (prefers-reduced-motion:no-preference){.hero > .logo,.dp-head > .logo{animation:logo-arrive .48s cubic-bezier(.22,.61,.36,1) both}@keyframes logo-arrive{from{transform:scale(.9)}to{transform:scale(1)}}.arrow{animation:float 1.7s ease-in-out infinite}.js .arrow.draw-reveal svg path{stroke-dasharray:1;stroke-dashoffset:1}.js .arrow.draw-reveal.in #ar1{animation:draw-curly .8s cubic-bezier(.22,.61,.36,1) var(--d,0s) forwards}.js .arrow.draw-reveal.in #ar2{animation:draw-curly .18s ease calc(var(--d,0s) + .62s) forwards}@keyframes draw-curly{to{stroke-dashoffset:0}}@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}}
 
 /* ===== Ownership section ===== */
