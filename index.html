@@ -21,7 +21,7 @@
 <script>try{if(window.IntersectionObserver&&!matchMedia("(prefers-reduced-motion: reduce)").matches)document.documentElement.className+=" js"}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600&family=Noto+Sans+Hebrew:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="styles.css?v=20261110-proof-40">
+<link rel="stylesheet" href="styles.css?v=20261110-proof-42">
   <script src="site.js?v=20261110-1207" defer></script>
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-6T641TL5ED"></script>
@@ -230,7 +230,7 @@ COMPANIES.forEach(function(c){var asset=COMPANY_ASSETS[c.name];if(asset){c.nav=a
 (function(){
   var logos=document.getElementById("logos"),det=document.getElementById("details"),track=document.getElementById("track"),shirt=document.getElementById("shirt-mark"),boxes=[];
 var proof=document.querySelector(".proof"),description=document.getElementById("d-desc"),proofLayoutFrame=null;
-var detailSwapTimer=null,detailHeightTimer=null;
+var detailSwapTimer=null,detailHeightTimer=null,shirtFadeFrame=null;
 function updateResponsiveProof(){
   if(!proof||!description)return;
   if(window.innerWidth<=768){proof.classList.remove("compact-layout");return}
@@ -252,7 +252,7 @@ function scheduleProofLayout(){
 window.addEventListener("resize",scheduleProofLayout,{passive:true});
 function show(i){
   boxes.forEach(function(b,j){b.setAttribute("aria-pressed",j===i)});
-  if(shirt)shirt.classList.add("fade-out");
+  if(shirt){if(shirtFadeFrame){cancelAnimationFrame(shirtFadeFrame);shirtFadeFrame=null}shirt.classList.remove("fade-in");shirt.classList.add("fade-out")}
   if(detailSwapTimer){clearTimeout(detailSwapTimer);detailSwapTimer=null}
   if(detailHeightTimer){clearTimeout(detailHeightTimer);detailHeightTimer=null}
   var oldHeight=det.getBoundingClientRect().height;
@@ -263,7 +263,7 @@ function show(i){
   detailSwapTimer=setTimeout(function(){
     detailSwapTimer=null;
     var c=COMPANIES[i];
-    if(shirt&&c.shirt){shirt.src=c.shirt;shirt.alt="";shirt.style.width=c.shirtWidth;shirt.classList.remove("fade-out")}
+    if(shirt&&c.shirt){shirt.classList.add("fade-in");shirt.src=c.shirt;shirt.alt="";shirt.style.width=c.shirtWidth;shirt.classList.remove("fade-out");void shirt.offsetWidth;shirtFadeFrame=requestAnimationFrame(function(){shirtFadeFrame=null;shirt.classList.remove("fade-in")})}
     document.getElementById("d-role").textContent=c.role;
     document.getElementById("d-years").textContent=c.years;
     document.getElementById("d-desc").textContent=c.desc;
