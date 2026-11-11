@@ -55,7 +55,8 @@ h1,h2,h3{word-break:normal;overflow-wrap:normal;text-wrap:balance}
 .logo-box{flex:0 0 auto;min-width:0;height:90px;display:flex;align-items:center;justify-content:center;background:none;border:0;padding:0;color:#fff;cursor:pointer;opacity:.85;transform:scale(1);transition:opacity .3s,transform .3s cubic-bezier(.2,.7,.2,1);border-radius:.4rem}
 .logo-box:hover{opacity:1;transform:none}
 .logo-box[aria-pressed="true"]{opacity:1;transform:none}
-.logo-box:focus-visible,.pill:focus-visible{outline-color:var(--yellow)}
+.logo-box:focus{outline:none;box-shadow:none}
+.pill:focus-visible{outline-color:var(--yellow)}
 .brand-mark{display:block;height:90px;max-width:220px;object-fit:contain;filter:brightness(0) saturate(100%) invert(68%) sepia(8%) saturate(584%) hue-rotate(190deg) brightness(91%) contrast(86%);transform:scale(.65);transition:filter .3s,transform .3s}
 .logo-box.unomy-logo{position:relative}
 .logo-box .brand-mark{width:100%!important;height:100%;transform:scale(1);transform-origin:center;transition:filter .3s,transform .3s}
@@ -238,7 +239,7 @@ h1,h2,h3{word-break:normal;overflow-wrap:normal;text-wrap:balance}
 .form-header{text-align:center;margin-bottom:var(--section-media-gap)}
 .form-title{font-family:'Lexend',sans-serif;font-size:32pt;font-weight:600;color:#24272D;margin:0 0 var(--heading-stack-gap);line-height:1.1;text-transform:uppercase}
 .form-subtitle{font-size:12pt;font-weight:400;color:#24272D;margin:0;line-height:1.6}
-.confidential-note{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:14px;font-size:9pt;font-weight:400;color:#4B5563;text-align:center}
+.confidential-note{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:14px;font-size:11pt;font-weight:400;color:#4B5563;text-align:center}
 .shield-icon{width:14px;height:14px;stroke:#4B5563;flex-shrink:0}
 .form-input:disabled,textarea.form-input:disabled,.form-input:disabled:focus{border-color:#D1D5DB!important;box-shadow:none!important;outline:none!important}
 input:-webkit-autofill,input:-webkit-autofill:hover,input:-webkit-autofill:active{-webkit-box-shadow:0 0 0 1000px #fff inset!important;-webkit-text-fill-color:#24272D!important;border:1px solid #D1D5DB!important;font-family:'Lexend',sans-serif!important;font-size:11pt!important;font-weight:400!important;transition:background-color 5000s ease-in-out 0s}
@@ -297,11 +298,13 @@ input.form-input.invalid:-webkit-autofill,input.form-input.invalid:-webkit-autof
 .built-using .tool-logo{overflow:hidden;flex:none}
 .built-using .figma,.built-using .claude,.built-using .chatgpt,.built-using .github,.built-using .vercel{width:auto}
 @media (prefers-reduced-motion:reduce){.social{transition:none}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
 @media(max-width:600px){
   .site-foot{padding:3.9rem 1rem 2.6rem}
   .site-foot .about{max-width:32em}
   .site-foot .about a{display:block}
   .site-foot .built-label{margin-top:3rem;font-size:10pt}
+  .confidential-note{font-size:10pt}
   .built-using{gap:15px;margin:1.35rem auto 0;font-size:10pt;align-items:center;justify-content:center}
   .site-foot .fine{font-size:10pt}
   .built-using>*{align-self:center}

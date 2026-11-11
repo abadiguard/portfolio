@@ -77,6 +77,8 @@
   function onWheel(event){if(completed)return;event.preventDefault();if(!started)pendingScroll=event.deltaY||120;begin()}
   function onKey(event){
     if(["ArrowDown","PageDown"," "].indexOf(event.key)===-1)return;
+    var target=event.target;
+    if(event.altKey||event.ctrlKey||event.metaKey||(target&&target.closest&&target.closest("a,button,input,textarea,select,[contenteditable='true'],[role='button'],[role='combobox'],[role='listbox'],[role='option']")))return;
     event.preventDefault();if(!started)pendingScroll=event.key==="ArrowDown"?100:Math.round(window.innerHeight*.8);begin();
   }
   function onTouchStart(event){touchStartY=event.touches&&event.touches.length?event.touches[0].clientY:null}

@@ -251,7 +251,7 @@ function scheduleProofLayout(){
 }
 window.addEventListener("resize",scheduleProofLayout,{passive:true});
 function show(i){
-  boxes.forEach(function(b,j){b.setAttribute("aria-pressed",j===i)});
+  boxes.forEach(function(b,j){b.setAttribute("aria-pressed",j===i);b.tabIndex=j===i?0:-1});
   var currentShirtToken=++shirtFadeToken;
   if(shirt){if(shirtFadeFrame){cancelAnimationFrame(shirtFadeFrame);shirtFadeFrame=null}shirt.onload=null;shirt.onerror=null;shirt.classList.remove("fade-in");shirt.classList.add("fade-out")}
   if(detailSwapTimer){clearTimeout(detailSwapTimer);detailSwapTimer=null}
@@ -301,7 +301,18 @@ function show(i){
 }
   COMPANIES.forEach(function(c,i){
     var logoClass=c.name==="unomy"?"unomy":c.name==="comedy.com"?"comedy":c.name.toLowerCase();var b=document.createElement("button");b.type="button";b.className="logo-box logo-"+logoClass+(c.name==="unomy"?" unomy-logo":"");b.setAttribute("aria-label",c.name);var mark=document.createElement("img");mark.className="brand-mark";mark.setAttribute("aria-hidden","true");mark.alt="";mark.src=c.nav+(c.name==="unomy"?"?v=20261110-2":"");mark.style.width=c.navWidth+"px";b.appendChild(mark);
-    b.addEventListener("click",function(){show(i)});logos.appendChild(b);boxes.push(b);
+    b.addEventListener("click",function(){show(i)});
+    logos.appendChild(b);boxes.push(b);
+  });
+  logos.addEventListener("keydown",function(event){
+    if(["ArrowRight","ArrowLeft","Home","End"].indexOf(event.key)<0)return;
+    var activeIndex=boxes.indexOf(document.activeElement);
+    if(activeIndex<0)return;
+    event.preventDefault();
+    var step=event.key==="ArrowRight"?1:-1;
+    var next=event.key==="Home"?0:event.key==="End"?COMPANIES.length-1:(activeIndex+step+COMPANIES.length)%COMPANIES.length;
+    show(next);
+    boxes[next].focus();
   });
   [false,true].forEach(function(isDuplicate){var group=document.createElement("div");group.className="track-group";if(isDuplicate)group.setAttribute("aria-hidden","true");COMPANIES.forEach(function(c){var d=document.createElement("span");d.innerHTML=c.mark;var s=d.firstChild;s.style.width=Math.round(c.w*.917)+"px";s.setAttribute("role","img");s.setAttribute("aria-label",c.name+" logo");if(isDuplicate)s.setAttribute("aria-hidden","true");else s.removeAttribute("aria-hidden");d.className="cell";group.appendChild(d)});track.appendChild(group)});
   show(0);
