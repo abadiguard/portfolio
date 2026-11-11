@@ -311,3 +311,17 @@
   isCarousel.addEventListener?isCarousel.addEventListener("change",setActive):isCarousel.addListener(setActive);
   setActive();
 })();
+
+// Case study pages can be navigated in sequence with the left and right arrow keys.
+(function(){
+  if(!document.body.classList.contains("case-study"))return;
+  document.addEventListener("keydown",function(event){
+    if(event.altKey||event.ctrlKey||event.metaKey||event.shiftKey)return;
+    var target=event.target;
+    if(target instanceof HTMLElement&&(target.isContentEditable||/^(INPUT|TEXTAREA|SELECT|BUTTON)$/.test(target.tagName)||target.getAttribute("role")==="textbox"))return;
+    var relation=event.key==="ArrowLeft"?"prev":event.key==="ArrowRight"?"next":null;
+    if(!relation)return;
+    var link=document.querySelector('.case-study__results-nav a[rel="'+relation+'"]');
+    if(link){event.preventDefault();window.location.assign(link.href);}
+  });
+})();

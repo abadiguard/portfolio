@@ -63,7 +63,7 @@
 .case-study__results-summary{max-width:37em;margin-top:var(--heading-stack-gap)}
 .case-study__feature-media--uncropped img{clip-path:none}
 .case-study__results-section .case-study__results-summary{color:inherit}
-.case-study--landau .case-study__client-logo{width:clamp(115.2px,18vw,144px)}
+.case-study--landau .case-study__client-logo{width:calc(clamp(115.2px,18vw,144px) * .62)}
 .case-study__quote-section{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:clamp(18rem,31vw,24rem);padding:6.75rem 1.5rem;text-align:center;background:#f00078;color:#fff}
 .case-study__quote-kicker{margin:0;font:var(--weight-body) var(--type-body)/var(--line-body) var(--f);color:inherit}
 .case-study__quote-section h2{width:100%;max-width:800px;margin:var(--heading-stack-gap) 0 0;font:var(--weight-heading) var(--type-display)/var(--line-heading) var(--f);letter-spacing:0;text-wrap:balance;text-transform:uppercase;color:inherit}
@@ -130,7 +130,7 @@
 @media(max-width:640px){
   .case-study__client-logo{width:calc(clamp(93px,12.75vw,165px) * 1.5)}
   .case-study--lexense .case-study__client-logo{width:calc(clamp(74.4px,10.2vw,132px) * 1.5)}
-  .case-study--landau .case-study__client-logo{width:calc(clamp(115.2px,18vw,144px) * 1.5)}
+  .case-study--landau .case-study__client-logo{width:calc(clamp(115.2px,18vw,144px) * .62)}
   .case-study__hero{padding-top:4.5rem}
   .case-study__client{margin-bottom:4.5rem}
 }
