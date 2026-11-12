@@ -93,6 +93,8 @@ h1,h2,h3{word-break:normal;overflow-wrap:normal;text-wrap:balance}
 @media (min-width:769px){
   .grp{margin-inline:auto}
   .details{align-self:start;top:calc(88px + clamp(.256rem,.512vw,.448rem))}
+  .meta{padding-bottom:.35rem}
+  .ach{position:absolute;bottom:calc(100% + .75rem);left:0}
   .desc{width:70%;margin-top:22px;margin-left:0;margin-right:0;text-align:left}
 }
 .marq{display:none;width:100%;overflow:hidden;margin-top:var(--section-media-gap);-webkit-mask-image:linear-gradient(to right,transparent,#000 10%,#000 90%,transparent);mask-image:linear-gradient(to right,transparent,#000 10%,#000 90%,transparent)}

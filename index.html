@@ -21,7 +21,7 @@
 <script>try{if(window.IntersectionObserver&&!matchMedia("(prefers-reduced-motion: reduce)").matches)document.documentElement.className+=" js"}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600&family=Noto+Sans+Hebrew:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="styles.css?v=20261112-portrait-mobile-center">
+<link rel="stylesheet" href="styles.css?v=20261112-proof-note-spacing-2">
   <script src="site.js?v=20261110-1207" defer></script>
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-6T641TL5ED"></script>
@@ -230,6 +230,7 @@ COMPANIES.forEach(function(c){var asset=COMPANY_ASSETS[c.name];if(asset){c.nav=a
 COMPANIES.forEach(function(c){if(c.shirtPhoto){var photo=new Image();photo.src=c.shirtPhoto}});
 (function(){
   var logos=document.getElementById("logos"),det=document.getElementById("details"),track=document.getElementById("track"),shirt=document.getElementById("shirt-mark"),boxes=[];
+var achievement=document.getElementById("d-ach");
 var proof=document.querySelector(".proof"),description=document.getElementById("d-desc"),proofLayoutFrame=null;
 var detailSwapTimer=null,detailHeightTimer=null,shirtFadeFrame=null,shirtFadeToken=0;
 function updateResponsiveProof(){
@@ -248,9 +249,13 @@ function updateResponsiveProof(){
 }
 function scheduleProofLayout(){
   if(proofLayoutFrame)cancelAnimationFrame(proofLayoutFrame);
-  proofLayoutFrame=requestAnimationFrame(function(){proofLayoutFrame=null;updateResponsiveProof()});
+  proofLayoutFrame=requestAnimationFrame(function(){
+    proofLayoutFrame=null;
+    updateResponsiveProof();
+  });
 }
 window.addEventListener("resize",scheduleProofLayout,{passive:true});
+if(document.fonts)document.fonts.ready.then(scheduleProofLayout);
 function show(i){
   boxes.forEach(function(b,j){b.setAttribute("aria-pressed",j===i);b.tabIndex=j===i?0:-1});
   var currentShirtToken=++shirtFadeToken;
@@ -259,7 +264,6 @@ function show(i){
   if(detailHeightTimer){clearTimeout(detailHeightTimer);detailHeightTimer=null}
   var oldHeight=det.getBoundingClientRect().height;
   det.style.height=oldHeight+"px";
-  det.style.overflow="hidden";
   void det.offsetHeight;
   det.classList.add("out");
   detailSwapTimer=setTimeout(function(){
@@ -301,7 +305,7 @@ function show(i){
     document.getElementById("d-years").textContent=c.years;
     document.getElementById("d-desc").textContent=c.desc;
     scheduleProofLayout();
-    var a=document.getElementById("d-ach");a.textContent="";
+    var a=achievement;a.textContent="";
     if(c.ach){var l=document.createElement("a");l.href=c.link;l.target="_blank";l.rel="noopener noreferrer";l.textContent=c.ach.replace(/\s*[\u00AB\u00BB]\s*$/,"");var icon=document.createElementNS("http://www.w3.org/2000/svg","svg");icon.setAttribute("class","parr");icon.setAttribute("viewBox","0 0 21 15");icon.setAttribute("fill","none");icon.setAttribute("aria-hidden","true");var path=document.createElementNS("http://www.w3.org/2000/svg","path");path.setAttribute("d","M12.9287 0.292745C13.3191 -0.0976803 13.9522 -0.0974829 14.3428 0.292745L20.707 6.657C21.0976 7.04753 21.0976 7.68054 20.707 8.07106L14.3428 14.4353C13.9522 14.8257 13.3191 14.8256 12.9287 14.4353C12.5383 14.0449 12.5385 13.4118 12.9287 13.0213L17.5859 8.36403H1C0.447715 8.36403 0 7.91632 0 7.36403C0 6.81175 0.447715 6.36403 1 6.36403H17.5859L12.9287 1.70681C12.5385 1.31626 12.5383 0.68317 12.9287 0.292745Z");path.setAttribute("fill","currentColor");icon.appendChild(path);l.appendChild(document.createTextNode(" "));l.appendChild(icon);a.appendChild(l)}
     det.style.height="auto";
     var nextHeight=det.getBoundingClientRect().height;
@@ -309,7 +313,7 @@ function show(i){
     void det.offsetHeight;
     det.classList.remove("out");
     requestAnimationFrame(function(){det.style.height=nextHeight+"px"});
-    detailHeightTimer=setTimeout(function(){det.style.height="auto";det.style.overflow="visible";detailHeightTimer=null},460);
+    detailHeightTimer=setTimeout(function(){det.style.height="auto";detailHeightTimer=null},460);
   },400);
 }
   COMPANIES.forEach(function(c,i){
