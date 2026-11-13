@@ -43,6 +43,7 @@
   let lastInputWasForward = false;
   let lastInputWasTouch = false;
   let touchAdvanceQueued = false;
+  let touchOwnsScroll = false;
 
   function measureScrollRange() {
     const frameHeight = frame.offsetHeight;
@@ -58,7 +59,9 @@
 
   function draw(resetToOpening = false) {
     if (returningFromSkip) return;
-    const { frameTop, start, end } = measureScrollRange();
+    const { frameTop, start, end, openingVisibleAt } = measureScrollRange();
+    sequence.classList.toggle('owns-touch-scroll', !reducedMotion.matches &&
+      acceptedScrollY >= Math.floor(openingVisibleAt) && acceptedScrollY < end - 1);
     frame.style.setProperty('--frame-top', frameTop + 'px');
     const overall = resetToOpening || acceptedScrollY <= Math.ceil(start) ? 0 : clamp((acceptedScrollY - start) / Math.max(1, end - start));
     const terrainProgress = overall < sowingStarts
@@ -346,6 +349,7 @@
   let touchY = null;
   let touchX = null;
   let touchFresh = false;
+  let touchDirection = 0;
 
   function touchInput() {
     const input = { touch: true, fresh: touchFresh };
@@ -356,6 +360,7 @@
   function onTouchEnd() {
     touchY = null;
     touchFresh = false;
+    touchOwnsScroll = false;
   }
 
   function onTouchStart(event) {
@@ -363,10 +368,15 @@
     touchY = touch?.clientY ?? null;
     touchX = touch?.clientX ?? null;
     touchFresh = Boolean(touch);
+    touchDirection = 0;
+    const { openingVisibleAt, end } = measureScrollRange();
+    touchOwnsScroll = Boolean(touch) && !reducedMotion.matches &&
+      acceptedScrollY >= Math.floor(openingVisibleAt) && acceptedScrollY < end - 1 &&
+      Boolean(event.target?.closest?.('.ownership-sequence'));
   }
 
   function onTouchMove(event) {
-    if (!event.cancelable || event.defaultPrevented || event.touches.length !== 1 ||
+    if (event.defaultPrevented || event.touches.length !== 1 ||
         touchY === null || reducedMotion.matches) return;
 
     const touch = event.touches[0];
@@ -374,17 +384,26 @@
     if (Math.abs(delta) < 6 || Math.abs(touchX - touch.clientX) > Math.abs(delta)) return;
     touchY = touch.clientY;
     touchX = touch.clientX;
+    const direction = Math.sign(delta);
+    // Finger recoil at the end of a swipe is not a new upward gesture.
+    if (touchDirection && direction !== touchDirection) return;
+    touchDirection = direction;
 
     const from = acceptedScrollY;
     const limited = limitTravel(from, from + delta, touchInput());
-    if (limited === null) return;
-    event.preventDefault();
-    scrollInstantly(limited);
+    if (limited === null && !touchOwnsScroll) return;
+    if (event.cancelable) event.preventDefault();
+    scrollInstantly(limited ?? from + delta);
     scheduleDraw();
   }
 
   function onScroll() {
     const actual = window.scrollY;
+    if (actual !== acceptedScrollY && (touchOwnsScroll || (segmentRunning && lastInputWasTouch))) {
+      // Ignore native momentum or viewport corrections while touch controls this scene.
+      scrollInstantly(acceptedScrollY);
+      return;
+    }
     if (actual !== acceptedScrollY) {
       const limited = limitTravel(acceptedScrollY, actual, touchY !== null ? touchInput() : undefined);
       if (limited !== null && limited !== actual) scrollInstantly(limited);
