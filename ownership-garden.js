@@ -114,7 +114,13 @@
       leafFramePending = true;
       requestAnimationFrame(swayFinalLeaves);
     }
-    sowing.style.setProperty('--seek', String(-3.6 * sowProgress) + 's');
+    const sowingTime = 3600 * sowProgress;
+    const animations = sowing.getAnimations?.({ subtree: true }) ?? [];
+    if (animations.length) {
+      for (const animation of animations) animation.currentTime = sowingTime;
+    } else {
+      sowing.style.setProperty('--seek', String(-sowingTime / 1000) + 's');
+    }
     // Move the SVG clip directly so growth does not depend on CSS transforms on clip paths.
     const growth = clamp((sowProgress - 0.61) / 0.26);
     const revealOffset = 42 * (1 - growth) ** 2;
