@@ -39,6 +39,7 @@
   let elevatorRunning = false;
   let returningFromSkip = false;
   let waitingForGesture = false;
+  let completedSegment = -1;
   let acceptedScrollY = window.scrollY;
   let lastInputTime = -Infinity;
   let lastInputWasForward = false;
@@ -235,6 +236,7 @@
       }
       cancelAnimationFrame(segmentFrame);
       segmentRunning = false;
+      completedSegment = -1;
       returningFromSkip = false;
       waitingForGesture = true;
       sequence.classList.toggle('is-skipping', false);
@@ -253,12 +255,14 @@
     }
     const stopFor = progress => Math.ceil(start + progress * (end - start));
     // Release native scrolling at the last frame, allowing for pixel rounding.
-    if (from >= end - 1) return null;
+    if (completedSegment === segments.length - 1 || (completedSegment < 0 && from >= end - 1)) return null;
     if (waitingForGesture && !freshGesture) return from;
 
-    const next = segments.find(segment => from < stopFor(segment.end));
+    const next = completedSegment >= 0
+      ? segments[completedSegment + 1]
+      : segments.find(segment => from < stopFor(segment.end));
     if (next) {
-      const segmentStart = Math.max(from, openingStop);
+      const segmentStart = completedSegment >= 0 ? stopFor(segments[completedSegment].end) : Math.max(from, openingStop);
       playSegment(segmentStart, next);
       return segmentStart;
     }
@@ -310,6 +314,7 @@
       if (elapsed < duration + thornCopyTime) {
         segmentFrame = requestAnimationFrame(advance);
       } else {
+        completedSegment = segmentIndex;
         const followingSegment = segments[segmentIndex + 1];
         const stillScrolling = !lastInputWasTouch && lastInputWasForward && now - lastInputTime < 180;
         const advanceRequested = touchAdvanceQueued || stillScrolling;
@@ -368,8 +373,7 @@
     touchDirection = 0;
     const { openingVisibleAt, end } = measureScrollRange();
     touchOwnsScroll = Boolean(touch) && !reducedMotion.matches &&
-      acceptedScrollY >= Math.floor(openingVisibleAt) && acceptedScrollY < end - 1 &&
-      Boolean(event.target?.closest?.('.ownership-sequence'));
+      acceptedScrollY >= Math.floor(openingVisibleAt) && acceptedScrollY < end - 1;
   }
 
   function onTouchMove(event) {
@@ -414,6 +418,7 @@
     cancelAnimationFrame(segmentFrame);
     segmentRunning = false;
     waitingForGesture = false;
+    completedSegment = -1;
     const origin = window.scrollY;
     if (reducedMotion.matches) {
       scrollInstantly(target);
