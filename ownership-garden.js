@@ -41,6 +41,8 @@
   let acceptedScrollY = window.scrollY;
   let lastInputTime = -Infinity;
   let lastInputWasForward = false;
+  let lastInputWasTouch = false;
+  let touchAdvanceQueued = false;
 
   function measureScrollRange() {
     const frameHeight = frame.offsetHeight;
@@ -211,17 +213,21 @@
     });
   }
 
-  function limitTravel(from, to) {
+  function limitTravel(from, to, input = {}) {
     if (from === to || reducedMotion.matches) return to;
 
     const now = performance.now();
-    const freshGesture = now - lastInputTime >= 180 || (to > from) !== lastInputWasForward;
+    const freshGesture = input.touch
+      ? input.fresh
+      : now - lastInputTime >= 180 || (to > from) !== lastInputWasForward;
+    lastInputWasTouch = Boolean(input.touch);
     lastInputTime = now;
     lastInputWasForward = to > from;
     if (elevatorRunning) return from;
     const { start, end, openingVisibleAt } = measureScrollRange();
     const openingStop = Math.ceil(start);
     if (to < from) {
+      touchAdvanceQueued = false;
       if (to >= end) return null;
       if (!segmentRunning && !returningFromSkip && from <= openingStop) {
         waitingForGesture = false;
@@ -234,7 +240,11 @@
       sequence.classList.toggle('is-skipping', false);
       return Math.floor(start);
     }
-    if (segmentRunning) return from;
+    if (segmentRunning) {
+      // A distinct swipe can request the next segment while this one finishes.
+      if (input.touch && freshGesture) touchAdvanceQueued = true;
+      return from;
+    }
     const visibleAt = Math.floor(openingVisibleAt);
     if (from < visibleAt) {
       if (to < visibleAt) return null;
@@ -301,8 +311,10 @@
         segmentFrame = requestAnimationFrame(advance);
       } else {
         const followingSegment = segments[segmentIndex + 1];
-        const stillScrolling = lastInputWasForward && now - lastInputTime < 180;
-        if (stillScrolling && followingSegment && !reducedMotion.matches) {
+        const stillScrolling = !lastInputWasTouch && lastInputWasForward && now - lastInputTime < 180;
+        const advanceRequested = touchAdvanceQueued || stillScrolling;
+        touchAdvanceQueued = false;
+        if (advanceRequested && followingSegment && !reducedMotion.matches) {
           playSegment(acceptedScrollY, followingSegment);
           return;
         }
@@ -331,10 +343,50 @@
     scheduleDraw();
   }
 
+  let touchY = null;
+  let touchX = null;
+  let touchFresh = false;
+
+  function touchInput() {
+    const input = { touch: true, fresh: touchFresh };
+    touchFresh = false;
+    return input;
+  }
+
+  function onTouchEnd() {
+    touchY = null;
+    touchFresh = false;
+  }
+
+  function onTouchStart(event) {
+    const touch = event.touches.length === 1 ? event.touches[0] : null;
+    touchY = touch?.clientY ?? null;
+    touchX = touch?.clientX ?? null;
+    touchFresh = Boolean(touch);
+  }
+
+  function onTouchMove(event) {
+    if (!event.cancelable || event.defaultPrevented || event.touches.length !== 1 ||
+        touchY === null || reducedMotion.matches) return;
+
+    const touch = event.touches[0];
+    const delta = touchY - touch.clientY;
+    if (Math.abs(delta) < 6 || Math.abs(touchX - touch.clientX) > Math.abs(delta)) return;
+    touchY = touch.clientY;
+    touchX = touch.clientX;
+
+    const from = acceptedScrollY;
+    const limited = limitTravel(from, from + delta, touchInput());
+    if (limited === null) return;
+    event.preventDefault();
+    scrollInstantly(limited);
+    scheduleDraw();
+  }
+
   function onScroll() {
     const actual = window.scrollY;
     if (actual !== acceptedScrollY) {
-      const limited = limitTravel(acceptedScrollY, actual);
+      const limited = limitTravel(acceptedScrollY, actual, touchY !== null ? touchInput() : undefined);
       if (limited !== null && limited !== actual) scrollInstantly(limited);
       else acceptedScrollY = actual;
     }
@@ -342,6 +394,7 @@
   }
 
   function moveElevator(target, onComplete) {
+    touchAdvanceQueued = false;
     cancelAnimationFrame(segmentFrame);
     segmentRunning = false;
     waitingForGesture = false;
@@ -405,6 +458,10 @@
   }, true);
 
   addEventListener('wheel', limitWheel, { passive: false, capture: true });
+  addEventListener('touchstart', onTouchStart, { passive: true });
+  addEventListener('touchmove', onTouchMove, { passive: false, capture: true });
+  addEventListener('touchend', onTouchEnd, { passive: true });
+  addEventListener('touchcancel', onTouchEnd, { passive: true });
   addEventListener('scroll', onScroll, { passive: true });
   addEventListener('resize', scheduleDraw);
   reducedMotion.addEventListener('change', scheduleDraw);
