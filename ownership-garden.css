@@ -9,6 +9,7 @@
   justify-content: center;
 }
 .ownership-sequence.is-enhanced {
+  overflow-anchor: none;
   height: 500vh;
   height: 500svh;
 }
@@ -27,37 +28,35 @@
   grid-area: 1 / 1;
 }
 .ownership-sequence .copy h3 {
-  margin-top: .75rem;
-  font-size: 16pt;
-  font-weight: 600;
+  margin: 0;
 }
-.ownership-sequence.is-enhanced .copy :is(.first-copy, .second-copy, .third-copy) .d {
-  transition: opacity 280ms ease-out;
+.ownership-sequence.is-enhanced .copy .second-copy {
+  display: grid;
+  justify-items: center;
 }
-
- (prefers-reduced-motion: reduce) {
-  .ownership-sequence.is-enhanced .copy :is(.first-copy, .second-copy, .third-copy) .d {
-    transition: none;
-  }
+.ownership-sequence.is-enhanced .second-copy > .d {
+  grid-area: 1 / 1;
+  align-self: start;
 }
-
+/* Keep the text height reserved while each line fades in. */
+.ownership-sequence.is-enhanced .copy .col:not([hidden]) :is(h3, .d):not([data-copy-hidden]) {
+  animation: ownership-copy-in 280ms ease-out both;
+}
+.ownership-sequence.is-enhanced .copy .second-copy:not([hidden]) h3 {
+  animation-delay: 500ms;
+}
+.ownership-sequence.is-enhanced .copy .first-copy:not([hidden]) > .d:not(h3) {
+  animation-delay: 700ms;
+}
 .ownership-sequence.is-enhanced .copy [data-copy-hidden] {
   visibility: hidden;
-  opacity: 0;
-  transition: none;
 }
-.ownership-sequence.is-enhanced .second-copy h3 {
-  animation: ownership-sowing-title-in 280ms ease-out 500ms both;
-}
-.ownership-sequence.is-enhanced .second-copy[hidden] h3 {
-  animation: none;
-}
-@keyframes ownership-sowing-title-in {
+@keyframes ownership-copy-in {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .ownership-sequence.is-enhanced .second-copy h3 {
+  .ownership-sequence.is-enhanced .copy .col:not([hidden]) :is(h3, .d):not([data-copy-hidden]) {
     animation: none;
   }
 }
@@ -66,12 +65,75 @@
   display: flex;
   visibility: hidden;
 }
+.ownership-sequence.is-enhanced .copy .second-copy[hidden] {
+  display: grid;
+}
+.own[aria-labelledby="own-h"] {
+  padding-bottom: 2rem;
+}
+.ownership-sequence .ownership-actions {
+  margin-top: calc(var(--section-media-gap) * 2 / 3);
+}
+.ownership-sequence .ownership-scroll-copy {
+  margin: 0;
+  font: 400 11pt/1.5 var(--f);
+}
+.ownership-sequence .ownership-skip {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: .2em;
+}
+@media (max-width: 600px) {
+  .ownership-sequence .ownership-scroll-copy { font-size: 10pt; }
+}
+.ownership-sequence .opening-leaf {
+  transform-box: view-box;
+}
+.ownership-sequence .opening-leaf-left {
+  transform-origin: 85px 115px;
+}
+.ownership-sequence .opening-leaf-right {
+  transform-origin: 83px 132px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .ownership-sequence.is-opening-idle .opening-leaf {
+    animation: ownership-opening-sway 3.2s ease-in-out infinite;
+  }
+  .ownership-sequence.is-opening-idle .opening-leaf-right {
+    animation-direction: reverse;
+    animation-duration: 3.7s;
+  }
+}
+@keyframes ownership-opening-sway {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(5deg); }
+  75% { transform: rotate(-5deg); }
+}
+.ownership-sequence.is-skipping .opening-leaf,
+.ownership-sequence.is-skipping .copy .col :is(h3, .d) {
+  animation-play-state: paused !important;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .ownership-sequence.is-opening-idle .garden-strip {
+    opacity: 0;
+  }
+  .ownership-sequence.is-opening-idle.is-opening-visible .garden-strip {
+    animation: ownership-opening-fade 480ms ease-out both;
+  }
+}
+@keyframes ownership-opening-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.ownership-sequence.is-skipping .garden-strip {
+  animation-play-state: paused;
+}
 .ownership-sequence .ownership-intro {
   order: -2;
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: clamp(4rem, 9vh, 6rem);
+  margin-bottom: calc(clamp(4rem, 9vh, 6rem) - .75rem);
 }
 .ownership-sequence .art {
   flex: none;

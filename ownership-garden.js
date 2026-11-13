@@ -34,6 +34,9 @@
     { end: 1, duration: 2100 }
   ];
   let segmentRunning = false;
+  let segmentFrame = 0;
+  let elevatorRunning = false;
+  let returningFromSkip = false;
   let waitingForGesture = false;
   let acceptedScrollY = window.scrollY;
   let lastInputTime = -Infinity;
@@ -42,18 +45,20 @@
   function measureScrollRange() {
     const frameHeight = frame.offsetHeight;
     const viewportHeight = document.documentElement.clientHeight;
-    const nextSectionInset = Math.min(112, Math.max(64, viewportHeight * 0.12));
-    const frameTop = Math.max(0, viewportHeight - frameHeight - nextSectionInset);
+    const ownershipSection = sequence.closest('.own');
+    const nextSectionGap = Number.parseFloat(getComputedStyle(ownershipSection).paddingBottom) || 0;
+    const frameTop = viewportHeight - frameHeight - nextSectionGap;
     const distance = sequence.offsetHeight - frameHeight;
     const startDelay = Math.min(160, Math.max(0, distance * 0.14));
     const start = window.scrollY + sequence.getBoundingClientRect().top - frameTop + startDelay;
-    return { frameTop, start, end: start + distance - startDelay };
+    return { frameTop, start, openingVisibleAt: start - startDelay, end: start + distance - startDelay };
   }
 
-  function draw() {
+  function draw(resetToOpening = false) {
+    if (returningFromSkip) return;
     const { frameTop, start, end } = measureScrollRange();
     frame.style.setProperty('--frame-top', frameTop + 'px');
-    const overall = clamp((acceptedScrollY - start) / Math.max(1, end - start));
+    const overall = resetToOpening || acceptedScrollY <= Math.ceil(start) ? 0 : clamp((acceptedScrollY - start) / Math.max(1, end - start));
     const terrainProgress = overall < sowingStarts
       ? Math.min(overall, thornCentered)
       : overall - (sowingStarts - thornCentered) - Math.max(0, Math.min(overall, 0.68) - sproutFinished);
@@ -74,7 +79,7 @@
     ground.setAttribute('d', groundPath + ' Q208 149 208 149');
     const progress = clamp(overall / sowingStarts);
     const flowerStart = Math.ceil(start + sproutFinished * (end - start));
-    const flowerProgress = clamp((acceptedScrollY - flowerStart) / Math.max(1, end - flowerStart));
+    const flowerProgress = resetToOpening ? 0 : clamp((acceptedScrollY - flowerStart) / Math.max(1, end - flowerStart));
     const activeCopy = flowerProgress > 0 ? 2 : overall >= sowingStarts ? 1 : 0;
     [firstCopy, secondCopy, thirdCopy].forEach((copy, index) => {
       copy.hidden = index !== activeCopy;
@@ -82,10 +87,17 @@
     });
     sowing.style.opacity = activeCopy !== 0 ? '1' : '0';
     const sowProgress = clamp((overall - sowingStarts) / (sproutFinished - sowingStarts));
+    const showFirstTitle = !resetToOpening && (segmentRunning || acceptedScrollY > Math.ceil(start));
+    const openingIdle = !segmentRunning && !showFirstTitle;
+    sequence.classList.toggle('is-opening-idle', openingIdle);
+    sequence.classList.toggle('is-opening-visible', openingIdle && openingInView);
+    firstCopy.querySelector("h3").toggleAttribute("data-copy-hidden", !showFirstTitle);
     const showThornCopy = overall >= thornCentered;
-    firstCopy.querySelector('.d').toggleAttribute('data-copy-hidden', !showThornCopy);
+    firstCopy.querySelector('div.d').toggleAttribute('data-copy-hidden', !showThornCopy);
     const packetStop = Math.ceil(start + packetFinished * (end - start));
-    secondCopy.querySelector('.d').toggleAttribute('data-copy-hidden', acceptedScrollY <= packetStop);
+    const showProductDirection = acceptedScrollY > packetStop;
+    secondCopy.querySelector('h3').toggleAttribute('data-copy-hidden', showProductDirection);
+    secondCopy.querySelector('div.d').toggleAttribute('data-copy-hidden', !showProductDirection);
     const leafProgress = reducedMotion.matches ? 0 : clamp((sowProgress - 0.87) / 0.13);
     const sway = Math.sin(leafProgress * Math.PI * 2) * Math.sin(leafProgress * Math.PI);
     const flowerIsGrown = flowerProgress >= 0.76 || (reducedMotion.matches && flowerProgress > 0);
@@ -104,7 +116,6 @@
     } else {
       sowing.style.setProperty('--seek', String(-sowingTime / 1000) + 's');
     }
-    thirdCopy.querySelector('.d').toggleAttribute('data-copy-hidden', !flowerIsGrown);
     drawFlower(reducedMotion.matches && flowerProgress > 0 ? 1 : flowerProgress);
     const pan = reducedMotion.matches ? 0 : 600 * clamp(progress / thornPanEnd);
     landscape.setAttribute('transform', 'translate(' + pan + ' 0)');
@@ -139,6 +150,14 @@
     uprootMarks.firstElementChild.setAttribute('d', marks.join(' '));
     uprootMarks.style.opacity = String(marksIn * (1 - marksOut));
     thorn.setAttribute('transform', 'translate(' + x + ' ' + y + ') rotate(' + angle + ' 88 149)');
+  }
+
+  let openingInView = typeof IntersectionObserver !== 'function';
+  if (typeof IntersectionObserver === 'function') {
+    new IntersectionObserver(([entry]) => {
+      openingInView = entry.isIntersecting;
+      scheduleDraw();
+    }).observe(gardenStrip);
   }
 
   let animateFinalLeaves = false;
@@ -199,11 +218,30 @@
     const freshGesture = now - lastInputTime >= 180 || (to > from) !== lastInputWasForward;
     lastInputTime = now;
     lastInputWasForward = to > from;
+    if (elevatorRunning) return from;
+    const { start, end, openingVisibleAt } = measureScrollRange();
+    const openingStop = Math.ceil(start);
+    if (to < from) {
+      if (to >= end) return null;
+      if (!segmentRunning && !returningFromSkip && from <= openingStop) {
+        if (from >= Math.floor(start) && waitingForGesture && !freshGesture) return from;
+        waitingForGesture = false;
+        return null;
+      }
+      cancelAnimationFrame(segmentFrame);
+      segmentRunning = false;
+      returningFromSkip = false;
+      waitingForGesture = true;
+      sequence.classList.toggle('is-skipping', false);
+      return Math.floor(start);
+    }
     if (segmentRunning) return from;
-    if (to < from) return to;
-
-    const { start, end } = measureScrollRange();
-    if (to <= start) return null;
+    const openingIsVisible = from >= Math.floor(openingVisibleAt);
+    if (!openingIsVisible) {
+      if (to < Math.floor(openingVisibleAt)) return null;
+      waitingForGesture = true;
+      return openingStop;
+    }
     const stopFor = progress => Math.ceil(start + progress * (end - start));
     // Release native scrolling at the last frame, allowing for pixel rounding.
     if (from >= end - 1) return null;
@@ -211,8 +249,9 @@
 
     const next = segments.find(segment => from < stopFor(segment.end));
     if (next) {
-      playSegment(from, next);
-      return Math.max(from, Math.ceil(start));
+      const segmentStart = Math.max(from, openingStop);
+      playSegment(segmentStart, next);
+      return segmentStart;
     }
     return null;
   }
@@ -223,6 +262,12 @@
   }
 
   function playSegment(from, segment) {
+    const segmentIndex = segments.indexOf(segment);
+    const target = segment.end;
+    const isOpeningSegment = segmentIndex === 0;
+    const openingTitleTime = isOpeningSegment ? 880 : 0;
+    const thornCopyTime = isOpeningSegment && !reducedMotion.matches ? 980 : 0;
+    const duration = segment.duration;
     const { start, end } = measureScrollRange();
     const initialProgress = clamp((from - start) / Math.max(1, end - start));
     const startedAt = performance.now();
@@ -232,10 +277,10 @@
     const titleFadeEnd = 780;
 
     function advance(now) {
-      const elapsed = reducedMotion.matches ? segment.duration : now - startedAt;
-      const time = clamp(elapsed / segment.duration);
+      const elapsed = reducedMotion.matches ? duration : Math.max(0, now - startedAt - openingTitleTime);
+      const time = clamp(elapsed / duration);
       const range = measureScrollRange();
-      let progress = initialProgress + (segment.end - initialProgress) * time;
+      let progress = initialProgress + (target - initialProgress) * time;
       if (hasTitleTransition) {
         const packetEntry = 0.08;
         if (elapsed < exitDuration) {
@@ -249,16 +294,16 @@
           progress = sowingStarts + (sproutFinished - sowingStarts) * sowProgress;
         }
       }
-      const position = range.start + (time === 1 ? segment.end : progress) * (range.end - range.start);
+      const position = range.start + (time === 1 ? target : progress) * (range.end - range.start);
       scrollInstantly(time === 1 || (hasTitleTransition && elapsed >= exitDuration && progress === sowingStarts) ? Math.ceil(position) : Math.max(Math.ceil(range.start), Math.floor(position)));
       draw();
 
-      if (time < 1) {
-        requestAnimationFrame(advance);
+      if (elapsed < duration + thornCopyTime) {
+        segmentFrame = requestAnimationFrame(advance);
       } else {
-        const followingSegment = segments[segments.indexOf(segment) + 1];
-        const stillScrollingForward = lastInputWasForward && now - lastInputTime < 180;
-        if (stillScrollingForward && followingSegment && !reducedMotion.matches) {
+        const followingSegment = segments[segmentIndex + 1];
+        const stillScrolling = lastInputWasForward && now - lastInputTime < 180;
+        if (stillScrolling && followingSegment && !reducedMotion.matches) {
           playSegment(acceptedScrollY, followingSegment);
           return;
         }
@@ -267,7 +312,7 @@
       }
     }
 
-    requestAnimationFrame(advance);
+    segmentFrame = requestAnimationFrame(advance);
   }
 
   function limitWheel(event) {
@@ -296,6 +341,69 @@
     }
     scheduleDraw();
   }
+
+  function moveElevator(target, onComplete) {
+    cancelAnimationFrame(segmentFrame);
+    segmentRunning = false;
+    waitingForGesture = false;
+    const origin = window.scrollY;
+    if (reducedMotion.matches) {
+      scrollInstantly(target);
+      onComplete?.();
+      scheduleDraw();
+      return;
+    }
+
+    elevatorRunning = true;
+    const startedAt = performance.now();
+    function advanceElevator(now) {
+      const progress = clamp((now - startedAt) / 700);
+      scrollInstantly(origin + (target - origin) * smooth(progress));
+      draw();
+      if (progress < 1) {
+        segmentFrame = requestAnimationFrame(advanceElevator);
+      } else {
+        elevatorRunning = false;
+        onComplete?.();
+      }
+    }
+    segmentFrame = requestAnimationFrame(advanceElevator);
+  }
+
+  frame.querySelector('.ownership-skip')?.addEventListener('click', event => {
+    if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    const destination = document.getElementById('work');
+    if (!destination) return;
+
+    event.preventDefault();
+    returningFromSkip = true;
+    animateFinalLeaves = false;
+    sequence.classList.toggle("is-skipping", true);
+    moveElevator(window.scrollY + destination.getBoundingClientRect().top, () => {
+      destination.focus({ preventScroll: true });
+    });
+  });
+
+  // Handle the sticky logo before its normal scroll handler runs.
+  document.addEventListener('click', event => {
+    if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    if (!event.target.closest?.('.scroll-logo-link')) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    cancelAnimationFrame(segmentFrame);
+    segmentRunning = false;
+    returningFromSkip = false;
+    sequence.classList.toggle('is-skipping', false);
+    draw(true);
+    returningFromSkip = true;
+    sequence.classList.toggle('is-skipping', true);
+    moveElevator(0, () => {
+      returningFromSkip = false;
+      sequence.classList.toggle('is-skipping', false);
+      scheduleDraw();
+    });
+  }, true);
 
   addEventListener('wheel', limitWheel, { passive: false, capture: true });
   addEventListener('scroll', onScroll, { passive: true });
