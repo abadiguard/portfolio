@@ -14,6 +14,7 @@
   const thirdCopy = frame.querySelector('.third-copy');
   const sprout = sowing.querySelector('.sprout');
   const sproutStroke = sprout.querySelector('.stem');
+  const sproutReveal = sowing.querySelector('.sprout-reveal');
   const flowerGrowth = sowing.querySelector('.flower-growth');
   const flowerStalk = flowerGrowth.querySelector('.flower-stalk');
   const flowerHead = flowerGrowth.querySelector('.flower-head');
@@ -112,15 +113,11 @@
       leafFramePending = true;
       requestAnimationFrame(swayFinalLeaves);
     }
-    const sowingTime = 3600 * sowProgress;
-    const animations = sowing.getAnimations?.({ subtree: true }) ?? [];
-    if (animations.length > 0) {
-      for (const animation of animations) {
-        animation.currentTime = sowingTime;
-      }
-    } else {
-      sowing.style.setProperty('--seek', String(-sowingTime / 1000) + 's');
-    }
+    sowing.style.setProperty('--seek', String(-3.6 * sowProgress) + 's');
+    // Move the SVG clip directly so growth does not depend on CSS transforms on clip paths.
+    const growth = clamp((sowProgress - 0.61) / 0.26);
+    const revealOffset = 42 * (1 - growth) ** 2;
+    sproutReveal?.setAttribute('y', String(-40 + revealOffset));
     drawFlower(reducedMotion.matches && flowerProgress > 0 ? 1 : flowerProgress);
     const pan = reducedMotion.matches ? 0 : 600 * clamp(progress / thornPanEnd);
     landscape.setAttribute('transform', 'translate(' + pan + ' 0)');
