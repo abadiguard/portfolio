@@ -224,7 +224,6 @@
     if (to < from) {
       if (to >= end) return null;
       if (!segmentRunning && !returningFromSkip && from <= openingStop) {
-        if (from >= Math.floor(start) && waitingForGesture && !freshGesture) return from;
         waitingForGesture = false;
         return null;
       }
