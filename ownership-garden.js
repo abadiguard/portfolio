@@ -205,7 +205,8 @@
     const { start, end } = measureScrollRange();
     if (to <= start) return null;
     const stopFor = progress => Math.ceil(start + progress * (end - start));
-    if (from >= stopFor(1)) return waitingForGesture && !freshGesture ? from : null;
+    // Release native scrolling at the last frame, allowing for pixel rounding.
+    if (from >= end - 1) return null;
     if (waitingForGesture && !freshGesture) return from;
 
     const next = segments.find(segment => from < stopFor(segment.end));
@@ -262,7 +263,7 @@
           return;
         }
         segmentRunning = false;
-        waitingForGesture = true;
+        waitingForGesture = Boolean(followingSegment);
       }
     }
 
