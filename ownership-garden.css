@@ -1,0 +1,170 @@
+.ownership-sequence {
+  width: 100%;
+  max-width: 1100px;
+}
+.ownership-sequence .frame {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.ownership-sequence.is-enhanced {
+  height: 500vh;
+  height: 500svh;
+}
+.ownership-sequence.is-enhanced .frame {
+  position: sticky;
+  top: var(--frame-top, 0px);
+  isolation: isolate;
+  overflow: hidden;
+}
+.ownership-sequence .copy {
+  display: grid;
+  width: 100%;
+}
+.ownership-sequence .copy .col {
+  align-self: start;
+  grid-area: 1 / 1;
+}
+.ownership-sequence .copy h3 {
+  margin-top: .75rem;
+  font-size: 16pt;
+  font-weight: 600;
+}
+.ownership-sequence.is-enhanced .copy :is(.first-copy, .second-copy, .third-copy) .d {
+  transition: opacity 280ms ease-out;
+}
+
+ (prefers-reduced-motion: reduce) {
+  .ownership-sequence.is-enhanced .copy :is(.first-copy, .second-copy, .third-copy) .d {
+    transition: none;
+  }
+}
+
+.ownership-sequence.is-enhanced .copy [data-copy-hidden] {
+  visibility: hidden;
+  opacity: 0;
+  transition: none;
+}
+.ownership-sequence.is-enhanced .second-copy h3 {
+  animation: ownership-sowing-title-in 280ms ease-out 500ms both;
+}
+.ownership-sequence.is-enhanced .second-copy[hidden] h3 {
+  animation: none;
+}
+@keyframes ownership-sowing-title-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ownership-sequence.is-enhanced .second-copy h3 {
+    animation: none;
+  }
+}
+
+.ownership-sequence.is-enhanced .copy .col[hidden] {
+  display: flex;
+  visibility: hidden;
+}
+.ownership-sequence .ownership-intro {
+  order: -2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: clamp(4rem, 9vh, 6rem);
+}
+.ownership-sequence .art {
+  flex: none;
+  order: -1;
+  display: grid;
+  place-items: center;
+  grid-template: minmax(0, 1fr) / minmax(0, 1fr);
+  width: 108px;
+  height: 194.4px;
+  margin-bottom: 1.25rem;
+}
+.ownership-sequence .art > svg {
+  grid-area: 1 / 1;
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  transform-origin: 53% 86%;
+}
+.ownership-sequence .uproot-marks,
+.ownership-sequence .sowing {
+  opacity: 0;
+  pointer-events: none;
+}
+.ownership-sequence:not(.is-enhanced) .copy .col {
+  grid-area: auto;
+}
+.ownership-sequence .art > .uproot-marks {
+  width: 194.4px;
+}
+
+@supports (animation-timeline: view()) {
+  .ownership-sequence:not(.is-enhanced) {
+    height: 500svh;
+    view-timeline-name: --ownership-scroll;
+  }
+  .ownership-sequence:not(.is-enhanced) .frame {
+    position: sticky;
+    top: clamp(0px, calc(100svh - 540px), 32svh);
+    overflow: hidden;
+  }
+  .ownership-sequence:not(.is-enhanced) .copy .col {
+    grid-area: 1 / 1;
+  }
+  .ownership-sequence:not(.is-enhanced) .first-copy {
+    animation: ownership-hide 1s step-end both;
+    animation-timeline: --ownership-scroll;
+    animation-range: contain 0% contain 33%;
+  }
+  .ownership-sequence:not(.is-enhanced) .second-copy {
+    animation: ownership-middle 1s step-end both;
+    animation-timeline: --ownership-scroll;
+    animation-range: contain 0% contain 100%;
+  }
+  .ownership-sequence:not(.is-enhanced) .third-copy,
+  .ownership-sequence:not(.is-enhanced) .sowing {
+    animation: ownership-show 1s step-end both;
+    animation-timeline: --ownership-scroll;
+    animation-range: contain 0% contain 68%;
+  }
+  .ownership-sequence:not(.is-enhanced) .sowing {
+    animation-range-end: contain 33%;
+  }
+  @keyframes ownership-middle {
+    0%, 68%, 100% { visibility: hidden; }
+    33% { visibility: visible; }
+  }
+  @keyframes ownership-hide { from { visibility: visible; } to { visibility: hidden; } }
+  @keyframes ownership-show {
+    from { visibility: hidden; opacity: 0; }
+    to { visibility: visible; opacity: 1; }
+  }
+}
+
+.ownership-sequence .motion-toggle {
+  position: absolute;
+  inset: auto .5rem .5rem auto;
+}
+
+.ownership-sequence .art > .garden-strip {
+  width: 194.4px;
+  height: 194.4px;
+  max-width: none;
+  overflow: visible;
+}
+.ownership-sequence:not(.is-enhanced) .garden-plant ~ .garden-plant {
+  visibility: hidden;
+}
+
+.ownership-sequence .art > .garden-ground {
+  width: 194.4px;
+  z-index: 1;
+}
+.ownership-sequence .sowing {
+  transform: translateY(46px);
+}
