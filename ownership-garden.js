@@ -235,9 +235,9 @@
       return Math.floor(start);
     }
     if (segmentRunning) return from;
-    const openingIsVisible = from >= Math.floor(openingVisibleAt);
-    if (!openingIsVisible) {
-      if (to < Math.floor(openingVisibleAt)) return null;
+    const visibleAt = Math.floor(openingVisibleAt);
+    if (from < visibleAt) {
+      if (to < visibleAt) return null;
       waitingForGesture = true;
       return openingStop;
     }
