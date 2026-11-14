@@ -281,7 +281,7 @@
         });
         return from;
       }
-      if (!segmentRunning && !returningFromSkip && from <= openingStop) {
+      if (!segmentRunning && !returningFromSkip && completedSegment < 0 && playingStep === null) {
         waitingForGesture = false;
         return null;
       }
@@ -434,6 +434,7 @@
   let touchX = null;
   let touchFresh = false;
   let touchDirection = 0;
+  let touchLeavingOpening = false;
 
   function touchInput() {
     const input = { touch: true, fresh: touchFresh };
@@ -453,6 +454,7 @@
     touchX = touch?.clientX ?? null;
     touchFresh = Boolean(touch);
     touchDirection = 0;
+    touchLeavingOpening = false;
     const { openingVisibleAt, end } = measureScrollRange();
     touchOwnsScroll = Boolean(touch) && !reducedMotion.matches &&
       acceptedScrollY >= Math.floor(openingVisibleAt) && acceptedScrollY < end - 1;
@@ -473,8 +475,10 @@
     touchDirection = direction;
 
     const from = acceptedScrollY;
-    const limited = limitTravel(from, from + delta, touchInput());
+    const input = touchInput();
+    const limited = touchLeavingOpening ? null : limitTravel(from, from + delta, input);
     if (limited === null && !touchOwnsScroll) return;
+    if (delta < 0 && limited === null) touchLeavingOpening = true;
     if (event.cancelable) event.preventDefault();
     scrollInstantly(limited ?? from + delta);
     scheduleDraw();
