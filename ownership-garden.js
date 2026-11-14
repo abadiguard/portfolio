@@ -42,6 +42,7 @@
   let returningFromSkip = false;
   let waitingForGesture = false;
   let completedSegment = -1;
+  let finalStop = null;
   let playingStep = null;
   let lateSeedTime = 0;
   let acceptedScrollY = window.scrollY;
@@ -53,10 +54,14 @@
 
   function measureScrollRange() {
     const frameHeight = frame.offsetHeight;
-    const viewportHeight = document.documentElement.clientHeight;
+    // Mobile browser bars can change the visible area independently of the layout.
+    const visibleViewport = window.visualViewport;
+    const viewportHeight = visibleViewport?.scale === 1
+      ? visibleViewport.height + visibleViewport.offsetTop
+      : document.documentElement.clientHeight;
     const ownershipSection = sequence.closest('.own');
     const nextSectionGap = Number.parseFloat(getComputedStyle(ownershipSection).paddingBottom) || 0;
-    const frameTop = viewportHeight - frameHeight - nextSectionGap;
+    const frameTop = Math.ceil(viewportHeight - frameHeight - nextSectionGap);
     const distance = sequence.offsetHeight - frameHeight;
     const startDelay = Math.min(160, Math.max(0, distance * 0.14));
     const start = window.scrollY + sequence.getBoundingClientRect().top - frameTop + startDelay;
@@ -66,6 +71,11 @@
   function draw(resetToOpening = false) {
     if (returningFromSkip) return;
     const { frameTop, start, end, openingVisibleAt } = measureScrollRange();
+    if (!segmentRunning && completedSegment === segments.length - 1 &&
+        finalStop !== null && acceptedScrollY === finalStop && window.scrollY === finalStop) {
+      if (Math.floor(end) !== finalStop) scrollInstantly(Math.floor(end));
+      finalStop = acceptedScrollY;
+    }
     sequence.classList.toggle('owns-touch-scroll', !reducedMotion.matches &&
       acceptedScrollY >= Math.floor(openingVisibleAt) && acceptedScrollY < end - 1);
     frame.style.setProperty('--frame-top', frameTop + 'px');
@@ -90,7 +100,7 @@
     ground.setAttribute('d', groundPath + ' Q184 149 184 149');
     const progress = clamp(overall / sowingStarts);
     const flowerStart = Math.ceil(start + sproutFinished * (end - start));
-    const flowerProgress = resetToOpening ? 0 : clamp((acceptedScrollY - flowerStart) / Math.max(1, end - flowerStart));
+    const flowerProgress = resetToOpening ? 0 : completedSegment === segments.length - 1 ? 1 : clamp((acceptedScrollY - flowerStart) / Math.max(1, end - flowerStart));
     const sowProgress = clamp((overall - sowingStarts) / (sproutFinished - sowingStarts));
     const packetEntering = sowProgress >= 0.08 || completedSegment >= 1;
     const step = resetToOpening ? 0 : playingStep ?? Math.min(3, completedSegment + 1);
@@ -389,13 +399,14 @@
         }
       }
       const position = range.start + (time === 1 ? target : progress) * (range.end - range.start);
-      scrollInstantly(time === 1 || (hasTitleTransition && elapsed >= exitDuration && progress === sowingStarts) ? Math.ceil(position) : Math.max(Math.ceil(range.start), Math.floor(position)));
+      scrollInstantly(time === 1 && target === 1 ? Math.floor(position) : time === 1 || (hasTitleTransition && elapsed >= exitDuration && progress === sowingStarts) ? Math.ceil(position) : Math.max(Math.ceil(range.start), Math.floor(position)));
       draw();
 
       if (elapsed < duration + seedSettleDelay) {
         segmentFrame = requestAnimationFrame(advance);
       } else {
         completedSegment = segmentIndex;
+        if (segmentIndex === segments.length - 1) finalStop = acceptedScrollY;
         playingStep = null;
         const followingSegment = segments[segmentIndex + 1];
         const advanceRequested = touchAdvanceQueued;
@@ -582,6 +593,7 @@
   addEventListener('touchcancel', onTouchEnd, { passive: true });
   addEventListener('scroll', onScroll, { passive: true });
   addEventListener('resize', scheduleDraw);
+  window.visualViewport?.addEventListener('resize', scheduleDraw);
   reducedMotion.addEventListener('change', scheduleDraw);
   draw();
 })();
