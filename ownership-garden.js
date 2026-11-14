@@ -45,6 +45,7 @@
   let finalStop = null;
   let playingStep = null;
   let lateSeedTime = 0;
+  let settlingScene = false;
   let acceptedScrollY = window.scrollY;
   let lastInputTime = -Infinity;
   let lastInputWasForward = false;
@@ -108,12 +109,14 @@
       : step === 2 && packetEntering ? secondCopy
       : step === 3 && sowProgress > 0.61 ? finalCopy
       : null;
+    const descriptionVisible = step === 1 ? completedSegment >= 0 || settlingScene
+      : step === 2 ? completedSegment >= 1 || settlingScene
+      : step === 3 && completedSegment >= 2;
     [firstCopy, secondCopy, finalCopy].forEach(copy => {
       copy.hidden = copy !== activeCopy;
       copy.setAttribute('aria-hidden', String(copy.hidden));
       const description = copy.querySelector('.stage-description');
-      const lastSegment = copy === firstCopy ? 0 : copy === secondCopy ? 1 : segments.length - 1;
-      const descriptionHidden = copy.hidden || completedSegment < lastSegment;
+      const descriptionHidden = copy.hidden || !descriptionVisible;
       description?.toggleAttribute('data-copy-hidden', descriptionHidden);
       description?.setAttribute('aria-hidden', String(descriptionHidden));
     });
@@ -371,13 +374,17 @@
     const target = segment.end;
     playingStep = Math.min(3, segmentIndex + 1);
     const isOpeningSegment = segmentIndex === 0;
-    const openingTitleTime = isOpeningSegment && !reducedMotion.matches ? Math.max(0, openingReadyAt - performance.now()) : 0;
+    // Let the title fade in before moving away from the opening flower.
+    const openingTitleTime = isOpeningSegment && !reducedMotion.matches
+      ? Math.max(1100, openingReadyAt - performance.now()) : 0;
     const duration = segment.duration;
     const { start, end } = measureScrollRange();
     const initialProgress = replayStart ?? clamp((from - start) / Math.max(1, end - start));
     const startedAt = performance.now();
     segmentRunning = true;
-    const seedSettleDelay = segment.thornExit && !reducedMotion.matches ? 1360 : 0;
+    settlingScene = false;
+    // Hold the scene through the description fade before advancing.
+    const settleDuration = reducedMotion.matches ? 0 : isOpeningSegment ? 1450 : segment.thornExit ? 1360 : 0;
     const hasTitleTransition = segment.thornExit && initialProgress < sowingStarts;
     const exitDuration = 1150;
     const packetEntryTime = 300;
@@ -385,6 +392,7 @@
     function advance(now) {
       const elapsed = reducedMotion.matches ? duration : Math.max(0, now - startedAt - openingTitleTime);
       const time = clamp(elapsed / duration);
+      settlingScene = elapsed >= duration;
       if (segment.thornExit) lateSeedTime = Math.max(0, elapsed - duration);
       const range = measureScrollRange();
       let progress = initialProgress + (target - initialProgress) * time;
@@ -405,9 +413,10 @@
       scrollInstantly(time === 1 && target === 1 ? Math.floor(position) : time === 1 || (hasTitleTransition && elapsed >= exitDuration && progress === sowingStarts) ? Math.ceil(position) : Math.max(Math.ceil(range.start), Math.floor(position)));
       draw();
 
-      if (elapsed < duration + seedSettleDelay) {
+      if (elapsed < duration + settleDuration) {
         segmentFrame = requestAnimationFrame(advance);
       } else {
+        settlingScene = false;
         completedSegment = segmentIndex;
         if (segmentIndex === segments.length - 1) finalStop = acceptedScrollY;
         playingStep = null;
