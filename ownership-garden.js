@@ -3,6 +3,8 @@
   if (!sequence) return;
   sequence.classList.add('is-enhanced');
   const frame = sequence.querySelector('.frame');
+  const stepNav = frame.querySelector('.ownership-steps');
+  const stepButtons = Array.from(stepNav?.querySelectorAll?.('button') ?? []);
   const gardenStrip = frame.querySelector('.garden-strip');
   const ground = frame.querySelector('.garden-ground path');
   const landscape = gardenStrip.querySelector('.garden-landscape');
@@ -12,6 +14,7 @@
   const firstCopy = frame.querySelector('.first-copy');
   const secondCopy = frame.querySelector('.second-copy');
   const thirdCopy = frame.querySelector('.third-copy');
+  const finalCopy = frame.querySelector('.final-copy');
   const sprout = sowing.querySelector('.sprout');
   const sproutStroke = sprout.querySelector('.stem');
   const sproutReveal = sowing.querySelector('.sprout-reveal');
@@ -40,6 +43,10 @@
   let returningFromSkip = false;
   let waitingForGesture = false;
   let completedSegment = -1;
+  let replayingOpening = false;
+  let playingStep = null;
+  let waitingForThornCopy = false;
+  let lateSeedTime = 0;
   let acceptedScrollY = window.scrollY;
   let lastInputTime = -Infinity;
   let lastInputWasForward = false;
@@ -71,40 +78,62 @@
       : overall - (sowingStarts - thornCentered) - Math.max(0, Math.min(overall, 0.68) - sproutFinished);
     const terrainTravel = reducedMotion.matches ? 0 : terrainProgress * 420;
     const terrain = Array.from({ length: 21 }, (_, index) => {
-      const x = -32 + index * 12;
+      const x = -8 + index * 9.6;
       const edgeTaper = Math.sin(Math.PI * index / 20);
       const sample = x + terrainTravel;
       const relief = 1.6 * Math.sin(sample / 21) + 0.65 * Math.sin(sample / 9 + 1);
       return { x, y: 149 + edgeTaper * relief };
     });
-    let groundPath = 'M-32 149';
+    let groundPath = 'M-8 149';
     for (let index = 1; index < terrain.length - 1; index++) {
       const point = terrain[index];
       const next = terrain[index + 1];
       groundPath += ` Q${point.x} ${point.y} ${(point.x + next.x) / 2} ${(point.y + next.y) / 2}`;
     }
-    ground.setAttribute('d', groundPath + ' Q208 149 208 149');
+    ground.setAttribute('d', groundPath + ' Q184 149 184 149');
     const progress = clamp(overall / sowingStarts);
     const flowerStart = Math.ceil(start + sproutFinished * (end - start));
     const flowerProgress = resetToOpening ? 0 : clamp((acceptedScrollY - flowerStart) / Math.max(1, end - flowerStart));
-    const activeCopy = flowerProgress > 0 ? 2 : overall >= sowingStarts ? 1 : 0;
-    [firstCopy, secondCopy, thirdCopy].forEach((copy, index) => {
-      copy.hidden = index !== activeCopy;
-      copy.setAttribute('aria-hidden', String(index !== activeCopy));
-    });
-    sowing.style.opacity = activeCopy !== 0 ? '1' : '0';
     const sowProgress = clamp((overall - sowingStarts) / (sproutFinished - sowingStarts));
-    const showFirstTitle = !resetToOpening && (segmentRunning || acceptedScrollY > Math.ceil(start));
-    const openingIdle = !segmentRunning && !showFirstTitle;
+    const packetEntering = sowProgress >= 0.08 || completedSegment >= 1;
+    const growing = sowProgress > seedBurialKeyframe + 0.003;
+    const activeCopy = flowerProgress >= 0.76 ? finalCopy
+      : flowerProgress > 0 || growing ? thirdCopy
+      : packetEntering ? secondCopy
+      : firstCopy;
+    [firstCopy, secondCopy, thirdCopy, finalCopy].forEach(copy => {
+      copy.hidden = copy !== activeCopy;
+      copy.setAttribute('aria-hidden', String(copy.hidden));
+    });
+    sowing.style.opacity = overall >= sowingStarts ? '1' : '0';
+    const openingIdle = !segmentRunning && overall === 0;
     sequence.classList.toggle('is-opening-idle', openingIdle);
-    sequence.classList.toggle('is-opening-visible', openingIdle && openingInView);
-    firstCopy.querySelector("h3").toggleAttribute("data-copy-hidden", !showFirstTitle);
-    const showThornCopy = overall >= thornCentered;
-    firstCopy.querySelector('div.d').toggleAttribute('data-copy-hidden', !showThornCopy);
-    const packetStop = Math.ceil(start + packetFinished * (end - start));
-    const showProductDirection = acceptedScrollY > packetStop;
-    secondCopy.querySelector('h3').toggleAttribute('data-copy-hidden', showProductDirection);
-    secondCopy.querySelector('div.d').toggleAttribute('data-copy-hidden', !showProductDirection);
+    sequence.classList.toggle('is-story-visible', !replayingOpening && (openingInView || overall > 0));
+    const step = resetToOpening ? 0 : playingStep ?? (completedSegment + 1);
+    stepButtons.forEach((button, index) => {
+      if (index === step) button.setAttribute('aria-current', 'step');
+      else button.removeAttribute('aria-current');
+    });
+    const scan = clamp(progress / thornPanEnd);
+    const impactAt = 0.68;
+    const compressionTime = 0.06;
+    const releaseAt = 0.77;
+    const sweepSpeed = 900;
+    const contactPan = impactAt * sweepSpeed;
+    const stopPan = contactPan + sweepSpeed * compressionTime / 2;
+    const compression = clamp((scan - impactAt) / compressionTime);
+    const rebound = clamp((scan - releaseAt) / (1 - releaseAt));
+    const impactPan = contactPan + sweepSpeed * compressionTime
+      * (compression - compression ** 2 / 2);
+    const pan = reducedMotion.matches ? (scan === 1 ? 600 : 0)
+      : scan < impactAt ? sweepSpeed * scan
+      : scan < releaseAt ? impactPan
+      : stopPan + (600 - stopPan) * smooth(rebound);
+    const thornArrived = !waitingForThornCopy && (completedSegment >= 0 || overall >= thornCentered);
+    const lateSeedDrop = completedSegment >= 1 ? 1 : smooth(clamp((lateSeedTime - 1000) / 360));
+    sowing.style.setProperty('--late-seed-drop', String(lateSeedDrop * 16) + 'px');
+    firstCopy.querySelector('h3').toggleAttribute('data-copy-hidden', pan >= 432);
+    firstCopy.querySelector('div.d').toggleAttribute('data-copy-hidden', !thornArrived);
     const leafProgress = reducedMotion.matches ? 0 : clamp((sowProgress - 0.87) / 0.13);
     const sway = Math.sin(leafProgress * Math.PI * 2) * Math.sin(leafProgress * Math.PI);
     const flowerIsGrown = flowerProgress >= 0.76 || (reducedMotion.matches && flowerProgress > 0);
@@ -126,7 +155,6 @@
     const revealOffset = 42 * (1 - growth) ** 2;
     sproutReveal?.setAttribute('y', String(-40 + revealOffset));
     drawFlower(reducedMotion.matches && flowerProgress > 0 ? 1 : flowerProgress);
-    const pan = reducedMotion.matches ? 0 : 600 * clamp(progress / thornPanEnd);
     landscape.setAttribute('transform', 'translate(' + pan + ' 0)');
     gardenStrip.style.visibility = overall < sowingStarts ? 'visible' : 'hidden';
 
@@ -162,11 +190,14 @@
   }
 
   let openingInView = typeof IntersectionObserver !== 'function';
+  let openingReadyAt = 0;
   if (typeof IntersectionObserver === 'function') {
     new IntersectionObserver(([entry]) => {
-      openingInView = entry.isIntersecting;
+      const visible = entry.intersectionRatio >= 0.25;
+      if (visible && !openingInView) openingReadyAt = performance.now() + 2000;
+      openingInView = visible;
       scheduleDraw();
-    }).observe(gardenStrip);
+    }, { threshold: 0.25 }).observe(frame.querySelector('.art'));
   }
 
   let animateFinalLeaves = false;
@@ -243,6 +274,9 @@
       cancelAnimationFrame(segmentFrame);
       segmentRunning = false;
       completedSegment = -1;
+      playingStep = null;
+      waitingForThornCopy = false;
+      lateSeedTime = 0;
       returningFromSkip = false;
       waitingForGesture = true;
       sequence.classList.toggle('is-skipping', false);
@@ -254,7 +288,7 @@
       return from;
     }
     const visibleAt = Math.floor(openingVisibleAt);
-    if (from < visibleAt) {
+    if (from < visibleAt && (!openingInView || to < visibleAt)) {
       if (to < visibleAt) return null;
       waitingForGesture = true;
       return openingStop;
@@ -275,29 +309,69 @@
     return null;
   }
 
+  stepNav?.addEventListener('click', event => {
+    const button = event.target.closest('button');
+    const step = stepButtons.indexOf(button);
+    if (step < 0) return;
+
+    cancelAnimationFrame(segmentFrame);
+    segmentRunning = false;
+    elevatorRunning = false;
+    returningFromSkip = false;
+    waitingForGesture = true;
+    waitingForThornCopy = false;
+    lateSeedTime = 0;
+    touchAdvanceQueued = false;
+    playingStep = null;
+    completedSegment = Math.max(-1, step - 2);
+    sequence.classList.toggle('is-skipping', false);
+
+    const { start, end } = measureScrollRange();
+    const previous = segments[step - 2]?.end ?? 0;
+    scrollInstantly(Math.ceil(start + previous * (end - start)));
+    if (step === 0) {
+      replayingOpening = true;
+      draw(true);
+      // Commit the hidden state before restarting the opening CSS animations.
+      frame.getBoundingClientRect();
+      replayingOpening = false;
+      openingReadyAt = performance.now() + 2000;
+      draw(true);
+    } else {
+      openingReadyAt = 0;
+      playSegment(acceptedScrollY, segments[step - 1], previous);
+      draw();
+    }
+  });
+
   function scrollInstantly(top) {
     window.scrollTo({ top, behavior: 'instant' });
     acceptedScrollY = window.scrollY;
   }
 
-  function playSegment(from, segment) {
+  function playSegment(from, segment, replayStart) {
     const segmentIndex = segments.indexOf(segment);
     const target = segment.end;
+    playingStep = segmentIndex + 1;
     const isOpeningSegment = segmentIndex === 0;
-    const openingTitleTime = isOpeningSegment ? 880 : 0;
-    const thornCopyTime = isOpeningSegment && !reducedMotion.matches ? 980 : 0;
+    const openingTitleTime = isOpeningSegment && !reducedMotion.matches ? Math.max(0, openingReadyAt - performance.now()) : 0;
     const duration = segment.duration;
     const { start, end } = measureScrollRange();
-    const initialProgress = clamp((from - start) / Math.max(1, end - start));
+    const initialProgress = replayStart ?? clamp((from - start) / Math.max(1, end - start));
     const startedAt = performance.now();
     segmentRunning = true;
+    const thornCopyDelay = isOpeningSegment && !reducedMotion.matches ? 160 : 0;
+    const seedSettleDelay = segment.thornExit && !reducedMotion.matches ? 1360 : 0;
+    waitingForThornCopy = thornCopyDelay > 0;
     const hasTitleTransition = segment.thornExit && initialProgress < sowingStarts;
     const exitDuration = 1150;
-    const titleFadeEnd = 780;
+    const packetEntryTime = 300;
 
     function advance(now) {
       const elapsed = reducedMotion.matches ? duration : Math.max(0, now - startedAt - openingTitleTime);
       const time = clamp(elapsed / duration);
+      if (segment.thornExit) lateSeedTime = Math.max(0, elapsed - duration);
+      if (isOpeningSegment) waitingForThornCopy = elapsed < duration + thornCopyDelay;
       const range = measureScrollRange();
       let progress = initialProgress + (target - initialProgress) * time;
       if (hasTitleTransition) {
@@ -306,10 +380,10 @@
           progress = initialProgress + (sowingStarts - initialProgress) * clamp(elapsed / exitDuration);
         } else {
           const sowTime = elapsed - exitDuration;
-          // When the title finishes fading in, the packet reaches its entry keyframe.
-          const sowProgress = sowTime < titleFadeEnd
-            ? packetEntry * clamp(sowTime / titleFadeEnd)
-            : packetEntry + (seedBurialKeyframe - packetEntry) * clamp((sowTime - titleFadeEnd) / (segment.duration - exitDuration - titleFadeEnd));
+          // Give the packet a beat to enter after the thorn exits.
+          const sowProgress = sowTime < packetEntryTime
+            ? packetEntry * clamp(sowTime / packetEntryTime)
+            : packetEntry + (seedBurialKeyframe - packetEntry) * clamp((sowTime - packetEntryTime) / (segment.duration - exitDuration - packetEntryTime));
           progress = sowingStarts + (sproutFinished - sowingStarts) * sowProgress;
         }
       }
@@ -317,13 +391,13 @@
       scrollInstantly(time === 1 || (hasTitleTransition && elapsed >= exitDuration && progress === sowingStarts) ? Math.ceil(position) : Math.max(Math.ceil(range.start), Math.floor(position)));
       draw();
 
-      if (elapsed < duration + thornCopyTime) {
+      if (elapsed < duration + thornCopyDelay + seedSettleDelay) {
         segmentFrame = requestAnimationFrame(advance);
       } else {
         completedSegment = segmentIndex;
+        playingStep = null;
         const followingSegment = segments[segmentIndex + 1];
-        const stillScrolling = !lastInputWasTouch && lastInputWasForward && now - lastInputTime < 180;
-        const advanceRequested = touchAdvanceQueued || stillScrolling;
+        const advanceRequested = touchAdvanceQueued;
         touchAdvanceQueued = false;
         if (advanceRequested && followingSegment && !reducedMotion.matches) {
           playSegment(acceptedScrollY, followingSegment);
@@ -425,6 +499,9 @@
     segmentRunning = false;
     waitingForGesture = false;
     completedSegment = -1;
+    playingStep = null;
+    waitingForThornCopy = false;
+    lateSeedTime = 0;
     const origin = window.scrollY;
     if (reducedMotion.matches) {
       scrollInstantly(target);

@@ -58,49 +58,48 @@
 .ownership-sequence .copy h3 {
   margin: 0;
 }
-.ownership-sequence.is-enhanced .copy .second-copy {
+.ownership-sequence.is-enhanced .copy .col {
   display: grid;
   justify-items: center;
+  align-items: start;
+  min-width: 0;
 }
-.ownership-sequence.is-enhanced .second-copy > .d {
+.ownership-sequence.is-enhanced .copy .col > .d {
   grid-area: 1 / 1;
-  align-self: start;
+  margin: 0;
 }
-/* Keep the text height reserved while each line fades in. */
-.ownership-sequence.is-enhanced .copy .col:not([hidden]) :is(h3, .d):not([data-copy-hidden]) {
-  animation: ownership-copy-in 280ms ease-out both;
+/* Keep outgoing lines in the grid until their fade finishes. */
+.ownership-sequence.is-enhanced .copy .col[hidden] { display: grid; }
+.ownership-sequence.is-enhanced .copy .col > .d {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 850ms ease-in-out, visibility 0s;
 }
-.ownership-sequence.is-enhanced .copy .second-copy:not([hidden]) h3 {
-  animation-delay: 500ms;
-}
-.ownership-sequence.is-enhanced .copy .first-copy:not([hidden]) > .d:not(h3) {
-  animation-delay: 700ms;
-}
-.ownership-sequence.is-enhanced .copy [data-copy-hidden] {
+.ownership-sequence.is-enhanced .copy .col[hidden] > .d,
+.ownership-sequence.is-enhanced .copy .col > .d[data-copy-hidden],
+.ownership-sequence.is-enhanced:not(.is-story-visible) .copy .col > .d {
+  opacity: 0;
   visibility: hidden;
+  transition: opacity 650ms ease-in-out, visibility 0s 650ms;
 }
 @keyframes ownership-copy-in {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .ownership-sequence.is-enhanced .copy .col:not([hidden]) :is(h3, .d):not([data-copy-hidden]) {
-    animation: none;
+  .ownership-sequence.is-enhanced .copy .col > .d,
+  .ownership-sequence.is-enhanced .copy .col[hidden] > .d,
+  .ownership-sequence.is-enhanced .copy .col > .d[data-copy-hidden],
+  .ownership-sequence.is-enhanced:not(.is-story-visible) .copy .col > .d {
+    transition: none;
   }
 }
 
-.ownership-sequence.is-enhanced .copy .col[hidden] {
-  display: flex;
-  visibility: hidden;
-}
-.ownership-sequence.is-enhanced .copy .second-copy[hidden] {
-  display: grid;
-}
 .own[aria-labelledby="own-h"] {
   padding-bottom: 2rem;
 }
 .ownership-sequence .ownership-actions {
-  margin-top: calc(var(--section-media-gap) * 2 / 3);
+  margin-top: var(--section-media-gap);
 }
 .ownership-sequence .ownership-scroll-copy {
   margin: 0;
@@ -141,17 +140,70 @@
 .ownership-sequence.is-skipping .copy .col :is(h3, .d) {
   animation-play-state: paused !important;
 }
+.ownership-sequence.is-enhanced:not(.is-story-visible) :is(.art, .ownership-actions) {
+  visibility: hidden;
+}
 @media (prefers-reduced-motion: no-preference) {
-  .ownership-sequence.is-opening-idle .garden-strip {
-    opacity: 0;
+  .ownership-sequence.is-story-visible .garden-ground path {
+    animation: ownership-line-in 720ms cubic-bezier(.3,.1,.25,1) both;
+    transform-box: fill-box;
+    transform-origin: center;
   }
-  .ownership-sequence.is-opening-idle.is-opening-visible .garden-strip {
-    animation: ownership-opening-fade 480ms ease-out both;
+  .ownership-sequence.is-story-visible .garden-strip {
+    animation: ownership-flower-in 920ms 600ms cubic-bezier(.25,.55,.25,1) both;
+  }
+  .ownership-sequence.is-enhanced.is-story-visible .copy .first-copy:not([hidden]) h3:not([data-copy-hidden]) {
+    transition-delay: 1520ms;
+  }
+  .ownership-sequence.is-story-visible .ownership-actions {
+    animation: ownership-copy-in 780ms 900ms ease-out both;
+  }
+  .ownership-sequence.is-opening-idle .opening-leaf {
+    animation-delay: 1520ms;
   }
 }
-@keyframes ownership-opening-fade {
-  from { opacity: 0; }
-  to { opacity: 1; }
+.ownership-sequence .art { position: relative; }
+.ownership-sequence .ownership-steps {
+  display: none;
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  left: max(calc(50% - 50vw + clamp(10px, 6vw, 88px)), calc(50% - 538px));
+  transform: translateY(-50%);
+}
+.ownership-sequence.is-enhanced.is-story-visible .ownership-steps { display: grid; }
+.ownership-sequence .ownership-steps button {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 28px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+}
+.ownership-sequence .ownership-steps button::before {
+  content: "";
+  width: 13px;
+  height: 13px;
+  box-sizing: border-box;
+  border: 2px solid #d3d8e4;
+  border-radius: 50%;
+  transition: border-color 380ms ease-in-out;
+}
+.ownership-sequence .ownership-steps button[aria-current]::before { border-color: currentColor; }
+.ownership-sequence .seed-late { translate: 0 var(--late-seed-drop, 0px); }
+@media (prefers-reduced-motion: reduce) {
+  .ownership-sequence .ownership-steps button::before { transition: none; }
+}
+@keyframes ownership-line-in {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+@keyframes ownership-flower-in {
+  from { clip-path: inset(93% -35% -8% -35%); opacity: .15; }
+  to { clip-path: inset(-10% -35% -8% -35%); opacity: 1; }
 }
 .ownership-sequence.is-skipping .garden-strip {
   animation-play-state: paused;
@@ -216,6 +268,7 @@
     animation-timeline: --ownership-scroll;
     animation-range: contain 0% contain 100%;
   }
+  .ownership-sequence:not(.is-enhanced) .final-copy { display: none; }
   .ownership-sequence:not(.is-enhanced) .third-copy,
   .ownership-sequence:not(.is-enhanced) .sowing {
     animation: ownership-show 1s step-end both;
@@ -310,29 +363,38 @@
     <div class="ownership-intro">
   <span class="pill">Now Fractional</span>
   <h2 id="own-h">Same ownership<br>just invoiced</h2>
-  <div class="sub">I partner directly with founders and product leaders, bringing the ownership of an in-house UX lead with the flexibility of an independent&nbsp;partner</div>
+  <div class="sub">I partner directly with founders and product leaders to turn messy product challenges into clear direction. <strong>Here's how:</strong></div>
     </div>
     <div class="copy">
       <section class="col first-copy">
         <h3 class="d" data-copy-hidden>First, we find the real pain</h3>
-        <div class="d" data-copy-hidden>(What’s actually getting in the way)</div>
+        <div class="d" data-copy-hidden>And start right there</div>
       </section>
       <section class="col second-copy">
-        <h3 class="d">And start right there</h3>
-        <div class="d" data-copy-hidden>Turn the need into a product direction<br>the team can actually build</div>
+        <div class="d">Turn the need into a product direction</div>
       </section>
       <section class="col third-copy">
-        <div class="d">Aligning users, business goals, and tech so the product scales without breaking</div>
+        <div class="d">Aligning users, business goals, and tech</div>
+      </section>
+      <section class="col final-copy">
+        <div class="d">Built to scale, ready to bloom</div>
       </section>
     </div>
     <div class="ownership-actions">
-      <p class="ownership-scroll-copy">Scroll to read or <a class="ownership-skip" href="#work">skip</a></p>
+      <p class="ownership-scroll-copy">Scroll to read or <a class="ownership-skip" href="#work">skip</a>.</p>
     </div>
-    <div class="art" aria-hidden="true">
+    <div class="art">
+  <nav class="ownership-steps" aria-label="Animation steps">
+    <button type="button" aria-label="Replay opening" aria-current="step"></button>
+    <button type="button" aria-label="Replay thorn reveal"></button>
+    <button type="button" aria-label="Replay sowing"></button>
+    <button type="button" aria-label="Replay sprout growth"></button>
+    <button type="button" aria-label="Replay final bloom"></button>
+  </nav>
 <svg class="garden-strip" viewBox="0 0 160 160" aria-hidden="true">
   <defs>
     <clipPath id="garden-view" clipPathUnits="userSpaceOnUse">
-      <rect x="-32" y="-160" width="240" height="480"/>
+      <rect x="-8" y="-160" width="192" height="480"/>
     </clipPath>
   </defs>
   <g clip-path="url(#garden-view)">
@@ -411,14 +473,14 @@
     <path d="M300 223 Q311 249 322 276
       M420 268 Q429 278 439 286
       M353 349 Q338 404 324 454
-      M318 477 Q330 502 336 550"/>
+  M318 477 Q330 502 336 550"/>
   </g>
 </g></g>
   </g>
   </g>
 </svg>
     <svg class="garden-ground" viewBox="0 0 160 160" aria-hidden="true">
-      <path d="M-32 149 Q-4 153 24.8 150 T81.6 150 T138.4 149 T208 149"
+      <path d="M-8 149 Q16 153 42 150 T88 150 T136 149 T184 149"
         fill="none" stroke="#171717" stroke-width="1.711" stroke-linecap="round"/>
     </svg>
     <svg class="uproot-marks" viewBox="0 0 160 160" aria-hidden="true">
@@ -429,7 +491,7 @@
   <title id="seed-packet-title">שקית זורעת ושתיל צומח</title>
   <style>
     .ownership-sequence .packet { transform-origin: 80px 80px; animation: ownership-pour 3.6s var(--seek, 0s) both paused; }
-    .ownership-sequence .seed { opacity: 0; animation: ownership-bury 3.6s calc(var(--delay) + var(--seek, 0s)) both paused; }
+    .ownership-sequence .seed { opacity: 0; animation: ownership-bury calc(3.6s - var(--delay) * 1.6) calc(var(--delay) + var(--seek, 0s)) both paused; }
     .ownership-sequence:not(.is-enhanced) .sprout-reveal { animation: ownership-grow 3.6s both paused; }
 
     @keyframes ownership-pour {
@@ -448,7 +510,8 @@
       40% { opacity: 1; transform: translate(var(--x), 132px) rotate(var(--turn)); animation-timing-function: ease-out; }
       43% { opacity: 1; transform: translate(var(--x), 128px) rotate(var(--turn)); animation-timing-function: ease-in; }
       47% { opacity: 1; transform: translate(var(--x), 133px) rotate(var(--turn)); animation-timing-function: ease-in; }
-      54%, 100% { opacity: 1; transform: translate(var(--x), 146px) rotate(var(--turn)); }
+      54%, 62% { opacity: 1; transform: translate(var(--x), var(--rest)) rotate(var(--turn)); }
+      73%, 100% { opacity: var(--last-opacity); transform: translate(var(--x), var(--rest)) rotate(var(--turn)); }
     }
 
     @keyframes ownership-grow {
@@ -481,9 +544,16 @@
     <clipPath id="seed-packet-view"><rect x="-121.6" y="-160" width="432" height="480"/></clipPath>
   </defs>
   <g clip-path="url(#seed-packet-ground)" fill="var(--bg)" stroke="var(--ink)" stroke-width="3.07980000" stroke-linejoin="round">
-    <path class="seed" style="--start:54px;--height:54px;--x:65px;--turn:-79deg;--delay:0s" d="M-3.2 2.08 Q-4.16 -2.08 3.12 -4.16 Q5.2 1.04 1.04 4.16 Q-3.12 5.2 -3.2 2.08 Z"/>
-    <path class="seed" style="--start:50px;--height:56px;--x:80px;--turn:92deg;--delay:.08s" d="M-3.2 2.08 Q-4.16 -2.08 3.12 -4.16 Q5.2 1.04 1.04 4.16 Q-3.12 5.2 -3.2 2.08 Z"/>
-    <path class="seed" style="--start:52px;--height:59px;--x:95px;--turn:132deg;--delay:.16s" d="M-3.2 2.08 Q-4.16 -2.08 3.12 -4.16 Q5.2 1.04 1.04 4.16 Q-3.12 5.2 -3.2 2.08 Z"/>
+    <path class="seed seed-surface seed-late" style="--start:46px;--height:51px;--x:49px;--turn:-79deg;--delay:0.000s;--rest:130px;--last-opacity:0" d="M-3.2 2.08 Q-4.16 -2.08 3.12 -4.16 Q5.2 1.04 1.04 4.16 Q-3.12 5.2 -3.2 2.08 Z"/>
+    <path class="seed" style="--start:49px;--height:52px;--x:57px;--turn:92deg;--delay:0.070s;--rest:146px;--last-opacity:1" d="M-3.2 2.08 Q-4.16 -2.08 3.12 -4.16 Q5.2 1.04 1.04 4.16 Q-3.12 5.2 -3.2 2.08 Z"/>
+    <path class="seed seed-surface" style="--start:52px;--height:53px;--x:64px;--turn:132deg;--delay:0.140s;--rest:130px;--last-opacity:0" d="M-3.2 2.08 Q-4.16 -2.08 3.12 -4.16 Q5.2 1.04 1.04 4.16 Q-3.12 5.2 -3.2 2.08 Z"/>
+    <path class="seed" style="--start:55px;--height:54px;--x:71px;--turn:-42deg;--delay:0.210s;--rest:146px;--last-opacity:1" d="M-3.2 2.08 Q-4.16 -2.08 3.12 -4.16 Q5.2 1.04 1.04 4.16 Q-3.12 5.2 -3.2 2.08 Z"/>
+    <path class="seed seed-surface" style="--start:47px;--height:55px;--x:77px;--turn:17deg;--delay:0.280s;--rest:130px;--last-opacity:0" d="M-3.2 2.08 Q-4.16 -2.08 3.12 -4.16 Q5.2 1.04 1.04 4.16 Q-3.12 5.2 -3.2 2.08 Z"/>
+    <path class="seed" style="--start:50px;--height:56px;--x:83px;--turn:-79deg;--delay:0.350s;--rest:146px;--last-opacity:1" d="M-3.2 2.08 Q-4.16 -2.08 3.12 -4.16 Q5.2 1.04 1.04 4.16 Q-3.12 5.2 -3.2 2.08 Z"/>
+    <path class="seed seed-surface" style="--start:53px;--height:57px;--x:89px;--turn:92deg;--delay:0.420s;--rest:130px;--last-opacity:0" d="M-3.2 2.08 Q-4.16 -2.08 3.12 -4.16 Q5.2 1.04 1.04 4.16 Q-3.12 5.2 -3.2 2.08 Z"/>
+    <path class="seed" style="--start:56px;--height:58px;--x:96px;--turn:132deg;--delay:0.490s;--rest:146px;--last-opacity:1" d="M-3.2 2.08 Q-4.16 -2.08 3.12 -4.16 Q5.2 1.04 1.04 4.16 Q-3.12 5.2 -3.2 2.08 Z"/>
+    <path class="seed seed-surface seed-late" style="--start:48px;--height:59px;--x:103px;--turn:-42deg;--delay:0.560s;--rest:130px;--last-opacity:0" d="M-3.2 2.08 Q-4.16 -2.08 3.12 -4.16 Q5.2 1.04 1.04 4.16 Q-3.12 5.2 -3.2 2.08 Z"/>
+    <path class="seed" style="--start:54px;--height:60px;--x:111px;--turn:17deg;--delay:0.630s;--rest:146px;--last-opacity:1" d="M-3.2 2.08 Q-4.16 -2.08 3.12 -4.16 Q5.2 1.04 1.04 4.16 Q-3.12 5.2 -3.2 2.08 Z"/>
   </g>
   <g clip-path="url(#seed-packet-view)">
     <g class="packet" fill="none" stroke="var(--ink)" stroke-width="2.68392157" stroke-linecap="round" stroke-linejoin="round">
@@ -882,6 +952,8 @@ function selectOption(label,value){
   if (!sequence) return;
   sequence.classList.add('is-enhanced');
   const frame = sequence.querySelector('.frame');
+  const stepNav = frame.querySelector('.ownership-steps');
+  const stepButtons = Array.from(stepNav?.querySelectorAll?.('button') ?? []);
   const gardenStrip = frame.querySelector('.garden-strip');
   const ground = frame.querySelector('.garden-ground path');
   const landscape = gardenStrip.querySelector('.garden-landscape');
@@ -891,6 +963,7 @@ function selectOption(label,value){
   const firstCopy = frame.querySelector('.first-copy');
   const secondCopy = frame.querySelector('.second-copy');
   const thirdCopy = frame.querySelector('.third-copy');
+  const finalCopy = frame.querySelector('.final-copy');
   const sprout = sowing.querySelector('.sprout');
   const sproutStroke = sprout.querySelector('.stem');
   const sproutReveal = sowing.querySelector('.sprout-reveal');
@@ -933,6 +1006,10 @@ function selectOption(label,value){
   let returningFromSkip = false;
   let waitingForGesture = false;
   let completedSegment = -1;
+  let replayingOpening = false;
+  let playingStep = null;
+  let waitingForThornCopy = false;
+  let lateSeedTime = 0;
   let acceptedScrollY = window.scrollY;
   let lastInputTime = -Infinity;
   let lastInputWasForward = false;
@@ -964,40 +1041,62 @@ function selectOption(label,value){
       : overall - (sowingStarts - thornCentered) - Math.max(0, Math.min(overall, 0.68) - sproutFinished);
     const terrainTravel = reducedMotion.matches ? 0 : terrainProgress * 420;
     const terrain = Array.from({ length: 21 }, (_, index) => {
-      const x = -32 + index * 12;
+      const x = -8 + index * 9.6;
       const edgeTaper = Math.sin(Math.PI * index / 20);
       const sample = x + terrainTravel;
       const relief = 1.6 * Math.sin(sample / 21) + 0.65 * Math.sin(sample / 9 + 1);
       return { x, y: 149 + edgeTaper * relief };
     });
-    let groundPath = 'M-32 149';
+    let groundPath = 'M-8 149';
     for (let index = 1; index < terrain.length - 1; index++) {
       const point = terrain[index];
       const next = terrain[index + 1];
       groundPath += ` Q${point.x} ${point.y} ${(point.x + next.x) / 2} ${(point.y + next.y) / 2}`;
     }
-    ground.setAttribute('d', groundPath + ' Q208 149 208 149');
+    ground.setAttribute('d', groundPath + ' Q184 149 184 149');
     const progress = clamp(overall / sowingStarts);
     const flowerStart = Math.ceil(start + sproutFinished * (end - start));
     const flowerProgress = resetToOpening ? 0 : clamp((acceptedScrollY - flowerStart) / Math.max(1, end - flowerStart));
-    const activeCopy = flowerProgress > 0 ? 2 : overall >= sowingStarts ? 1 : 0;
-    [firstCopy, secondCopy, thirdCopy].forEach((copy, index) => {
-      copy.hidden = index !== activeCopy;
-      copy.setAttribute('aria-hidden', String(index !== activeCopy));
-    });
-    sowing.style.opacity = activeCopy !== 0 ? '1' : '0';
     const sowProgress = clamp((overall - sowingStarts) / (sproutFinished - sowingStarts));
-    const showFirstTitle = !resetToOpening && (segmentRunning || acceptedScrollY > Math.ceil(start));
-    const openingIdle = !segmentRunning && !showFirstTitle;
+    const packetEntering = sowProgress >= 0.08 || completedSegment >= 1;
+    const growing = sowProgress > seedBurialKeyframe + 0.003;
+    const activeCopy = flowerProgress >= 0.76 ? finalCopy
+      : flowerProgress > 0 || growing ? thirdCopy
+      : packetEntering ? secondCopy
+      : firstCopy;
+    [firstCopy, secondCopy, thirdCopy, finalCopy].forEach(copy => {
+      copy.hidden = copy !== activeCopy;
+      copy.setAttribute('aria-hidden', String(copy.hidden));
+    });
+    sowing.style.opacity = overall >= sowingStarts ? '1' : '0';
+    const openingIdle = !segmentRunning && overall === 0;
     sequence.classList.toggle('is-opening-idle', openingIdle);
-    sequence.classList.toggle('is-opening-visible', openingIdle && openingInView);
-    firstCopy.querySelector("h3").toggleAttribute("data-copy-hidden", !showFirstTitle);
-    const showThornCopy = overall >= thornCentered;
-    firstCopy.querySelector('div.d').toggleAttribute('data-copy-hidden', !showThornCopy);
-    const packetStop = Math.ceil(start + packetFinished * (end - start));
-    const showProductDirection = acceptedScrollY > packetStop;
-    secondCopy.querySelector('h3').toggleAttribute('data-copy-hidden', showProductDirection);
-    secondCopy.querySelector('div.d').toggleAttribute('data-copy-hidden', !showProductDirection);
+    sequence.classList.toggle('is-story-visible', !replayingOpening && (openingInView || overall > 0));
+    const step = resetToOpening ? 0 : playingStep ?? (completedSegment + 1);
+    stepButtons.forEach((button, index) => {
+      if (index === step) button.setAttribute('aria-current', 'step');
+      else button.removeAttribute('aria-current');
+    });
+    const scan = clamp(progress / thornPanEnd);
+    const impactAt = 0.68;
+    const compressionTime = 0.06;
+    const releaseAt = 0.77;
+    const sweepSpeed = 900;
+    const contactPan = impactAt * sweepSpeed;
+    const stopPan = contactPan + sweepSpeed * compressionTime / 2;
+    const compression = clamp((scan - impactAt) / compressionTime);
+    const rebound = clamp((scan - releaseAt) / (1 - releaseAt));
+    const impactPan = contactPan + sweepSpeed * compressionTime
+      * (compression - compression ** 2 / 2);
+    const pan = reducedMotion.matches ? (scan === 1 ? 600 : 0)
+      : scan < impactAt ? sweepSpeed * scan
+      : scan < releaseAt ? impactPan
+      : stopPan + (600 - stopPan) * smooth(rebound);
+    const thornArrived = !waitingForThornCopy && (completedSegment >= 0 || overall >= thornCentered);
+    const lateSeedDrop = completedSegment >= 1 ? 1 : smooth(clamp((lateSeedTime - 1000) / 360));
+    sowing.style.setProperty('--late-seed-drop', String(lateSeedDrop * 16) + 'px');
+    firstCopy.querySelector('h3').toggleAttribute('data-copy-hidden', pan >= 432);
+    firstCopy.querySelector('div.d').toggleAttribute('data-copy-hidden', !thornArrived);
     const leafProgress = reducedMotion.matches ? 0 : clamp((sowProgress - 0.87) / 0.13);
     const sway = Math.sin(leafProgress * Math.PI * 2) * Math.sin(leafProgress * Math.PI);
     const flowerIsGrown = flowerProgress >= 0.76 || (reducedMotion.matches && flowerProgress > 0);
@@ -1019,7 +1118,6 @@ function selectOption(label,value){
     const revealOffset = 42 * (1 - growth) ** 2;
     sproutReveal?.setAttribute('y', String(-40 + revealOffset));
     drawFlower(reducedMotion.matches && flowerProgress > 0 ? 1 : flowerProgress);
-    const pan = reducedMotion.matches ? 0 : 600 * clamp(progress / thornPanEnd);
     landscape.setAttribute('transform', 'translate(' + pan + ' 0)');
     gardenStrip.style.visibility = overall < sowingStarts ? 'visible' : 'hidden';
 
@@ -1055,11 +1153,14 @@ function selectOption(label,value){
   }
 
   let openingInView = typeof IntersectionObserver !== 'function';
+  let openingReadyAt = 0;
   if (typeof IntersectionObserver === 'function') {
     new IntersectionObserver(([entry]) => {
-      openingInView = entry.isIntersecting;
+      const visible = entry.intersectionRatio >= 0.25;
+      if (visible && !openingInView) openingReadyAt = performance.now() + 2000;
+      openingInView = visible;
       scheduleDraw();
-    }).observe(gardenStrip);
+    }, { threshold: 0.25 }).observe(frame.querySelector('.art'));
   }
 
   let animateFinalLeaves = false;
@@ -1136,6 +1237,9 @@ function selectOption(label,value){
       cancelAnimationFrame(segmentFrame);
       segmentRunning = false;
       completedSegment = -1;
+      playingStep = null;
+      waitingForThornCopy = false;
+      lateSeedTime = 0;
       returningFromSkip = false;
       waitingForGesture = true;
       sequence.classList.toggle('is-skipping', false);
@@ -1147,7 +1251,7 @@ function selectOption(label,value){
       return from;
     }
     const visibleAt = Math.floor(openingVisibleAt);
-    if (from < visibleAt) {
+    if (from < visibleAt && (!openingInView || to < visibleAt)) {
       if (to < visibleAt) return null;
       waitingForGesture = true;
       return openingStop;
@@ -1168,29 +1272,69 @@ function selectOption(label,value){
     return null;
   }
 
+  stepNav?.addEventListener('click', event => {
+    const button = event.target.closest('button');
+    const step = stepButtons.indexOf(button);
+    if (step < 0) return;
+
+    cancelAnimationFrame(segmentFrame);
+    segmentRunning = false;
+    elevatorRunning = false;
+    returningFromSkip = false;
+    waitingForGesture = true;
+    waitingForThornCopy = false;
+    lateSeedTime = 0;
+    touchAdvanceQueued = false;
+    playingStep = null;
+    completedSegment = Math.max(-1, step - 2);
+    sequence.classList.toggle('is-skipping', false);
+
+    const { start, end } = measureScrollRange();
+    const previous = segments[step - 2]?.end ?? 0;
+    scrollInstantly(Math.ceil(start + previous * (end - start)));
+    if (step === 0) {
+      replayingOpening = true;
+      draw(true);
+      // Commit the hidden state before restarting the opening CSS animations.
+      frame.getBoundingClientRect();
+      replayingOpening = false;
+      openingReadyAt = performance.now() + 2000;
+      draw(true);
+    } else {
+      openingReadyAt = 0;
+      playSegment(acceptedScrollY, segments[step - 1], previous);
+      draw();
+    }
+  });
+
   function scrollInstantly(top) {
     window.scrollTo({ top, behavior: 'instant' });
     acceptedScrollY = window.scrollY;
   }
 
-  function playSegment(from, segment) {
+  function playSegment(from, segment, replayStart) {
     const segmentIndex = segments.indexOf(segment);
     const target = segment.end;
+    playingStep = segmentIndex + 1;
     const isOpeningSegment = segmentIndex === 0;
-    const openingTitleTime = isOpeningSegment ? 880 : 0;
-    const thornCopyTime = isOpeningSegment && !reducedMotion.matches ? 980 : 0;
+    const openingTitleTime = isOpeningSegment && !reducedMotion.matches ? Math.max(0, openingReadyAt - performance.now()) : 0;
     const duration = segment.duration;
     const { start, end } = measureScrollRange();
-    const initialProgress = clamp((from - start) / Math.max(1, end - start));
+    const initialProgress = replayStart ?? clamp((from - start) / Math.max(1, end - start));
     const startedAt = performance.now();
     segmentRunning = true;
+    const thornCopyDelay = isOpeningSegment && !reducedMotion.matches ? 160 : 0;
+    const seedSettleDelay = segment.thornExit && !reducedMotion.matches ? 1360 : 0;
+    waitingForThornCopy = thornCopyDelay > 0;
     const hasTitleTransition = segment.thornExit && initialProgress < sowingStarts;
     const exitDuration = 1150;
-    const titleFadeEnd = 780;
+    const packetEntryTime = 300;
 
     function advance(now) {
       const elapsed = reducedMotion.matches ? duration : Math.max(0, now - startedAt - openingTitleTime);
       const time = clamp(elapsed / duration);
+      if (segment.thornExit) lateSeedTime = Math.max(0, elapsed - duration);
+      if (isOpeningSegment) waitingForThornCopy = elapsed < duration + thornCopyDelay;
       const range = measureScrollRange();
       let progress = initialProgress + (target - initialProgress) * time;
       if (hasTitleTransition) {
@@ -1199,10 +1343,10 @@ function selectOption(label,value){
           progress = initialProgress + (sowingStarts - initialProgress) * clamp(elapsed / exitDuration);
         } else {
           const sowTime = elapsed - exitDuration;
-          // When the title finishes fading in, the packet reaches its entry keyframe.
-          const sowProgress = sowTime < titleFadeEnd
-            ? packetEntry * clamp(sowTime / titleFadeEnd)
-            : packetEntry + (seedBurialKeyframe - packetEntry) * clamp((sowTime - titleFadeEnd) / (segment.duration - exitDuration - titleFadeEnd));
+          // Give the packet a beat to enter after the thorn exits.
+          const sowProgress = sowTime < packetEntryTime
+            ? packetEntry * clamp(sowTime / packetEntryTime)
+            : packetEntry + (seedBurialKeyframe - packetEntry) * clamp((sowTime - packetEntryTime) / (segment.duration - exitDuration - packetEntryTime));
           progress = sowingStarts + (sproutFinished - sowingStarts) * sowProgress;
         }
       }
@@ -1210,13 +1354,13 @@ function selectOption(label,value){
       scrollInstantly(time === 1 || (hasTitleTransition && elapsed >= exitDuration && progress === sowingStarts) ? Math.ceil(position) : Math.max(Math.ceil(range.start), Math.floor(position)));
       draw();
 
-      if (elapsed < duration + thornCopyTime) {
+      if (elapsed < duration + thornCopyDelay + seedSettleDelay) {
         segmentFrame = requestAnimationFrame(advance);
       } else {
         completedSegment = segmentIndex;
+        playingStep = null;
         const followingSegment = segments[segmentIndex + 1];
-        const stillScrolling = !lastInputWasTouch && lastInputWasForward && now - lastInputTime < 180;
-        const advanceRequested = touchAdvanceQueued || stillScrolling;
+        const advanceRequested = touchAdvanceQueued;
         touchAdvanceQueued = false;
         if (advanceRequested && followingSegment && !reducedMotion.matches) {
           playSegment(acceptedScrollY, followingSegment);
@@ -1318,6 +1462,9 @@ function selectOption(label,value){
     segmentRunning = false;
     waitingForGesture = false;
     completedSegment = -1;
+    playingStep = null;
+    waitingForThornCopy = false;
+    lateSeedTime = 0;
     const origin = window.scrollY;
     if (reducedMotion.matches) {
       scrollInstantly(target);
