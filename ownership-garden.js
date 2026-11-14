@@ -285,7 +285,7 @@
       return from;
     }
     const visibleAt = Math.floor(openingVisibleAt);
-    if (from < visibleAt && (!openingInView || to < visibleAt)) {
+    if (from < visibleAt) {
       if (to < visibleAt) return null;
       waitingForGesture = true;
       return openingStop;
