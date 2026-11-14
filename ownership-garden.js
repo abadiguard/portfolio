@@ -111,6 +111,7 @@
     const openingIdle = !segmentRunning && overall === 0;
     sequence.classList.toggle('is-opening-idle', openingIdle);
     sequence.classList.toggle('is-story-visible', openingInView || overall > 0);
+    sequence.classList.toggle('is-guide-suspended', acceptedScrollY >= end || returningFromSkip);
     stepButtons.forEach((button, index) => {
       if (index === Math.max(0, step - 1)) button.setAttribute('aria-current', 'step');
       else button.removeAttribute('aria-current');
@@ -264,7 +265,22 @@
     const openingStop = Math.ceil(start);
     if (to < from) {
       touchAdvanceQueued = false;
+      if (from >= end || returningFromSkip) {
+        sequence.classList.toggle('is-guide-suspended', true);
+      }
       if (to >= end) return null;
+      if (from >= end || returningFromSkip) {
+        returningFromSkip = true;
+        sequence.classList.toggle('is-story-visible', false);
+        moveElevator(openingStop, () => {
+          returningFromSkip = false;
+          waitingForGesture = true;
+          sequence.classList.toggle('is-skipping', false);
+          restartOpeningReveal();
+          scheduleDraw();
+        });
+        return from;
+      }
       if (!segmentRunning && !returningFromSkip && from <= openingStop) {
         waitingForGesture = false;
         return null;
@@ -277,7 +293,8 @@
       returningFromSkip = false;
       waitingForGesture = true;
       sequence.classList.toggle('is-skipping', false);
-      return Math.floor(start);
+      restartOpeningReveal();
+      return openingStop;
     }
     if (segmentRunning) {
       // A distinct swipe can request the next segment while this one finishes.
@@ -292,7 +309,7 @@
     }
     const stopFor = progress => Math.ceil(start + progress * (end - start));
     // Release native scrolling at the last frame, allowing for pixel rounding.
-    if (completedSegment === segments.length - 1 || (completedSegment < 0 && from >= end - 1)) return null;
+    if (completedSegment === segments.length - 1 || (completedSegment < 0 && from >= end - 1) || returningFromSkip) return null;
     if (waitingForGesture && !freshGesture) return from;
 
     const next = completedSegment >= 0
@@ -478,6 +495,14 @@
     scheduleDraw();
   }
 
+  function restartOpeningReveal() {
+    sequence.classList.toggle('is-story-visible', false);
+    sequence.classList.toggle('is-guide-suspended', false);
+    frame.getBoundingClientRect();
+    openingInView = true;
+    openingReadyAt = performance.now() + 2000;
+  }
+
   function moveElevator(target, onComplete) {
     touchAdvanceQueued = false;
     cancelAnimationFrame(segmentFrame);
@@ -517,6 +542,7 @@
 
     event.preventDefault();
     returningFromSkip = true;
+    sequence.classList.toggle('is-guide-suspended', true);
     animateFinalLeaves = false;
     sequence.classList.toggle("is-skipping", true);
     moveElevator(window.scrollY + destination.getBoundingClientRect().top, () => {

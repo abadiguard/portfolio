@@ -21,7 +21,7 @@
 <script>try{if(window.IntersectionObserver&&!matchMedia("(prefers-reduced-motion: reduce)").matches)document.documentElement.className+=" js"}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600&family=Noto+Sans+Hebrew:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="styles.css?v=20261113-indicator-motion">
+<link rel="stylesheet" href="styles.css?v=20261113-case-scroll">
 <style id="ownership-garden-styles">
 .ownership-sequence {
   width: 100%;
@@ -187,6 +187,10 @@
 }
 .ownership-sequence.is-enhanced.is-story-visible .ownership-steps { display: grid; }
 .ownership-sequence .seed-late { translate: 0 var(--late-seed-drop, 0px); }
+.ownership-sequence.is-enhanced.is-guide-suspended .ownership-actions {
+  visibility: hidden;
+  animation: none;
+}
 @keyframes ownership-line-in {
   from { transform: scaleX(0); }
   to { transform: scaleX(1); }
@@ -301,7 +305,7 @@
   transform: translateY(46px);
 }
 </style>
-  <script src="site.js?v=20261113-indicator-motion" defer></script>
+  <script src="site.js?v=20261113-case-scroll" defer></script>
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-6T641TL5ED"></script>
   <script>
@@ -1060,6 +1064,7 @@ function selectOption(label,value){
     const openingIdle = !segmentRunning && overall === 0;
     sequence.classList.toggle('is-opening-idle', openingIdle);
     sequence.classList.toggle('is-story-visible', openingInView || overall > 0);
+    sequence.classList.toggle('is-guide-suspended', acceptedScrollY >= end || returningFromSkip);
     stepButtons.forEach((button, index) => {
       if (index === Math.max(0, step - 1)) button.setAttribute('aria-current', 'step');
       else button.removeAttribute('aria-current');
@@ -1213,7 +1218,22 @@ function selectOption(label,value){
     const openingStop = Math.ceil(start);
     if (to < from) {
       touchAdvanceQueued = false;
+      if (from >= end || returningFromSkip) {
+        sequence.classList.toggle('is-guide-suspended', true);
+      }
       if (to >= end) return null;
+      if (from >= end || returningFromSkip) {
+        returningFromSkip = true;
+        sequence.classList.toggle('is-story-visible', false);
+        moveElevator(openingStop, () => {
+          returningFromSkip = false;
+          waitingForGesture = true;
+          sequence.classList.toggle('is-skipping', false);
+          restartOpeningReveal();
+          scheduleDraw();
+        });
+        return from;
+      }
       if (!segmentRunning && !returningFromSkip && from <= openingStop) {
         waitingForGesture = false;
         return null;
@@ -1226,7 +1246,8 @@ function selectOption(label,value){
       returningFromSkip = false;
       waitingForGesture = true;
       sequence.classList.toggle('is-skipping', false);
-      return Math.floor(start);
+      restartOpeningReveal();
+      return openingStop;
     }
     if (segmentRunning) {
       // A distinct swipe can request the next segment while this one finishes.
@@ -1241,7 +1262,7 @@ function selectOption(label,value){
     }
     const stopFor = progress => Math.ceil(start + progress * (end - start));
     // Release native scrolling at the last frame, allowing for pixel rounding.
-    if (completedSegment === segments.length - 1 || (completedSegment < 0 && from >= end - 1)) return null;
+    if (completedSegment === segments.length - 1 || (completedSegment < 0 && from >= end - 1) || returningFromSkip) return null;
     if (waitingForGesture && !freshGesture) return from;
 
     const next = completedSegment >= 0
@@ -1427,6 +1448,14 @@ function selectOption(label,value){
     scheduleDraw();
   }
 
+  function restartOpeningReveal() {
+    sequence.classList.toggle('is-story-visible', false);
+    sequence.classList.toggle('is-guide-suspended', false);
+    frame.getBoundingClientRect();
+    openingInView = true;
+    openingReadyAt = performance.now() + 2000;
+  }
+
   function moveElevator(target, onComplete) {
     touchAdvanceQueued = false;
     cancelAnimationFrame(segmentFrame);
@@ -1466,6 +1495,7 @@ function selectOption(label,value){
 
     event.preventDefault();
     returningFromSkip = true;
+    sequence.classList.toggle('is-guide-suspended', true);
     animateFinalLeaves = false;
     sequence.classList.toggle("is-skipping", true);
     moveElevator(window.scrollY + destination.getBoundingClientRect().top, () => {
@@ -1501,8 +1531,29 @@ function selectOption(label,value){
   addEventListener('touchcancel', onTouchEnd, { passive: true });
   addEventListener('scroll', onScroll, { passive: true });
   addEventListener('resize', scheduleDraw);
-  addEventListener('pageshow', () => {
+  addEventListener('pagehide', () => {
+    sequence.classList.toggle('is-story-visible', false);
+  });
+  addEventListener('pageshow', event => {
     acceptedScrollY = window.scrollY;
+    const navigation = performance.getEntriesByType?.('navigation')[0];
+    if (event.persisted || navigation?.type === 'back_forward') {
+      const { start, end, openingVisibleAt } = measureScrollRange();
+      cancelAnimationFrame(segmentFrame);
+      segmentRunning = false;
+      elevatorRunning = false;
+      waitingForGesture = true;
+      completedSegment = -1;
+      playingStep = null;
+      touchAdvanceQueued = false;
+      lateSeedTime = 0;
+      sequence.classList.toggle('is-skipping', false);
+      returningFromSkip = acceptedScrollY >= end;
+      if (!returningFromSkip && acceptedScrollY >= openingVisibleAt) {
+        scrollInstantly(Math.ceil(start));
+        restartOpeningReveal();
+      }
+    }
     scheduleDraw();
   });
   systemMotion.addEventListener?.('change', () => {

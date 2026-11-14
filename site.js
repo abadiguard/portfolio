@@ -279,14 +279,10 @@
     dots.appendChild(button);
     return button;
   });
-  var outline=document.createElement("span");
-  outline.className="case-dot-outline";
-  outline.setAttribute("aria-hidden","true");
-  dots.appendChild(outline);
   dots.hidden=false;
-  var frame=false;
+  var frame;
   function setActive(){
-    frame=false;
+    clearTimeout(frame);
     if(!isCarousel.matches){dots.hidden=true;return}
     dots.hidden=false;
     var railLeft=rail.getBoundingClientRect().left;
@@ -307,18 +303,16 @@
       if(active.indexOf(index)!==-1)button.setAttribute("aria-current","true");
       else button.removeAttribute("aria-current");
     });
-    var first=buttons[active[0]];
-    var last=buttons[active[active.length-1]];
-    var diameter=11.7;
-    var firstCenter=first.offsetLeft+first.offsetWidth/2;
-    var lastCenter=last.offsetLeft+last.offsetWidth/2;
-    outline.style.translate=(firstCenter-diameter/2)+"px";
-    outline.style.width=(lastCenter-firstCenter+diameter)+"px";
-    if(!outline.classList.contains("is-ready")){
-      requestAnimationFrame(function(){outline.classList.add("is-ready")});
-    }
+    var pair=fullyVisible.length===2&&fullyVisible[1]===fullyVisible[0]+1;
+    dots.classList.toggle("is-pair",pair);
+    buttons.forEach(function(button,index){
+      button.classList.toggle("is-pair-start",pair&&index===fullyVisible[0]);
+    });
   }
-  rail.addEventListener("scroll",function(){if(frame)return;frame=true;window.requestAnimationFrame(setActive)},{passive:true});
+  rail.addEventListener("scroll",function(){
+    clearTimeout(frame);
+    frame=setTimeout(setActive,100);
+  },{passive:true});
   window.addEventListener("resize",setActive,{passive:true});
   isCarousel.addEventListener?isCarousel.addEventListener("change",setActive):isCarousel.addListener(setActive);
   setActive();

@@ -183,28 +183,30 @@ h1,h2,h3{word-break:normal;overflow-wrap:normal;text-wrap:balance}
 }
 :is(.ownership-steps, .case-dots) button[aria-current]::before { border-color: currentColor; }
 .case-dots { position: relative; }
-.case-dots button::before { transition: opacity 180ms ease; }
-.case-dots button[aria-current]::before { opacity: 0; }
-.case-dots .case-dot-outline {
+.case-dots button { position: relative; }
+.case-dots button::before { transition: opacity 240ms ease, border-color 240ms ease; }
+.case-dots.is-pair button[aria-current]::before { opacity: 0; }
+.case-dots button:not(:last-child)::after {
+  content: "";
   position: absolute;
-  left: 0;
-  top: calc(50% - 5.85px);
-  width: 11.7px;
+  left: calc((100% - 11.7px) / 2);
+  top: calc((100% - 11.7px) / 2);
+  width: calc(100% + 11.7px);
   height: 11.7px;
   box-sizing: border-box;
   border: 2px solid var(--ink);
   border-radius: 999px;
+  opacity: 0;
   pointer-events: none;
+  transition: opacity 240ms ease;
 }
-.case-dots .case-dot-outline.is-ready {
-  transition: translate 320ms cubic-bezier(.22,.68,.24,1), width 320ms cubic-bezier(.22,.68,.24,1);
-}
+.case-dots.is-pair button.is-pair-start::after { opacity: 1; }
 :is(.ownership-steps, .case-dots) button:focus-visible {
   outline: 2px solid var(--ink);
   outline-offset: 2px;
 }
 @media (prefers-reduced-motion: reduce) {
-  :is(.ownership-steps, .case-dots) button::before, .case-dots .case-dot-outline.is-ready { transition: none; }
+  :is(.ownership-steps, .case-dots) button::before, .case-dots button::after { transition: none; }
 }
 .ph{width:100%;aspect-ratio:365/240;border-radius:var(--radius-card);background:var(--ph)}
 .lg{height:40px;margin-top:26px;display:flex;align-items:center;justify-content:center;color:var(--ink)}
