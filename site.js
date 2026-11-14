@@ -279,6 +279,10 @@
     dots.appendChild(button);
     return button;
   });
+  var outline=document.createElement("span");
+  outline.className="case-dot-outline";
+  outline.setAttribute("aria-hidden","true");
+  dots.appendChild(outline);
   dots.hidden=false;
   var frame=false;
   function setActive(){
@@ -292,19 +296,27 @@
       var distance=Math.abs(card.getBoundingClientRect().left-railLeft);
       if(distance<nearest){nearest=distance;activeIndex=index}
     });
-    var firstCard=cards[0];
-    var cardStyle=window.getComputedStyle(rail);
-    var gap=parseFloat(cardStyle.columnGap)||parseFloat(cardStyle.gap)||0;
-    var cardWidth=firstCard.getBoundingClientRect().width;
-    var visibleCount=Math.max(1,Math.floor((rail.clientWidth+gap)/(cardWidth+gap)));
+    var railRight=railLeft+rail.clientWidth;
+    var fullyVisible=cards.reduce(function(indices,card,index){
+      var bounds=card.getBoundingClientRect();
+      if(bounds.left>=railLeft-1&&bounds.right<=railRight+1)indices.push(index);
+      return indices;
+    },[]);
+    var active=fullyVisible.length?fullyVisible:[activeIndex];
     buttons.forEach(function(button,index){
-      button.classList.remove("is-active-start","is-active-end");
-      if(index>=activeIndex&&index<Math.min(cards.length,activeIndex+visibleCount))button.setAttribute("aria-current","true");
+      if(active.indexOf(index)!==-1)button.setAttribute("aria-current","true");
       else button.removeAttribute("aria-current");
     });
-    buttons[activeIndex].classList.add("is-active-start");
-    buttons[Math.min(cards.length,activeIndex+visibleCount)-1].classList.add("is-active-end");
-    dots.dataset.visible=String(visibleCount);
+    var first=buttons[active[0]];
+    var last=buttons[active[active.length-1]];
+    var diameter=11.7;
+    var firstCenter=first.offsetLeft+first.offsetWidth/2;
+    var lastCenter=last.offsetLeft+last.offsetWidth/2;
+    outline.style.translate=(firstCenter-diameter/2)+"px";
+    outline.style.width=(lastCenter-firstCenter+diameter)+"px";
+    if(!outline.classList.contains("is-ready")){
+      requestAnimationFrame(function(){outline.classList.add("is-ready")});
+    }
   }
   rail.addEventListener("scroll",function(){if(frame)return;frame=true;window.requestAnimationFrame(setActive)},{passive:true});
   window.addEventListener("resize",setActive,{passive:true});

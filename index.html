@@ -21,7 +21,7 @@
 <script>try{if(window.IntersectionObserver&&!matchMedia("(prefers-reduced-motion: reduce)").matches)document.documentElement.className+=" js"}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600&family=Noto+Sans+Hebrew:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="styles.css?v=20261113-ownership-scroll">
+<link rel="stylesheet" href="styles.css?v=20261113-indicator-motion">
 <style id="ownership-garden-styles">
 .ownership-sequence {
   width: 100%;
@@ -186,31 +186,7 @@
   transform: translateY(-50%);
 }
 .ownership-sequence.is-enhanced.is-story-visible .ownership-steps { display: grid; }
-.ownership-sequence .ownership-steps button {
-  display: grid;
-  place-items: center;
-  width: 30px;
-  height: 28px;
-  border: 0;
-  padding: 0;
-  background: transparent;
-  color: var(--ink);
-  cursor: pointer;
-}
-.ownership-sequence .ownership-steps button::before {
-  content: "";
-  width: 13px;
-  height: 13px;
-  box-sizing: border-box;
-  border: 2px solid #d3d8e4;
-  border-radius: 50%;
-  transition: border-color 380ms ease-in-out;
-}
-.ownership-sequence .ownership-steps button[aria-current]::before { border-color: currentColor; }
 .ownership-sequence .seed-late { translate: 0 var(--late-seed-drop, 0px); }
-@media (prefers-reduced-motion: reduce) {
-  .ownership-sequence .ownership-steps button::before { transition: none; }
-}
 @keyframes ownership-line-in {
   from { transform: scaleX(0); }
   to { transform: scaleX(1); }
@@ -325,7 +301,7 @@
   transform: translateY(46px);
 }
 </style>
-  <script src="site.js?v=20261110-1207" defer></script>
+  <script src="site.js?v=20261113-indicator-motion" defer></script>
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-6T641TL5ED"></script>
   <script>
