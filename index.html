@@ -187,6 +187,20 @@
 }
 .ownership-sequence.is-enhanced.is-story-visible .ownership-steps { display: grid; }
 .ownership-sequence .seed-late { translate: 0 var(--late-seed-drop, 0px); }
+.ownership-sequence.is-enhanced .ownership-scroll-copy {
+  transition: opacity 650ms ease-in-out, visibility 0s;
+}
+.ownership-sequence.is-enhanced.is-guide-complete .ownership-scroll-copy {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 650ms ease-in-out, visibility 0s 650ms;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ownership-sequence.is-enhanced .ownership-scroll-copy,
+  .ownership-sequence.is-enhanced.is-guide-complete .ownership-scroll-copy {
+    transition: none;
+  }
+}
 .ownership-sequence.is-enhanced.is-guide-suspended .ownership-actions {
   visibility: hidden;
   animation: none;
@@ -207,7 +221,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: calc(clamp(4rem, 9vh, 6rem) - .75rem);
+  margin-bottom: clamp(3.25rem, 8vh, 5.25rem);
 }
 .ownership-sequence .art {
   flex: none;
@@ -355,8 +369,7 @@
   <div class="frame">
     <div class="ownership-intro">
   <span class="pill">Now Fractional</span>
-  <h2 id="own-h">Same ownership<br>just invoiced</h2>
-  <div class="sub">I partner directly with founders and product leaders to turn messy product challenges into clear direction. Here's how:</div>
+  <h2 id="own-h">STRATEGIC UX<br>FOR FOUNDERS</h2>
     </div>
     <div class="copy">
       <section class="col first-copy">
@@ -1074,7 +1087,10 @@ function selectOption(label,value){
     const openingIdle = !segmentRunning && overall === 0;
     sequence.classList.toggle('is-opening-idle', openingIdle);
     sequence.classList.toggle('is-story-visible', openingInView || overall > 0);
-    sequence.classList.toggle('is-guide-suspended', acceptedScrollY >= end || returningFromSkip);
+    const atFinalStop = completedSegment === segments.length - 1 && acceptedScrollY === finalStop;
+    sequence.classList.toggle('is-guide-suspended', (acceptedScrollY >= end && !atFinalStop) || returningFromSkip);
+    sequence.classList.toggle('is-guide-complete', activeCopy === finalCopy &&
+      completedSegment === segments.length - 1);
     stepButtons.forEach((button, index) => {
       if (index === Math.max(0, step - 1)) button.setAttribute('aria-current', 'step');
       else button.removeAttribute('aria-current');

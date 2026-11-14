@@ -121,7 +121,10 @@
     const openingIdle = !segmentRunning && overall === 0;
     sequence.classList.toggle('is-opening-idle', openingIdle);
     sequence.classList.toggle('is-story-visible', openingInView || overall > 0);
-    sequence.classList.toggle('is-guide-suspended', acceptedScrollY >= end || returningFromSkip);
+    const atFinalStop = completedSegment === segments.length - 1 && acceptedScrollY === finalStop;
+    sequence.classList.toggle('is-guide-suspended', (acceptedScrollY >= end && !atFinalStop) || returningFromSkip);
+    sequence.classList.toggle('is-guide-complete', activeCopy === finalCopy &&
+      completedSegment === segments.length - 1);
     stepButtons.forEach((button, index) => {
       if (index === Math.max(0, step - 1)) button.setAttribute('aria-current', 'step');
       else button.removeAttribute('aria-current');
