@@ -13,7 +13,6 @@
   const sowing = frame.querySelector('.sowing');
   const firstCopy = frame.querySelector('.first-copy');
   const secondCopy = frame.querySelector('.second-copy');
-  const thirdCopy = frame.querySelector('.third-copy');
   const finalCopy = frame.querySelector('.final-copy');
   const sprout = sowing.querySelector('.sprout');
   const sproutStroke = sprout.querySelector('.stem');
@@ -43,9 +42,7 @@
   let returningFromSkip = false;
   let waitingForGesture = false;
   let completedSegment = -1;
-  let replayingOpening = false;
   let playingStep = null;
-  let waitingForThornCopy = false;
   let lateSeedTime = 0;
   let acceptedScrollY = window.scrollY;
   let lastInputTime = -Infinity;
@@ -96,22 +93,26 @@
     const flowerProgress = resetToOpening ? 0 : clamp((acceptedScrollY - flowerStart) / Math.max(1, end - flowerStart));
     const sowProgress = clamp((overall - sowingStarts) / (sproutFinished - sowingStarts));
     const packetEntering = sowProgress >= 0.08 || completedSegment >= 1;
-    const growing = sowProgress > seedBurialKeyframe + 0.003;
-    const activeCopy = flowerProgress >= 0.76 ? finalCopy
-      : flowerProgress > 0 || growing ? thirdCopy
-      : packetEntering ? secondCopy
-      : firstCopy;
-    [firstCopy, secondCopy, thirdCopy, finalCopy].forEach(copy => {
+    const step = resetToOpening ? 0 : playingStep ?? Math.min(3, completedSegment + 1);
+    const activeCopy = step === 1 ? firstCopy
+      : step === 2 && packetEntering ? secondCopy
+      : step === 3 && sowProgress > 0.61 ? finalCopy
+      : null;
+    [firstCopy, secondCopy, finalCopy].forEach(copy => {
       copy.hidden = copy !== activeCopy;
       copy.setAttribute('aria-hidden', String(copy.hidden));
+      const description = copy.querySelector('.stage-description');
+      const lastSegment = copy === firstCopy ? 0 : copy === secondCopy ? 1 : segments.length - 1;
+      const descriptionHidden = copy.hidden || completedSegment < lastSegment;
+      description?.toggleAttribute('data-copy-hidden', descriptionHidden);
+      description?.setAttribute('aria-hidden', String(descriptionHidden));
     });
     sowing.style.opacity = overall >= sowingStarts ? '1' : '0';
     const openingIdle = !segmentRunning && overall === 0;
     sequence.classList.toggle('is-opening-idle', openingIdle);
-    sequence.classList.toggle('is-story-visible', !replayingOpening && (openingInView || overall > 0));
-    const step = resetToOpening ? 0 : playingStep ?? (completedSegment + 1);
+    sequence.classList.toggle('is-story-visible', openingInView || overall > 0);
     stepButtons.forEach((button, index) => {
-      if (index === step) button.setAttribute('aria-current', 'step');
+      if (index === Math.max(0, step - 1)) button.setAttribute('aria-current', 'step');
       else button.removeAttribute('aria-current');
     });
     const scan = clamp(progress / thornPanEnd);
@@ -129,11 +130,8 @@
       : scan < impactAt ? sweepSpeed * scan
       : scan < releaseAt ? impactPan
       : stopPan + (600 - stopPan) * smooth(rebound);
-    const thornArrived = !waitingForThornCopy && (completedSegment >= 0 || overall >= thornCentered);
     const lateSeedDrop = completedSegment >= 1 ? 1 : smooth(clamp((lateSeedTime - 1000) / 360));
     sowing.style.setProperty('--late-seed-drop', String(lateSeedDrop * 16) + 'px');
-    firstCopy.querySelector('h3').toggleAttribute('data-copy-hidden', pan >= 432);
-    firstCopy.querySelector('div.d').toggleAttribute('data-copy-hidden', !thornArrived);
     const leafProgress = reducedMotion.matches ? 0 : clamp((sowProgress - 0.87) / 0.13);
     const sway = Math.sin(leafProgress * Math.PI * 2) * Math.sin(leafProgress * Math.PI);
     const flowerIsGrown = flowerProgress >= 0.76 || (reducedMotion.matches && flowerProgress > 0);
@@ -275,7 +273,6 @@
       segmentRunning = false;
       completedSegment = -1;
       playingStep = null;
-      waitingForThornCopy = false;
       lateSeedTime = 0;
       returningFromSkip = false;
       waitingForGesture = true;
@@ -311,15 +308,15 @@
 
   stepNav?.addEventListener('click', event => {
     const button = event.target.closest('button');
-    const step = stepButtons.indexOf(button);
-    if (step < 0) return;
+    const index = stepButtons.indexOf(button);
+    if (index < 0) return;
+    const step = index + 1;
 
     cancelAnimationFrame(segmentFrame);
     segmentRunning = false;
     elevatorRunning = false;
     returningFromSkip = false;
     waitingForGesture = true;
-    waitingForThornCopy = false;
     lateSeedTime = 0;
     touchAdvanceQueued = false;
     playingStep = null;
@@ -329,19 +326,9 @@
     const { start, end } = measureScrollRange();
     const previous = segments[step - 2]?.end ?? 0;
     scrollInstantly(Math.ceil(start + previous * (end - start)));
-    if (step === 0) {
-      replayingOpening = true;
-      draw(true);
-      // Commit the hidden state before restarting the opening CSS animations.
-      frame.getBoundingClientRect();
-      replayingOpening = false;
-      openingReadyAt = performance.now() + 2000;
-      draw(true);
-    } else {
-      openingReadyAt = 0;
-      playSegment(acceptedScrollY, segments[step - 1], previous);
-      draw();
-    }
+    openingReadyAt = 0;
+    playSegment(acceptedScrollY, segments[index], previous);
+    draw();
   });
 
   function scrollInstantly(top) {
@@ -352,7 +339,7 @@
   function playSegment(from, segment, replayStart) {
     const segmentIndex = segments.indexOf(segment);
     const target = segment.end;
-    playingStep = segmentIndex + 1;
+    playingStep = Math.min(3, segmentIndex + 1);
     const isOpeningSegment = segmentIndex === 0;
     const openingTitleTime = isOpeningSegment && !reducedMotion.matches ? Math.max(0, openingReadyAt - performance.now()) : 0;
     const duration = segment.duration;
@@ -360,9 +347,7 @@
     const initialProgress = replayStart ?? clamp((from - start) / Math.max(1, end - start));
     const startedAt = performance.now();
     segmentRunning = true;
-    const thornCopyDelay = isOpeningSegment && !reducedMotion.matches ? 160 : 0;
     const seedSettleDelay = segment.thornExit && !reducedMotion.matches ? 1360 : 0;
-    waitingForThornCopy = thornCopyDelay > 0;
     const hasTitleTransition = segment.thornExit && initialProgress < sowingStarts;
     const exitDuration = 1150;
     const packetEntryTime = 300;
@@ -371,7 +356,6 @@
       const elapsed = reducedMotion.matches ? duration : Math.max(0, now - startedAt - openingTitleTime);
       const time = clamp(elapsed / duration);
       if (segment.thornExit) lateSeedTime = Math.max(0, elapsed - duration);
-      if (isOpeningSegment) waitingForThornCopy = elapsed < duration + thornCopyDelay;
       const range = measureScrollRange();
       let progress = initialProgress + (target - initialProgress) * time;
       if (hasTitleTransition) {
@@ -391,7 +375,7 @@
       scrollInstantly(time === 1 || (hasTitleTransition && elapsed >= exitDuration && progress === sowingStarts) ? Math.ceil(position) : Math.max(Math.ceil(range.start), Math.floor(position)));
       draw();
 
-      if (elapsed < duration + thornCopyDelay + seedSettleDelay) {
+      if (elapsed < duration + seedSettleDelay) {
         segmentFrame = requestAnimationFrame(advance);
       } else {
         completedSegment = segmentIndex;
@@ -399,12 +383,13 @@
         const followingSegment = segments[segmentIndex + 1];
         const advanceRequested = touchAdvanceQueued;
         touchAdvanceQueued = false;
-        if (advanceRequested && followingSegment && !reducedMotion.matches) {
-          playSegment(acceptedScrollY, followingSegment);
+        if (followingSegment && (segmentIndex === 2 || (advanceRequested && !reducedMotion.matches))) {
+          playSegment(acceptedScrollY, followingSegment, target);
           return;
         }
         segmentRunning = false;
         waitingForGesture = Boolean(followingSegment);
+        draw();
       }
     }
 
@@ -500,7 +485,6 @@
     waitingForGesture = false;
     completedSegment = -1;
     playingStep = null;
-    waitingForThornCopy = false;
     lateSeedTime = 0;
     const origin = window.scrollY;
     if (reducedMotion.matches) {

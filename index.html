@@ -50,7 +50,10 @@
 .ownership-sequence .copy {
   display: grid;
   width: 100%;
+  container-type: inline-size;
 }
+.ownership-sequence .copy .col { padding-inline: 0; }
+
 .ownership-sequence .copy .col {
   align-self: start;
   grid-area: 1 / 1;
@@ -67,6 +70,20 @@
 .ownership-sequence.is-enhanced .copy .col > .d {
   grid-area: 1 / 1;
   margin: 0;
+}
+.ownership-sequence .copy .stage-title {
+  max-width: none;
+  font: var(--weight-body) calc(var(--p) + 2pt)/1.2 var(--f);
+  text-wrap: balance;
+}
+.ownership-sequence .copy .stage-description {
+  max-width: 38em;
+  font: var(--weight-body) var(--type-body)/var(--line-body) var(--f);
+  text-wrap: balance;
+}
+.ownership-sequence.is-enhanced .copy .col > .stage-description {
+  grid-area: 2 / 1;
+  margin: .65rem 0 0;
 }
 /* Keep outgoing lines in the grid until their fade finishes. */
 .ownership-sequence.is-enhanced .copy .col[hidden] { display: grid; }
@@ -103,7 +120,7 @@
 }
 .ownership-sequence .ownership-scroll-copy {
   margin: 0;
-  font: 400 11pt/1.5 var(--f);
+  font: 400 var(--ownership-guide-size, 11pt)/1.5 var(--f);
 }
 .ownership-sequence .ownership-skip {
   color: inherit;
@@ -111,7 +128,7 @@
   text-underline-offset: .2em;
 }
 @media (max-width: 600px) {
-  .ownership-sequence .ownership-scroll-copy { font-size: 10pt; }
+  .ownership-sequence { --ownership-guide-size: 10pt; }
 }
 .ownership-sequence .opening-leaf {
   transform-box: view-box;
@@ -152,9 +169,6 @@
   .ownership-sequence.is-story-visible .garden-strip {
     animation: ownership-flower-in 920ms 600ms cubic-bezier(.25,.55,.25,1) both;
   }
-  .ownership-sequence.is-enhanced.is-story-visible .copy .first-copy:not([hidden]) h3:not([data-copy-hidden]) {
-    transition-delay: 1520ms;
-  }
   .ownership-sequence.is-story-visible .ownership-actions {
     animation: ownership-copy-in 780ms 900ms ease-out both;
   }
@@ -167,7 +181,7 @@
   display: none;
   position: absolute;
   z-index: 2;
-  top: 50%;
+  top: 62%;
   left: max(calc(50% - 50vw + clamp(10px, 6vw, 88px)), calc(50% - 538px));
   transform: translateY(-50%);
 }
@@ -268,8 +282,7 @@
     animation-timeline: --ownership-scroll;
     animation-range: contain 0% contain 100%;
   }
-  .ownership-sequence:not(.is-enhanced) .final-copy { display: none; }
-  .ownership-sequence:not(.is-enhanced) .third-copy,
+  .ownership-sequence:not(.is-enhanced) .final-copy,
   .ownership-sequence:not(.is-enhanced) .sowing {
     animation: ownership-show 1s step-end both;
     animation-timeline: --ownership-scroll;
@@ -363,21 +376,20 @@
     <div class="ownership-intro">
   <span class="pill">Now Fractional</span>
   <h2 id="own-h">Same ownership<br>just invoiced</h2>
-  <div class="sub">I partner directly with founders and product leaders to turn messy product challenges into clear direction. <strong>Here's how:</strong></div>
+  <div class="sub">I partner directly with founders and product leaders to turn messy product challenges into clear direction. Here's how:</div>
     </div>
     <div class="copy">
       <section class="col first-copy">
-        <h3 class="d" data-copy-hidden>First, we find the real pain</h3>
-        <div class="d" data-copy-hidden>And start right there</div>
+        <h3 class="d stage-title">First, we find the real pain</h3>
+        <p class="d stage-description" data-copy-hidden>Uncovering the core problem worth solving,<br>before jumping to solutions</p>
       </section>
       <section class="col second-copy">
-        <div class="d">Turn the need into a product direction</div>
-      </section>
-      <section class="col third-copy">
-        <div class="d">Aligning users, business goals, and tech</div>
+        <h3 class="d stage-title">Then, we define the right solution</h3>
+        <p class="d stage-description" data-copy-hidden>Bridging user needs, business goals, and<br>tech feasibility into a clear direction</p>
       </section>
       <section class="col final-copy">
-        <div class="d">Built to scale, ready to bloom</div>
+        <h3 class="d stage-title">Built to scale, ready to bloom</h3>
+        <p class="d stage-description" data-copy-hidden>Shipping a solid UX foundation<br>that supports your next stage of growth</p>
       </section>
     </div>
     <div class="ownership-actions">
@@ -385,11 +397,9 @@
     </div>
     <div class="art">
   <nav class="ownership-steps" aria-label="Animation steps">
-    <button type="button" aria-label="Replay opening" aria-current="step"></button>
-    <button type="button" aria-label="Replay thorn reveal"></button>
+    <button type="button" aria-label="Play flower to thorn" aria-current="step"></button>
     <button type="button" aria-label="Replay sowing"></button>
-    <button type="button" aria-label="Replay sprout growth"></button>
-    <button type="button" aria-label="Replay final bloom"></button>
+    <button type="button" aria-label="Replay growth and bloom"></button>
   </nav>
 <svg class="garden-strip" viewBox="0 0 160 160" aria-hidden="true">
   <defs>
@@ -962,7 +972,6 @@ function selectOption(label,value){
   const sowing = frame.querySelector('.sowing');
   const firstCopy = frame.querySelector('.first-copy');
   const secondCopy = frame.querySelector('.second-copy');
-  const thirdCopy = frame.querySelector('.third-copy');
   const finalCopy = frame.querySelector('.final-copy');
   const sprout = sowing.querySelector('.sprout');
   const sproutStroke = sprout.querySelector('.stem');
@@ -1006,9 +1015,7 @@ function selectOption(label,value){
   let returningFromSkip = false;
   let waitingForGesture = false;
   let completedSegment = -1;
-  let replayingOpening = false;
   let playingStep = null;
-  let waitingForThornCopy = false;
   let lateSeedTime = 0;
   let acceptedScrollY = window.scrollY;
   let lastInputTime = -Infinity;
@@ -1059,22 +1066,26 @@ function selectOption(label,value){
     const flowerProgress = resetToOpening ? 0 : clamp((acceptedScrollY - flowerStart) / Math.max(1, end - flowerStart));
     const sowProgress = clamp((overall - sowingStarts) / (sproutFinished - sowingStarts));
     const packetEntering = sowProgress >= 0.08 || completedSegment >= 1;
-    const growing = sowProgress > seedBurialKeyframe + 0.003;
-    const activeCopy = flowerProgress >= 0.76 ? finalCopy
-      : flowerProgress > 0 || growing ? thirdCopy
-      : packetEntering ? secondCopy
-      : firstCopy;
-    [firstCopy, secondCopy, thirdCopy, finalCopy].forEach(copy => {
+    const step = resetToOpening ? 0 : playingStep ?? Math.min(3, completedSegment + 1);
+    const activeCopy = step === 1 ? firstCopy
+      : step === 2 && packetEntering ? secondCopy
+      : step === 3 && sowProgress > 0.61 ? finalCopy
+      : null;
+    [firstCopy, secondCopy, finalCopy].forEach(copy => {
       copy.hidden = copy !== activeCopy;
       copy.setAttribute('aria-hidden', String(copy.hidden));
+      const description = copy.querySelector('.stage-description');
+      const lastSegment = copy === firstCopy ? 0 : copy === secondCopy ? 1 : segments.length - 1;
+      const descriptionHidden = copy.hidden || completedSegment < lastSegment;
+      description?.toggleAttribute('data-copy-hidden', descriptionHidden);
+      description?.setAttribute('aria-hidden', String(descriptionHidden));
     });
     sowing.style.opacity = overall >= sowingStarts ? '1' : '0';
     const openingIdle = !segmentRunning && overall === 0;
     sequence.classList.toggle('is-opening-idle', openingIdle);
-    sequence.classList.toggle('is-story-visible', !replayingOpening && (openingInView || overall > 0));
-    const step = resetToOpening ? 0 : playingStep ?? (completedSegment + 1);
+    sequence.classList.toggle('is-story-visible', openingInView || overall > 0);
     stepButtons.forEach((button, index) => {
-      if (index === step) button.setAttribute('aria-current', 'step');
+      if (index === Math.max(0, step - 1)) button.setAttribute('aria-current', 'step');
       else button.removeAttribute('aria-current');
     });
     const scan = clamp(progress / thornPanEnd);
@@ -1092,11 +1103,8 @@ function selectOption(label,value){
       : scan < impactAt ? sweepSpeed * scan
       : scan < releaseAt ? impactPan
       : stopPan + (600 - stopPan) * smooth(rebound);
-    const thornArrived = !waitingForThornCopy && (completedSegment >= 0 || overall >= thornCentered);
     const lateSeedDrop = completedSegment >= 1 ? 1 : smooth(clamp((lateSeedTime - 1000) / 360));
     sowing.style.setProperty('--late-seed-drop', String(lateSeedDrop * 16) + 'px');
-    firstCopy.querySelector('h3').toggleAttribute('data-copy-hidden', pan >= 432);
-    firstCopy.querySelector('div.d').toggleAttribute('data-copy-hidden', !thornArrived);
     const leafProgress = reducedMotion.matches ? 0 : clamp((sowProgress - 0.87) / 0.13);
     const sway = Math.sin(leafProgress * Math.PI * 2) * Math.sin(leafProgress * Math.PI);
     const flowerIsGrown = flowerProgress >= 0.76 || (reducedMotion.matches && flowerProgress > 0);
@@ -1238,7 +1246,6 @@ function selectOption(label,value){
       segmentRunning = false;
       completedSegment = -1;
       playingStep = null;
-      waitingForThornCopy = false;
       lateSeedTime = 0;
       returningFromSkip = false;
       waitingForGesture = true;
@@ -1274,15 +1281,15 @@ function selectOption(label,value){
 
   stepNav?.addEventListener('click', event => {
     const button = event.target.closest('button');
-    const step = stepButtons.indexOf(button);
-    if (step < 0) return;
+    const index = stepButtons.indexOf(button);
+    if (index < 0) return;
+    const step = index + 1;
 
     cancelAnimationFrame(segmentFrame);
     segmentRunning = false;
     elevatorRunning = false;
     returningFromSkip = false;
     waitingForGesture = true;
-    waitingForThornCopy = false;
     lateSeedTime = 0;
     touchAdvanceQueued = false;
     playingStep = null;
@@ -1292,19 +1299,9 @@ function selectOption(label,value){
     const { start, end } = measureScrollRange();
     const previous = segments[step - 2]?.end ?? 0;
     scrollInstantly(Math.ceil(start + previous * (end - start)));
-    if (step === 0) {
-      replayingOpening = true;
-      draw(true);
-      // Commit the hidden state before restarting the opening CSS animations.
-      frame.getBoundingClientRect();
-      replayingOpening = false;
-      openingReadyAt = performance.now() + 2000;
-      draw(true);
-    } else {
-      openingReadyAt = 0;
-      playSegment(acceptedScrollY, segments[step - 1], previous);
-      draw();
-    }
+    openingReadyAt = 0;
+    playSegment(acceptedScrollY, segments[index], previous);
+    draw();
   });
 
   function scrollInstantly(top) {
@@ -1315,7 +1312,7 @@ function selectOption(label,value){
   function playSegment(from, segment, replayStart) {
     const segmentIndex = segments.indexOf(segment);
     const target = segment.end;
-    playingStep = segmentIndex + 1;
+    playingStep = Math.min(3, segmentIndex + 1);
     const isOpeningSegment = segmentIndex === 0;
     const openingTitleTime = isOpeningSegment && !reducedMotion.matches ? Math.max(0, openingReadyAt - performance.now()) : 0;
     const duration = segment.duration;
@@ -1323,9 +1320,7 @@ function selectOption(label,value){
     const initialProgress = replayStart ?? clamp((from - start) / Math.max(1, end - start));
     const startedAt = performance.now();
     segmentRunning = true;
-    const thornCopyDelay = isOpeningSegment && !reducedMotion.matches ? 160 : 0;
     const seedSettleDelay = segment.thornExit && !reducedMotion.matches ? 1360 : 0;
-    waitingForThornCopy = thornCopyDelay > 0;
     const hasTitleTransition = segment.thornExit && initialProgress < sowingStarts;
     const exitDuration = 1150;
     const packetEntryTime = 300;
@@ -1334,7 +1329,6 @@ function selectOption(label,value){
       const elapsed = reducedMotion.matches ? duration : Math.max(0, now - startedAt - openingTitleTime);
       const time = clamp(elapsed / duration);
       if (segment.thornExit) lateSeedTime = Math.max(0, elapsed - duration);
-      if (isOpeningSegment) waitingForThornCopy = elapsed < duration + thornCopyDelay;
       const range = measureScrollRange();
       let progress = initialProgress + (target - initialProgress) * time;
       if (hasTitleTransition) {
@@ -1354,7 +1348,7 @@ function selectOption(label,value){
       scrollInstantly(time === 1 || (hasTitleTransition && elapsed >= exitDuration && progress === sowingStarts) ? Math.ceil(position) : Math.max(Math.ceil(range.start), Math.floor(position)));
       draw();
 
-      if (elapsed < duration + thornCopyDelay + seedSettleDelay) {
+      if (elapsed < duration + seedSettleDelay) {
         segmentFrame = requestAnimationFrame(advance);
       } else {
         completedSegment = segmentIndex;
@@ -1362,12 +1356,13 @@ function selectOption(label,value){
         const followingSegment = segments[segmentIndex + 1];
         const advanceRequested = touchAdvanceQueued;
         touchAdvanceQueued = false;
-        if (advanceRequested && followingSegment && !reducedMotion.matches) {
-          playSegment(acceptedScrollY, followingSegment);
+        if (followingSegment && (segmentIndex === 2 || (advanceRequested && !reducedMotion.matches))) {
+          playSegment(acceptedScrollY, followingSegment, target);
           return;
         }
         segmentRunning = false;
         waitingForGesture = Boolean(followingSegment);
+        draw();
       }
     }
 
@@ -1463,7 +1458,6 @@ function selectOption(label,value){
     waitingForGesture = false;
     completedSegment = -1;
     playingStep = null;
-    waitingForThornCopy = false;
     lateSeedTime = 0;
     const origin = window.scrollY;
     if (reducedMotion.matches) {
