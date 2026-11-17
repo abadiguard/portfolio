@@ -21,7 +21,7 @@
 <script>try{if(window.IntersectionObserver&&!matchMedia("(prefers-reduced-motion: reduce)").matches)document.documentElement.className+=" js"}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600&family=Noto+Sans+Hebrew:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="styles.css?v=20261113-case-scroll">
+<link rel="stylesheet" href="styles.css?v=20261117-shared-elevator">
 <style id="ownership-garden-styles">
 .ownership-sequence {
   width: 100%;
@@ -319,7 +319,7 @@
   transform: translateY(46px);
 }
 </style>
-  <script src="site.js?v=20261113-case-scroll" defer></script>
+  <script src="site.js?v=20261117-shared-elevator" defer></script>
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-6T641TL5ED"></script>
   <script>
@@ -1404,6 +1404,7 @@ function selectOption(label,value){
 
   function limitWheel(event) {
     if (event.defaultPrevented || !event.cancelable || event.ctrlKey ||
+        event.target.closest?.(".site-menu") ||
         reducedMotion.matches || Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
 
     const units = event.deltaMode;
@@ -1438,6 +1439,7 @@ function selectOption(label,value){
   }
 
   function onTouchStart(event) {
+    if (event.target.closest?.(".site-menu")) return;
     const touch = event.touches.length === 1 ? event.touches[0] : null;
     touchY = touch?.clientY ?? null;
     touchX = touch?.clientX ?? null;
@@ -1450,7 +1452,7 @@ function selectOption(label,value){
   }
 
   function onTouchMove(event) {
-    if (event.defaultPrevented || event.touches.length !== 1 ||
+    if (event.defaultPrevented || event.target.closest?.(".site-menu") || event.touches.length !== 1 ||
         touchY === null || reducedMotion.matches) return;
 
     const touch = event.touches[0];
@@ -1564,6 +1566,36 @@ function selectOption(label,value){
     });
   }, true);
 
+  function syncMenuDestination() {
+    cancelAnimationFrame(segmentFrame);
+    segmentRunning = false;
+    elevatorRunning = false;
+    touchOwnsScroll = false;
+    waitingForGesture = true;
+    completedSegment = -1;
+    playingStep = null;
+    touchAdvanceQueued = false;
+    acceptedScrollY = window.scrollY;
+    returningFromSkip = acceptedScrollY >= measureScrollRange().end;
+    sequence.classList.toggle('is-skipping', returningFromSkip);
+    scheduleDraw();
+  }
+  document.addEventListener('site:elevator', event => {
+    event.preventDefault();
+    const destination = event.detail;
+    const margin = parseFloat(getComputedStyle(destination).scrollMarginTop) || 0;
+    const padding = parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
+    const target = destination.id === "home" ? 0
+      : window.scrollY + destination.getBoundingClientRect().top - margin - padding;
+    touchOwnsScroll = false;
+    returningFromSkip = true;
+    sequence.classList.add('is-skipping');
+    moveElevator(target, () => {
+      syncMenuDestination();
+      destination.focus({ preventScroll: true });
+    });
+  });
+
   addEventListener('wheel', limitWheel, { passive: false, capture: true });
   addEventListener('touchstart', onTouchStart, { passive: true });
   addEventListener('touchmove', onTouchMove, { passive: false, capture: true });
@@ -1578,6 +1610,11 @@ function selectOption(label,value){
   addEventListener('pageshow', event => {
     acceptedScrollY = window.scrollY;
     const navigation = performance.getEntriesByType?.('navigation')[0];
+    if (!event.persisted && navigation?.type !== 'back_forward' &&
+        ['#work', '#contact'].includes(location.hash)) {
+      document.getElementById(location.hash.slice(1)).scrollIntoView({ behavior: 'instant' });
+      syncMenuDestination();
+    }
     if (event.persisted || navigation?.type === 'back_forward') {
       const { start, end, openingVisibleAt } = measureScrollRange();
       cancelAnimationFrame(segmentFrame);

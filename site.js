@@ -28,6 +28,7 @@
     hero.classList.add("copy-reveal","copy-visible","arrow-reveal","intro-ready");
     completed=true;
   }
+  if(window.location.hash&&window.location.hash!=="#home"){showFinalState();return}
   try{if(sessionStorage.getItem(introStateKey)==="1"){showFinalState();return}}catch(e){}
   function revealArrow(){
     hero.classList.add("arrow-reveal");
@@ -41,8 +42,10 @@
   }
   function finish(){
     hero.classList.add("copy-reveal");
-    requestAnimationFrame(function(){requestAnimationFrame(function(){hero.classList.add("copy-visible")})});
-    setTimeout(revealArrow,1050);
+    requestAnimationFrame(function(){requestAnimationFrame(function(){
+      hero.classList.add("copy-visible");
+      revealArrow();
+    })});
   }
   function begin(){
     if(started)return;
@@ -72,9 +75,9 @@
     hero.classList.add("intro-ready");
     saveFinalState();
     window.removeEventListener("wheel",onWheel);window.removeEventListener("touchstart",onTouchStart);window.removeEventListener("touchmove",onTouchMove);window.removeEventListener("keydown",onKey);
-    if(pendingScroll)window.scrollBy({top:pendingScroll,behavior:"smooth"});
+    if(pendingScroll&&!document.querySelector(".site-menu[open]")&&!window.location.hash)window.scrollBy({top:pendingScroll,behavior:"smooth"});
   }
-  function onWheel(event){if(completed)return;event.preventDefault();if(!started)pendingScroll=event.deltaY||120;begin()}
+  function onWheel(event){if(completed||event.target.closest?.(".site-menu"))return;event.preventDefault();if(!started)pendingScroll=event.deltaY||120;begin()}
   function onKey(event){
     if(["ArrowDown","PageDown"," "].indexOf(event.key)===-1)return;
     var target=event.target;
@@ -83,7 +86,7 @@
   }
   function onTouchStart(event){touchStartY=event.touches&&event.touches.length?event.touches[0].clientY:null}
   function onTouchMove(event){
-    if(completed||touchStartY===null||!event.touches||!event.touches.length)return;
+    if(completed||event.target.closest?.(".site-menu")||touchStartY===null||!event.touches||!event.touches.length)return;
     var delta=event.touches[0].clientY-touchStartY;
     event.preventDefault();
     if(!started&&Math.abs(delta)>8){pendingScroll=-delta;begin()}
@@ -215,6 +218,123 @@
     stickyLogo.removeAttribute("tabindex");
     setProgress(window.scrollY);
   }
+})();
+
+(function(){
+  "use strict";
+
+  const trigger=document.createElement("button");
+  trigger.type="button";
+  trigger.className="site-menu-trigger";
+  trigger.setAttribute("aria-label","Open navigation");
+  trigger.setAttribute("aria-haspopup","dialog");
+  trigger.setAttribute("aria-controls","site-menu");
+  trigger.setAttribute("aria-expanded","false");
+  trigger.innerHTML='<img src="site-assets/menu-hamburger.svg" width="54" height="54" alt="">';
+
+  const menu=document.createElement("dialog");
+  menu.className="site-menu";
+  menu.id="site-menu";
+  menu.setAttribute("aria-label","Site navigation");
+  menu.innerHTML=`
+    <button type="button" class="site-menu-close" aria-label="Close navigation" autofocus>
+      <img src="site-assets/menu-close.svg" width="12" height="12" alt="">
+    </button>
+    <nav aria-label="Main navigation">
+      <a href="index.html#home">Home</a>
+      <a href="index.html#work">Case studies</a>
+      <a href="deconstructed.html">Notes on UX</a>
+      <a href="faq.html">Question answered</a>
+      <a href="index.html#contact">Bring your challenge</a>
+    </nav>`;
+  document.body.append(trigger,menu);
+
+  const reducedMotion=window.matchMedia("(prefers-reduced-motion: reduce)");
+  let closing=false;
+
+  function slide(from,to,duration){
+    if(reducedMotion.matches)return Promise.resolve();
+    return menu.animate(
+      [{transform:from},{transform:to}],
+      {duration,easing:"cubic-bezier(.25,.75,.25,1)",fill:"both"}
+    ).finished;
+  }
+
+  async function closeMenu(){
+    if(closing||!menu.open)return;
+    closing=true;
+    const start=getComputedStyle(menu).transform;
+    menu.getAnimations().forEach(animation=>animation.cancel());
+    await slide(start,"translateX(-100%)",260);
+    menu.close();
+    menu.getAnimations().forEach(animation=>animation.cancel());
+    trigger.setAttribute("aria-expanded","false");
+    closing=false;
+  }
+
+  trigger.addEventListener("click",function(){
+    if(menu.open)return;
+    menu.showModal();
+    trigger.setAttribute("aria-expanded","true");
+    slide("translateX(-100%)","translateX(0)",320).catch(()=>{});
+  });
+  menu.querySelector(".site-menu-close").addEventListener("click",closeMenu);
+  menu.addEventListener("cancel",function(event){
+    event.preventDefault();
+    closeMenu();
+  });
+  function getDestination(link){
+    const target=new URL(link.href);
+    if(!target.hash||target.origin!==location.origin||target.search!==location.search)return null;
+    const normalize=path=>path.replace(/\/index\.html$/,"/");
+    if(normalize(target.pathname)!==normalize(location.pathname))return null;
+    try{return document.getElementById(decodeURIComponent(target.hash.slice(1)))}
+    catch(error){return null}
+  }
+
+  function navigateWithinPage(link,destination){
+    if(location.hash!==link.hash)history.pushState(null,"",link.hash);
+    if(!destination.hasAttribute("tabindex"))destination.tabIndex=-1;
+    const useDefault=document.dispatchEvent(new CustomEvent("site:elevator",{
+      cancelable:true,detail:destination
+    }));
+    if(useDefault){
+      destination.scrollIntoView({behavior:reducedMotion.matches?"instant":"smooth"});
+      destination.focus({preventScroll:true});
+    }
+  }
+
+  function plainClick(event){
+    return !event.defaultPrevented&&event.button===0&&
+      !event.metaKey&&!event.ctrlKey&&!event.shiftKey&&!event.altKey;
+  }
+
+  document.addEventListener("click",function(event){
+    if(!plainClick(event))return;
+    const link=event.target.closest?.("a[href]");
+    if(!link||link.hasAttribute("download")||(link.target&&link.target!=="_self"))return;
+    const destination=getDestination(link);
+    if(!destination)return;
+    event.preventDefault();
+    navigateWithinPage(link,destination);
+  });
+
+  menu.addEventListener("click",async function(event){
+    if(event.target===menu){
+      const bounds=menu.getBoundingClientRect();
+      if(event.clientX<bounds.left||event.clientX>=bounds.right)closeMenu();
+      return;
+    }
+    const link=event.target.closest("a");
+    if(!link||!plainClick(event))return;
+    event.preventDefault();
+    if(closing)return;
+    await closeMenu();
+
+    const destination=getDestination(link);
+    if(destination)navigateWithinPage(link,destination);
+    else window.location.assign(link.href);
+  });
 })();
 
 (function(){
