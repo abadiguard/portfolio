@@ -21,7 +21,7 @@
 <script>try{if(window.IntersectionObserver&&!matchMedia("(prefers-reduced-motion: reduce)").matches)document.documentElement.className+=" js"}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600&family=Noto+Sans+Hebrew:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="styles.css?v=20261117-shared-elevator">
+<link rel="stylesheet" href="styles.css?v=20261117-section-alignment">
 <style id="ownership-garden-styles">
 .ownership-sequence {
   width: 100%;
@@ -99,6 +99,7 @@
   visibility: hidden;
   transition: opacity 650ms ease-in-out, visibility 0s 650ms;
 }
+.ownership-sequence.is-opening-idle .copy .col[hidden] > .d { transition: none; }
 @keyframes ownership-copy-in {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -1036,7 +1037,7 @@ function selectOption(label,value){
   }
 
   function draw(resetToOpening = false) {
-    if (elevatorRunning || returningFromSkip) return;
+    if (!resetToOpening && (elevatorRunning || returningFromSkip)) return;
     const { frameTop, start, end, openingVisibleAt } = measureScrollRange();
     if (!segmentRunning && completedSegment === segments.length - 1 &&
         finalStop !== null && acceptedScrollY === finalStop && window.scrollY === finalStop) {
@@ -1253,13 +1254,13 @@ function selectOption(label,value){
       if (to >= end) return null;
       if (from >= end || returningFromSkip) {
         returningFromSkip = true;
-        sequence.classList.toggle('is-story-visible', false);
+        sequence.classList.remove("is-story-visible", "is-opening-idle");
         moveElevator(openingStop, () => {
           returningFromSkip = false;
           waitingForGesture = true;
           sequence.classList.toggle('is-skipping', false);
           restartOpeningReveal();
-          scheduleDraw();
+          draw(true);
         });
         return from;
       }
@@ -1492,15 +1493,19 @@ function selectOption(label,value){
   }
 
   function restartOpeningReveal() {
-    sequence.classList.toggle('is-story-visible', false);
-    sequence.classList.toggle('is-guide-suspended', false);
+    sequence.classList.remove("is-story-visible", "is-opening-idle");
+    // Commit the hidden state before starting the same CSS reveal as the first entry.
     frame.getBoundingClientRect();
+    settlingScene = false;
+    finalStop = null;
     openingInView = true;
     openingReadyAt = performance.now() + 2000;
   }
 
   function moveElevator(target, onComplete) {
     elevatorRunning = false;
+    animateFinalLeaves = false;
+    settlingScene = false;
     touchOwnsScroll = false;
     sequence.classList.remove('owns-touch-scroll');
     touchAdvanceQueued = false;
@@ -1551,6 +1556,13 @@ function selectOption(label,value){
     segmentFrame = requestAnimationFrame(advanceElevator);
   }
 
+  function sectionScrollTop(destination) {
+    if (destination.id === "home") return 0;
+    const margin = parseFloat(getComputedStyle(destination).scrollMarginTop) || 0;
+    const padding = parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
+    return window.scrollY + destination.getBoundingClientRect().top - margin - padding;
+  }
+
   frame.querySelector('.ownership-skip')?.addEventListener('click', event => {
     if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     const destination = document.getElementById('work');
@@ -1561,7 +1573,7 @@ function selectOption(label,value){
     sequence.classList.toggle('is-guide-suspended', true);
     animateFinalLeaves = false;
     sequence.classList.toggle("is-skipping", true);
-    moveElevator(window.scrollY + destination.getBoundingClientRect().top, () => {
+    moveElevator(sectionScrollTop(destination), () => {
       destination.focus({ preventScroll: true });
     });
   });
@@ -1599,15 +1611,15 @@ function selectOption(label,value){
     acceptedScrollY = window.scrollY;
     returningFromSkip = acceptedScrollY >= measureScrollRange().end;
     sequence.classList.toggle('is-skipping', returningFromSkip);
-    scheduleDraw();
+    finalStop = null;
+    settlingScene = false;
+    if (returningFromSkip) draw(true);
+    else scheduleDraw();
   }
   document.addEventListener('site:elevator', event => {
     event.preventDefault();
     const destination = event.detail;
-    const margin = parseFloat(getComputedStyle(destination).scrollMarginTop) || 0;
-    const padding = parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
-    const target = destination.id === "home" ? 0
-      : window.scrollY + destination.getBoundingClientRect().top - margin - padding;
+    const target = sectionScrollTop(destination);
     touchOwnsScroll = false;
     returningFromSkip = true;
     sequence.classList.add('is-skipping');
