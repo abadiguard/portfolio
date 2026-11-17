@@ -1036,7 +1036,7 @@ function selectOption(label,value){
   }
 
   function draw(resetToOpening = false) {
-    if (returningFromSkip) return;
+    if (elevatorRunning || returningFromSkip) return;
     const { frameTop, start, end, openingVisibleAt } = measureScrollRange();
     if (!segmentRunning && completedSegment === segments.length - 1 &&
         finalStop !== null && acceptedScrollY === finalStop && window.scrollY === finalStop) {
@@ -1439,7 +1439,7 @@ function selectOption(label,value){
   }
 
   function onTouchStart(event) {
-    if (event.target.closest?.(".site-menu")) return;
+    if (elevatorRunning || event.target.closest?.(".site-menu")) return;
     const touch = event.touches.length === 1 ? event.touches[0] : null;
     touchY = touch?.clientY ?? null;
     touchX = touch?.clientX ?? null;
@@ -1452,7 +1452,7 @@ function selectOption(label,value){
   }
 
   function onTouchMove(event) {
-    if (event.defaultPrevented || event.target.closest?.(".site-menu") || event.touches.length !== 1 ||
+    if (elevatorRunning || event.defaultPrevented || event.target.closest?.(".site-menu") || event.touches.length !== 1 ||
         touchY === null || reducedMotion.matches) return;
 
     const touch = event.touches[0];
@@ -1476,6 +1476,7 @@ function selectOption(label,value){
   }
 
   function onScroll() {
+    if (elevatorRunning) return;
     const actual = window.scrollY;
     if (actual !== acceptedScrollY && (touchOwnsScroll || (segmentRunning && lastInputWasTouch))) {
       // Ignore native momentum or viewport corrections while touch controls this scene.
@@ -1499,6 +1500,9 @@ function selectOption(label,value){
   }
 
   function moveElevator(target, onComplete) {
+    elevatorRunning = false;
+    touchOwnsScroll = false;
+    sequence.classList.remove('owns-touch-scroll');
     touchAdvanceQueued = false;
     cancelAnimationFrame(segmentFrame);
     segmentRunning = false;
@@ -1515,16 +1519,33 @@ function selectOption(label,value){
     }
 
     elevatorRunning = true;
+    // The sticky scene spans several viewports. Give that range less travel time
+    // so the elevator does not appear to stop on the pinned frame.
+    const { openingVisibleAt, end } = measureScrollRange();
+    const pinnedStart = Math.max(Math.min(origin, target), openingVisibleAt);
+    const pinnedEnd = Math.min(Math.max(origin, target), end);
+    const pinnedWeight = 0.15;
+    const toTravel = position => position -
+      Math.max(0, Math.min(position, pinnedEnd) - pinnedStart) * (1 - pinnedWeight);
+    const fromTravel = position => {
+      if (pinnedEnd <= pinnedStart || position <= pinnedStart) return position;
+      const pinnedTravelEnd = toTravel(pinnedEnd);
+      return position <= pinnedTravelEnd
+        ? pinnedStart + (position - pinnedStart) / pinnedWeight
+        : pinnedEnd + position - pinnedTravelEnd;
+    };
+    const start = toTravel(origin);
+    const finish = toTravel(target);
     const startedAt = performance.now();
     function advanceElevator(now) {
       const progress = clamp((now - startedAt) / 700);
-      scrollInstantly(origin + (target - origin) * smooth(progress));
-      draw();
+      scrollInstantly(progress === 1 ? target : fromTravel(start + (finish - start) * smooth(progress)));
       if (progress < 1) {
         segmentFrame = requestAnimationFrame(advanceElevator);
       } else {
         elevatorRunning = false;
         onComplete?.();
+        scheduleDraw();
       }
     }
     segmentFrame = requestAnimationFrame(advanceElevator);
