@@ -42,12 +42,54 @@
   touch-action: pan-x pinch-zoom;
 }
 .ownership-sequence.is-enhanced .frame {
+  padding-bottom: clamp(1rem, 4svh, 2rem);
   position: sticky;
   top: var(--frame-top, 0px);
   isolation: isolate;
   overflow: hidden;
 }
+.ownership-sequence.is-enhanced:is(.is-complete,.is-paused) { height: auto; }
+.ownership-sequence.is-enhanced:is(.is-complete,.is-paused) .frame { position: relative; top: auto; }
+.ownership-sequence .ownership-next {
+  display: none;
+  order: 3;
+  margin: clamp(1.5rem,5svh,3rem) auto .75rem;
+  padding: .35rem .75rem;
+  color: inherit;
+}
+.ownership-sequence.is-opening-frame .ownership-next {
+  display: block;
+  position: absolute;
+  inset: auto auto 0 50%;
+  margin: 0;
+  transform: translateX(-50%);
+}
+.ownership-sequence.is-complete .ownership-next {
+  display: block;
+  margin-bottom: 0;
+  padding-bottom: 15px;
+}
+.ownership-sequence.is-enhanced.is-complete .frame { padding-bottom: 0; }
+.own:has(.ownership-sequence.is-complete) { padding-bottom: 2rem; }
+@media (max-width: 768px) {
+  .own:has(.ownership-sequence.is-complete) { padding-bottom: 1.2rem; }
+}
+.ownership-next svg { display: block; width: 56px; height: 92px; }
+.ownership-next .opening-arrow { display: none; width: 34px; height: 55px; }
+.ownership-sequence.is-opening-frame .opening-arrow { display: block; }
+.ownership-sequence.is-opening-frame .completion-arrow { display: none; }
+@media (prefers-reduced-motion: no-preference) {
+  .ownership-next svg { animation: float 1.7s ease-in-out infinite; }
+  .ownership-sequence.is-opening-frame .ownership-next {
+    animation: reveal-opening-arrow 420ms ease-out 500ms both;
+  }
+}
+@keyframes reveal-opening-arrow {
+  from { opacity: 0; visibility: hidden; }
+  to { opacity: 1; visibility: visible; }
+}
 .ownership-sequence .copy {
+  order: 1;
   display: grid;
   width: 100%;
   container-type: inline-size;
@@ -57,9 +99,6 @@
 .ownership-sequence .copy .col {
   align-self: start;
   grid-area: 1 / 1;
-}
-.ownership-sequence .copy h3 {
-  margin: 0;
 }
 .ownership-sequence.is-enhanced .copy .col {
   display: grid;
@@ -71,20 +110,12 @@
   grid-area: 1 / 1;
   margin: 0;
 }
-.ownership-sequence .copy .stage-title {
-  max-width: none;
-  font: var(--weight-body) calc(var(--p) + 2pt)/1.2 var(--f);
-  text-wrap: balance;
-}
-.ownership-sequence .copy .stage-description {
-  max-width: 38em;
+.ownership-sequence .copy :is(.stage-caption,.stage-description) {
+  max-width: 31em;
   font: var(--weight-body) var(--type-body)/var(--line-body) var(--f);
-  text-wrap: balance;
+  margin: 0;
 }
-.ownership-sequence.is-enhanced .copy .col > .stage-description {
-  grid-area: 2 / 1;
-  margin: .65rem 0 0;
-}
+@media (max-width: 600px) { .ownership-sequence .copy br { display: none; } }
 /* Keep outgoing lines in the grid until their fade finishes. */
 .ownership-sequence.is-enhanced .copy .col[hidden] { display: grid; }
 .ownership-sequence.is-enhanced .copy .col > .d {
@@ -94,43 +125,21 @@
 }
 .ownership-sequence.is-enhanced .copy .col[hidden] > .d,
 .ownership-sequence.is-enhanced .copy .col > .d[data-copy-hidden],
-.ownership-sequence.is-enhanced:not(.is-story-visible) .copy .col > .d {
+.ownership-sequence.is-enhanced:not(.is-story-visible) .copy .col:not(.opening-copy) > .d {
   opacity: 0;
   visibility: hidden;
-  transition: opacity 650ms ease-in-out, visibility 0s 650ms;
+  transition: none;
 }
 .ownership-sequence.is-opening-idle .copy .col[hidden] > .d { transition: none; }
-@keyframes ownership-copy-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
 @media (prefers-reduced-motion: reduce) {
   .ownership-sequence.is-enhanced .copy .col > .d,
   .ownership-sequence.is-enhanced .copy .col[hidden] > .d,
   .ownership-sequence.is-enhanced .copy .col > .d[data-copy-hidden],
-  .ownership-sequence.is-enhanced:not(.is-story-visible) .copy .col > .d {
+  .ownership-sequence.is-enhanced:not(.is-story-visible) .copy .col:not(.opening-copy) > .d {
     transition: none;
   }
 }
 
-.own[aria-labelledby="own-h"] {
-  padding-bottom: 2rem;
-}
-.ownership-sequence .ownership-actions {
-  margin-top: var(--section-media-gap);
-}
-.ownership-sequence .ownership-scroll-copy {
-  margin: 0;
-  font: 400 var(--ownership-guide-size, 11pt)/1.5 var(--f);
-}
-.ownership-sequence .ownership-skip {
-  color: inherit;
-  text-decoration: underline;
-  text-underline-offset: .2em;
-}
-@media (max-width: 600px) {
-  .ownership-sequence { --ownership-guide-size: 10pt; }
-}
 .ownership-sequence .opening-leaf {
   transform-box: view-box;
 }
@@ -140,72 +149,57 @@
 .ownership-sequence .opening-leaf-right {
   transform-origin: 83px 132px;
 }
-@media (prefers-reduced-motion: no-preference) {
-  .ownership-sequence.is-opening-idle .opening-leaf {
-    animation: ownership-opening-sway 3.2s ease-in-out infinite;
-  }
-  .ownership-sequence.is-opening-idle .opening-leaf-right {
-    animation-direction: reverse;
-    animation-duration: 3.7s;
-  }
-}
-@keyframes ownership-opening-sway {
-  0%, 100% { transform: rotate(0deg); }
-  25% { transform: rotate(5deg); }
-  75% { transform: rotate(-5deg); }
-}
 .ownership-sequence.is-skipping .opening-leaf,
 .ownership-sequence.is-skipping .copy .col :is(h3, .d) {
   animation-play-state: paused !important;
 }
-.ownership-sequence.is-enhanced:not(.is-story-visible) :is(.art, .ownership-actions) {
-  visibility: hidden;
-}
-@media (prefers-reduced-motion: no-preference) {
-  .ownership-sequence.is-story-visible .garden-ground path {
-    animation: ownership-line-in 720ms cubic-bezier(.3,.1,.25,1) both;
-    transform-box: fill-box;
-    transform-origin: center;
-  }
-  .ownership-sequence.is-story-visible .garden-strip {
-    animation: ownership-flower-in 920ms 600ms cubic-bezier(.25,.55,.25,1) both;
-  }
-  .ownership-sequence.is-story-visible .ownership-actions {
-    animation: ownership-copy-in 780ms 900ms ease-out both;
-  }
-  .ownership-sequence.is-opening-idle .opening-leaf {
-    animation-delay: 1520ms;
-  }
-}
 .ownership-sequence .art { position: relative; }
 .ownership-sequence .ownership-steps {
+  --step-size: 44px;
+  --step-gap: clamp(12px, 4vw, 25px);
+  position: relative;
   display: none;
-  position: absolute;
-  z-index: 2;
-  top: 62%;
-  left: max(calc(50% - 50vw + clamp(10px, 6vw, 88px)), calc(50% - 538px));
-  transform: translateY(-50%);
+  order: 2;
+  grid-template-columns: repeat(3, var(--step-size));
+  gap: var(--step-gap);
+  margin-top: clamp(1rem, 4svh, 2.25rem);
 }
-.ownership-sequence.is-enhanced.is-story-visible .ownership-steps { display: grid; }
-.ownership-sequence .seed-late { translate: 0 var(--late-seed-drop, 0px); }
-.ownership-sequence.is-enhanced .ownership-scroll-copy {
-  transition: opacity 650ms ease-in-out, visibility 0s;
-}
-.ownership-sequence.is-enhanced.is-guide-complete .ownership-scroll-copy {
+.ownership-sequence.is-enhanced .ownership-steps {
+  display: grid;
+  visibility: hidden;
   opacity: 0;
-  visibility: hidden;
-  transition: opacity 650ms ease-in-out, visibility 0s 650ms;
 }
+.ownership-sequence.is-enhanced .ownership-steps.has-active-step {
+  visibility: visible;
+  opacity: 1;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .ownership-sequence.is-enhanced .ownership-steps { transition: opacity 600ms ease-out; }
+}
+.ownership-sequence .ownership-steps button {
+  width: var(--step-size);
+  height: var(--step-size);
+  font: var(--weight-body) calc(var(--p) + 2pt)/1.2 var(--f);
+}
+.ownership-sequence .ownership-steps button::before { content: none; }
+.ownership-sequence .ownership-steps button:focus-visible { outline: none; }
+.ownership-steps .step-marker {
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: var(--step-size);
+  height: var(--step-size);
+  border: calc(2px + .25pt) solid currentColor;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateX(calc(var(--active-index, 0) * (var(--step-size) + var(--step-gap))));
+  transition: transform 520ms cubic-bezier(.22,.61,.36,1), opacity 420ms ease;
+}
+.ownership-steps.has-active-step .step-marker { opacity: 1; }
 @media (prefers-reduced-motion: reduce) {
-  .ownership-sequence.is-enhanced .ownership-scroll-copy,
-  .ownership-sequence.is-enhanced.is-guide-complete .ownership-scroll-copy {
-    transition: none;
-  }
+  .ownership-steps .step-marker { transition: none; }
 }
-.ownership-sequence.is-enhanced.is-guide-suspended .ownership-actions {
-  visibility: hidden;
-  animation: none;
-}
+.ownership-sequence .seed-late { translate: 0 var(--late-seed-drop, 0px); }
 @keyframes ownership-line-in {
   from { transform: scaleX(0); }
   to { transform: scaleX(1); }
@@ -219,19 +213,20 @@
 }
 .ownership-sequence .ownership-intro {
   order: -2;
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: clamp(3.25rem, 8vh, 5.25rem);
+  margin-bottom: clamp(1.5rem, 5svh, 3rem);
 }
 .ownership-sequence .art {
   flex: none;
-  order: -1;
+  order: 0;
   display: grid;
   place-items: center;
   grid-template: minmax(0, 1fr) / minmax(0, 1fr);
   width: 108px;
-  height: 194.4px;
+  height: clamp(135px, 23svh, 194.4px);
   margin-bottom: 1.25rem;
 }
 .ownership-sequence .art > svg {
@@ -369,32 +364,42 @@
   <div class="ownership-sequence">
   <div class="frame">
     <div class="ownership-intro">
-  <span class="pill">Now Fractional</span>
-  <h2 id="own-h">STRATEGIC UX<br>FOR FOUNDERS</h2>
+      <span class="pill">Now Fractional</span>
+      <h2 id="own-h">Strategic UX <br>in 3 steps</h2>
     </div>
-    <div class="copy">
-      <section class="col first-copy">
-        <h3 class="d stage-title">First, we find the real pain</h3>
-        <p class="d stage-description" data-copy-hidden>Uncovering the core problem worth solving,<br>before jumping to solutions</p>
-      </section>
-      <section class="col second-copy">
-        <h3 class="d stage-title">Then, we define the right solution</h3>
-        <p class="d stage-description" data-copy-hidden>Bridging user needs, business goals, and<br>tech feasibility into a clear direction</p>
-      </section>
-      <section class="col final-copy">
-        <h3 class="d stage-title">Built to scale, ready to bloom</h3>
-        <p class="d stage-description" data-copy-hidden>Shipping a solid UX foundation<br>that supports your next stage of growth</p>
-      </section>
+    <div class="copy sub">
+      <div class="col opening-copy">
+        <p class="d stage-caption">Here’s how it’s going to work</p>
+      </div>
+      <div class="col first-copy">
+        <p class="d stage-caption" data-copy-hidden>First, we find the real pain</p>
+        <p class="d stage-description" data-copy-hidden>Uncovering the core problem worth solving, <br>before jumping to solutions</p>
+      </div>
+      <div class="col second-copy">
+        <p class="d stage-caption" data-copy-hidden>Then, we define the right solution</p>
+        <p class="d stage-description" data-copy-hidden>Bridging user needs, business goals, and <br>tech feasibility into a clear direction</p>
+      </div>
+      <div class="col final-copy">
+        <p class="d stage-caption" data-copy-hidden>Built to scale, ready to bloom</p>
+        <p class="d stage-description" data-copy-hidden>Shipping a solid UX foundation <br>that supports your next stage of growth</p>
+      </div>
     </div>
-    <div class="ownership-actions">
-      <p class="ownership-scroll-copy">Scroll to read or <a class="ownership-skip" href="#work">skip</a>.</p>
-    </div>
+    <nav class="ownership-steps" aria-label="Animation steps">
+      <span class="step-marker" aria-hidden="true"></span>
+      <button type="button" aria-label="Step 1: Find the real pain">1</button>
+      <button type="button" aria-label="Step 2: Define the right solution">2</button>
+      <button type="button" aria-label="Step 3: Build to scale">3</button>
+    </nav>
+    <a class="ownership-next" href="#work" aria-label="Continue to Case Studies">
+      <svg class="opening-arrow" viewBox="0 0 34 55" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M17 4c8 9 9 19 1 23-3 2-8 2-8-1 0-3 6-4 10-1 7 5 3 17-5 25m-5-13 5 13 12-9"/>
+      </svg>
+      <svg class="completion-arrow" viewBox="0 0 30 48" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path vector-effect="non-scaling-stroke" d="M10 3c10 5 14 14 9 19-3 3-9 3-9-1 0-4 10-5 12 2 2 7-4 14-9 20m-2-10 2 10 10-4"/>
+      </svg>
+    </a>
     <div class="art">
-  <nav class="ownership-steps" aria-label="Animation steps">
-    <button type="button" aria-label="Play flower to thorn" aria-current="step"></button>
-    <button type="button" aria-label="Replay sowing"></button>
-    <button type="button" aria-label="Replay growth and bloom"></button>
-  </nav>
+
 <svg class="garden-strip" viewBox="8 0 160 160" aria-hidden="true">
   <defs>
     <clipPath id="garden-view" clipPathUnits="userSpaceOnUse">
@@ -957,6 +962,7 @@ function selectOption(label,value){
   sequence.classList.add('is-enhanced');
   const frame = sequence.querySelector('.frame');
   const stepNav = frame.querySelector('.ownership-steps');
+  const nextArrow = frame.querySelector('.ownership-next');
   const stepButtons = Array.from(stepNav?.querySelectorAll?.('button') ?? []);
   const gardenStrip = frame.querySelector('.garden-strip');
   const ground = frame.querySelector('.garden-ground path');
@@ -964,6 +970,7 @@ function selectOption(label,value){
   const thorn = landscape.querySelector('.garden-thorn');
   const uprootMarks = frame.querySelector('.uproot-marks');
   const sowing = frame.querySelector('.sowing');
+  const openingCopy = frame.querySelector('.opening-copy');
   const firstCopy = frame.querySelector('.first-copy');
   const secondCopy = frame.querySelector('.second-copy');
   const finalCopy = frame.querySelector('.final-copy');
@@ -1009,7 +1016,9 @@ function selectOption(label,value){
   let returningFromSkip = false;
   let waitingForGesture = false;
   let completedSegment = -1;
-  let finalStop = null;
+  let sceneComplete = false;
+  let pausedScene = null;
+  let resumeSegment = null;
   let playingStep = null;
   let lateSeedTime = 0;
   let settlingScene = false;
@@ -1027,9 +1036,8 @@ function selectOption(label,value){
     const viewportHeight = visibleViewport?.scale === 1
       ? visibleViewport.height + visibleViewport.offsetTop
       : document.documentElement.clientHeight;
-    const ownershipSection = sequence.closest('.own');
-    const nextSectionGap = Number.parseFloat(getComputedStyle(ownershipSection).paddingBottom) || 0;
-    const frameTop = Math.ceil(viewportHeight - frameHeight - nextSectionGap);
+    const viewportInset = 2 * (parseFloat(getComputedStyle(document.documentElement).fontSize) || 16);
+    const frameTop = Math.ceil(viewportHeight - frameHeight - viewportInset);
     const distance = sequence.offsetHeight - frameHeight;
     const startDelay = Math.min(160, Math.max(0, distance * 0.14));
     const start = window.scrollY + sequence.getBoundingClientRect().top - frameTop + startDelay;
@@ -1037,13 +1045,8 @@ function selectOption(label,value){
   }
 
   function draw(resetToOpening = false) {
-    if (!resetToOpening && (elevatorRunning || returningFromSkip)) return;
+    if (sceneComplete || pausedScene || (!resetToOpening && (elevatorRunning || returningFromSkip))) return;
     const { frameTop, start, end, openingVisibleAt } = measureScrollRange();
-    if (!segmentRunning && completedSegment === segments.length - 1 &&
-        finalStop !== null && acceptedScrollY === finalStop && window.scrollY === finalStop) {
-      if (Math.floor(end) !== finalStop) scrollInstantly(Math.floor(end));
-      finalStop = acceptedScrollY;
-    }
     sequence.classList.toggle('owns-touch-scroll', !reducedMotion.matches &&
       acceptedScrollY >= Math.floor(openingVisibleAt) && acceptedScrollY < end - 1);
     frame.style.setProperty('--frame-top', frameTop + 'px');
@@ -1070,33 +1073,34 @@ function selectOption(label,value){
     const flowerStart = Math.ceil(start + sproutFinished * (end - start));
     const flowerProgress = resetToOpening ? 0 : completedSegment === segments.length - 1 ? 1 : clamp((acceptedScrollY - flowerStart) / Math.max(1, end - flowerStart));
     const sowProgress = clamp((overall - sowingStarts) / (sproutFinished - sowingStarts));
-    const packetEntering = sowProgress >= 0.08 || completedSegment >= 1;
     const step = resetToOpening ? 0 : playingStep ?? Math.min(3, completedSegment + 1);
-    const activeCopy = step === 1 ? firstCopy
-      : step === 2 && packetEntering ? secondCopy
-      : step === 3 && sowProgress > 0.61 ? finalCopy
-      : null;
-    const descriptionVisible = step === 1 ? completedSegment >= 0 || settlingScene
-      : step === 2 ? completedSegment >= 1 || settlingScene
-      : step === 3 && completedSegment >= 2;
-    [firstCopy, secondCopy, finalCopy].forEach(copy => {
-      copy.hidden = copy !== activeCopy;
-      copy.setAttribute('aria-hidden', String(copy.hidden));
-      const description = copy.querySelector('.stage-description');
-      const descriptionHidden = copy.hidden || !descriptionVisible;
-      description?.toggleAttribute('data-copy-hidden', descriptionHidden);
-      description?.setAttribute('aria-hidden', String(descriptionHidden));
+    const atOpening = step === 0 && !returningFromSkip &&
+      acceptedScrollY >= Math.floor(start) - 1 && acceptedScrollY < end;
+    sequence.classList.toggle('is-opening-frame', atOpening);
+    nextArrow.setAttribute('aria-label', atOpening ? 'Start step 1' : 'Continue to Case Studies');
+    const activeCopy = [openingCopy, firstCopy, secondCopy, finalCopy][step];
+    // The caption names the action. Switch to the explanation once the step reaches its end pose.
+    const showExplanation = step === 3
+      ? completedSegment === segments.length - 1
+      : step > 0 && (completedSegment >= step - 1 || settlingScene);
+    [openingCopy, firstCopy, secondCopy, finalCopy].forEach(copy => {
+      const active = copy === activeCopy;
+      copy.hidden = !active;
+      copy.setAttribute('aria-hidden', String(!active));
+      copy.querySelectorAll('.stage-caption, .stage-description').forEach(text => {
+        const visible = active && text.classList.contains('stage-description') === showExplanation;
+        text.toggleAttribute('data-copy-hidden', !visible);
+        text.setAttribute('aria-hidden', String(!visible));
+      });
     });
     sowing.style.opacity = overall >= sowingStarts ? '1' : '0';
     const openingIdle = !segmentRunning && overall === 0;
     sequence.classList.toggle('is-opening-idle', openingIdle);
     sequence.classList.toggle('is-story-visible', openingInView || overall > 0);
-    const atFinalStop = completedSegment === segments.length - 1 && acceptedScrollY === finalStop;
-    sequence.classList.toggle('is-guide-suspended', (acceptedScrollY >= end && !atFinalStop) || returningFromSkip);
-    sequence.classList.toggle('is-guide-complete', activeCopy === finalCopy &&
-      completedSegment === segments.length - 1);
+    stepNav.classList.toggle('has-active-step', step > 0);
+    if (step > 0) stepNav.style.setProperty('--active-index', step - 1);
     stepButtons.forEach((button, index) => {
-      if (index === Math.max(0, step - 1)) button.setAttribute('aria-current', 'step');
+      if (step > 0 && index === step - 1) button.setAttribute('aria-current', 'step');
       else button.removeAttribute('aria-current');
     });
     const scan = clamp(progress / thornPanEnd);
@@ -1234,6 +1238,9 @@ function selectOption(label,value){
   }
 
   function limitTravel(from, to, input = {}) {
+    if (sceneComplete) return null;
+    if (elevatorRunning) return from;
+    if (pausedScene) return repinScene(from, to);
     if (from === to || reducedMotion.matches) return to;
 
     const now = performance.now();
@@ -1243,14 +1250,10 @@ function selectOption(label,value){
     lastInputWasTouch = Boolean(input.touch);
     lastInputTime = now;
     lastInputWasForward = to > from;
-    if (elevatorRunning) return from;
     const { start, end, openingVisibleAt } = measureScrollRange();
     const openingStop = Math.ceil(start);
     if (to < from) {
       touchAdvanceQueued = false;
-      if (from >= end || returningFromSkip) {
-        sequence.classList.toggle('is-guide-suspended', true);
-      }
       if (to >= end) return null;
       if (from >= end || returningFromSkip) {
         returningFromSkip = true;
@@ -1268,16 +1271,7 @@ function selectOption(label,value){
         waitingForGesture = false;
         return null;
       }
-      cancelAnimationFrame(segmentFrame);
-      segmentRunning = false;
-      completedSegment = -1;
-      playingStep = null;
-      lateSeedTime = 0;
-      returningFromSkip = false;
-      waitingForGesture = true;
-      sequence.classList.toggle('is-skipping', false);
-      restartOpeningReveal();
-      return openingStop;
+      return pauseScene(from, to, start, end);
     }
     if (segmentRunning) {
       // A distinct swipe can request the next segment while this one finishes.
@@ -1306,11 +1300,48 @@ function selectOption(label,value){
     return null;
   }
 
-  stepNav?.addEventListener('click', event => {
-    const button = event.target.closest('button');
-    const index = stepButtons.indexOf(button);
-    if (index < 0) return;
+  let restartRequest = 0;
+  let restartFades = [];
+
+  function cancelRestart() {
+    restartRequest++;
+    restartFades.forEach(animation => animation.cancel());
+    restartFades = [];
+  }
+
+  async function chooseStep(index) {
+    cancelRestart();
+    const request = restartRequest;
+    const { frameTop } = measureScrollRange();
+    const viewportHeight = window.visualViewport?.height || document.documentElement.clientHeight;
+    const framePadding = Math.max(16, Math.min(32, viewportHeight * 0.04));
+    const arrowSpace = nextArrow.offsetHeight + (parseFloat(getComputedStyle(nextArrow).marginTop) || 0);
+    const desiredTop = frameTop + (sceneComplete ? arrowSpace - framePadding : 0);
+    const distance = frame.getBoundingClientRect().top - desiredTop;
+    const needsElevator = index < 2 && !reducedMotion.matches && Math.abs(distance) > 3;
+    if (!needsElevator) {
+      activateStep(index, request);
+      return;
+    }
+
+    cancelAnimationFrame(segmentFrame);
+    const layers = frame.querySelectorAll('.art, .copy, .ownership-next, .ownership-steps');
+    restartFades = Array.from(layers, layer => layer.animate(
+      [{ opacity: 1 }, { opacity: 0 }], { duration: 380, easing: 'ease-in-out', fill: 'forwards' }
+    ));
+    await Promise.allSettled(restartFades.map(animation => animation.finished));
+    if (request !== restartRequest) return;
+    stepNav.classList.remove('has-active-step');
+    const target = Math.ceil(window.scrollY + frame.getBoundingClientRect().top - desiredTop);
+    moveElevator(target, () => activateStep(index, request, true), { duration: 1000, pinnedWeight: 1 });
+  }
+
+  function activateStep(index, request, alreadyAligned = false) {
     const step = index + 1;
+    sceneComplete = false;
+    pausedScene = null;
+    resumeSegment = null;
+    sequence.classList.remove('is-complete', 'is-paused');
 
     cancelAnimationFrame(segmentFrame);
     segmentRunning = false;
@@ -1325,10 +1356,51 @@ function selectOption(label,value){
 
     const { start, end } = measureScrollRange();
     const previous = segments[step - 2]?.end ?? 0;
-    scrollInstantly(Math.ceil(start + previous * (end - start)));
-    openingReadyAt = 0;
-    playSegment(acceptedScrollY, segments[index], previous);
-    draw();
+    const target = Math.ceil(start + previous * (end - start));
+    if (alreadyAligned) frame.style.setProperty('--frame-top', measureScrollRange().frameTop + 'px');
+    function startStep() {
+      if (request !== restartRequest) return;
+      restartFades.forEach(animation => animation.cancel());
+      restartFades = [];
+      if (alreadyAligned) {
+        // Commit the hidden numbers before the stage toggles their fade-in.
+        getComputedStyle(stepNav).opacity;
+        restartFades = Array.from(frame.querySelectorAll('.art, .copy'), layer =>
+          layer.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 580, easing: 'ease-in-out' }));
+      }
+      openingReadyAt = 0;
+      playSegment(acceptedScrollY, segments[index], previous);
+      draw();
+    }
+    scrollInstantly(target);
+    startStep();
+  }
+
+  nextArrow.addEventListener('click', event => {
+    if (!sequence.classList.contains('is-opening-frame')) return;
+    event.preventDefault();
+    if (!segmentRunning && !elevatorRunning) {
+      playSegment(acceptedScrollY, segments[0], 0);
+      draw();
+    }
+  });
+
+  stepNav.addEventListener('click', event => {
+    const index = stepButtons.indexOf(event.target.closest('button'));
+    if (index >= 0) chooseStep(index);
+  });
+
+  stepNav.addEventListener('keydown', event => {
+    const index = stepButtons.indexOf(event.target);
+    if (index < 0) return;
+    const destinations = { ArrowRight: Math.min(2, index + 1), ArrowDown: Math.min(2, index + 1),
+      ArrowLeft: Math.max(0, index - 1), ArrowUp: Math.max(0, index - 1),
+      Home: 0, End: 2, 1: 0, 2: 1, 3: 2 };
+    if (!Object.hasOwn(destinations, event.key)) return;
+    event.preventDefault();
+    const next = destinations[event.key];
+    if (next !== index || /^[123]$/.test(event.key)) chooseStep(next);
+    stepButtons[next].focus({ preventScroll: true });
   });
 
   function scrollInstantly(top) {
@@ -1343,23 +1415,26 @@ function selectOption(label,value){
     const isOpeningSegment = segmentIndex === 0;
     // Let the title fade in before moving away from the opening flower.
     const openingTitleTime = isOpeningSegment && !reducedMotion.matches
-      ? Math.max(1100, openingReadyAt - performance.now()) : 0;
+      ? Math.max(1800, openingReadyAt - performance.now()) : 0;
     const duration = segment.duration;
     const { start, end } = measureScrollRange();
     const initialProgress = replayStart ?? clamp((from - start) / Math.max(1, end - start));
-    const startedAt = performance.now();
+    let startedAt = performance.now();
+    let lastRenderedAt = startedAt;
     segmentRunning = true;
     settlingScene = false;
     // Hold the scene through the description fade before advancing.
-    const settleDuration = reducedMotion.matches ? 0 : isOpeningSegment ? 1450 : segment.thornExit ? 1360 : 0;
+    const captionHold = isOpeningSegment && !reducedMotion.matches ? 450 : 0;
+    const settleDuration = reducedMotion.matches ? 0 : isOpeningSegment ? 1450 + captionHold : segment.thornExit ? 1360 : 0;
     const hasTitleTransition = segment.thornExit && initialProgress < sowingStarts;
     const exitDuration = 1150;
     const packetEntryTime = 300;
 
     function advance(now) {
+      lastRenderedAt = now;
       const elapsed = reducedMotion.matches ? duration : Math.max(0, now - startedAt - openingTitleTime);
       const time = clamp(elapsed / duration);
-      settlingScene = elapsed >= duration;
+      settlingScene = elapsed >= duration + captionHold;
       if (segment.thornExit) lateSeedTime = Math.max(0, elapsed - duration);
       const range = measureScrollRange();
       let progress = initialProgress + (target - initialProgress) * time;
@@ -1385,7 +1460,6 @@ function selectOption(label,value){
       } else {
         settlingScene = false;
         completedSegment = segmentIndex;
-        if (segmentIndex === segments.length - 1) finalStop = acceptedScrollY;
         playingStep = null;
         const followingSegment = segments[segmentIndex + 1];
         const advanceRequested = touchAdvanceQueued;
@@ -1397,13 +1471,72 @@ function selectOption(label,value){
         segmentRunning = false;
         waitingForGesture = Boolean(followingSegment);
         draw();
+        resumeSegment = null;
+        if (!followingSegment) releaseCompletedScene();
       }
     }
 
+    resumeSegment = () => {
+      segmentFrame = requestAnimationFrame(now => {
+        startedAt += now - lastRenderedAt;
+        advance(now);
+      });
+    };
     segmentFrame = requestAnimationFrame(advance);
   }
 
+  function pauseScene(from, to, start, end) {
+    cancelAnimationFrame(segmentFrame);
+    sequence.classList.remove('owns-touch-scroll');
+    const before = frame.getBoundingClientRect().top;
+    const progress = clamp((from - start) / Math.max(1, end - start));
+    sequence.classList.add('is-paused');
+    const after = frame.getBoundingClientRect().top;
+    pausedScene = { progress, anchor: from + after - before };
+    return to + after - before;
+  }
+
+  function repinScene(from, to) {
+    if (to <= from || to < pausedScene.anchor) return null;
+    const { progress } = pausedScene;
+    pausedScene = null;
+    returningFromSkip = false;
+    sequence.classList.remove('is-paused', 'is-skipping');
+    const { start, end } = measureScrollRange();
+    const position = Math.ceil(start + progress * (end - start));
+    touchAdvanceQueued = false;
+    waitingForGesture = true;
+    if (segmentRunning) resumeSegment?.();
+    return position;
+  }
+
+  function releaseCompletedScene() {
+    const previousTop = frame.getBoundingClientRect().top;
+    sceneComplete = true;
+    touchOwnsScroll = false;
+    sequence.classList.remove('owns-touch-scroll');
+    sequence.classList.add('is-complete');
+    const shift = frame.getBoundingClientRect().top - previousTop;
+    // Keep the frame visually in place while releasing the sticky layout.
+    scrollInstantly(window.scrollY + shift);
+    const viewport = window.visualViewport;
+    const viewportBottom = viewport ? viewport.height + viewport.offsetTop : window.innerHeight;
+    const arrowBottom = nextArrow.getBoundingClientRect().bottom;
+    const distance = Math.max(0, Math.ceil(arrowBottom + 16 - viewportBottom));
+    if (!distance || reducedMotion.matches) return;
+
+    const origin = window.scrollY;
+    const startedAt = performance.now();
+    function revealArrow(now) {
+      const progress = clamp((now - startedAt) / 950);
+      scrollInstantly(origin + distance * smooth(progress));
+      if (progress < 1) segmentFrame = requestAnimationFrame(revealArrow);
+    }
+    segmentFrame = requestAnimationFrame(revealArrow);
+  }
+
   function limitWheel(event) {
+    if (sceneComplete && !elevatorRunning) cancelAnimationFrame(segmentFrame);
     if (event.defaultPrevented || !event.cancelable || event.ctrlKey ||
         event.target.closest?.(".site-menu") ||
         reducedMotion.matches || Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
@@ -1440,7 +1573,8 @@ function selectOption(label,value){
   }
 
   function onTouchStart(event) {
-    if (elevatorRunning || event.target.closest?.(".site-menu")) return;
+    if (sceneComplete && !elevatorRunning) cancelAnimationFrame(segmentFrame);
+    if (sceneComplete || elevatorRunning || event.target.closest?.(".site-menu")) return;
     const touch = event.touches.length === 1 ? event.touches[0] : null;
     touchY = touch?.clientY ?? null;
     touchX = touch?.clientX ?? null;
@@ -1448,12 +1582,12 @@ function selectOption(label,value){
     touchDirection = 0;
     touchLeavingOpening = false;
     const { openingVisibleAt, end } = measureScrollRange();
-    touchOwnsScroll = Boolean(touch) && !reducedMotion.matches &&
+    touchOwnsScroll = !pausedScene && Boolean(touch) && !reducedMotion.matches &&
       acceptedScrollY >= Math.floor(openingVisibleAt) && acceptedScrollY < end - 1;
   }
 
   function onTouchMove(event) {
-    if (elevatorRunning || event.defaultPrevented || event.target.closest?.(".site-menu") || event.touches.length !== 1 ||
+    if (sceneComplete || elevatorRunning || event.defaultPrevented || event.target.closest?.(".site-menu") || event.touches.length !== 1 ||
         touchY === null || reducedMotion.matches) return;
 
     const touch = event.touches[0];
@@ -1479,7 +1613,7 @@ function selectOption(label,value){
   function onScroll() {
     if (elevatorRunning) return;
     const actual = window.scrollY;
-    if (actual !== acceptedScrollY && (touchOwnsScroll || (segmentRunning && lastInputWasTouch))) {
+    if (actual !== acceptedScrollY && !pausedScene && (touchOwnsScroll || (segmentRunning && lastInputWasTouch))) {
       // Ignore native momentum or viewport corrections while touch controls this scene.
       scrollInstantly(acceptedScrollY);
       return;
@@ -1497,24 +1631,25 @@ function selectOption(label,value){
     // Commit the hidden state before starting the same CSS reveal as the first entry.
     frame.getBoundingClientRect();
     settlingScene = false;
-    finalStop = null;
     openingInView = true;
     openingReadyAt = performance.now() + 2000;
   }
 
-  function moveElevator(target, onComplete) {
+  function moveElevator(target, onComplete, { duration = 700, pinnedWeight = 0.15 } = {}) {
     elevatorRunning = false;
-    animateFinalLeaves = false;
-    settlingScene = false;
     touchOwnsScroll = false;
     sequence.classList.remove('owns-touch-scroll');
-    touchAdvanceQueued = false;
     cancelAnimationFrame(segmentFrame);
-    segmentRunning = false;
-    waitingForGesture = false;
-    completedSegment = -1;
-    playingStep = null;
-    lateSeedTime = 0;
+    if (!pausedScene) {
+      animateFinalLeaves = false;
+      settlingScene = false;
+      touchAdvanceQueued = false;
+      segmentRunning = false;
+      waitingForGesture = false;
+      completedSegment = -1;
+      playingStep = null;
+      lateSeedTime = 0;
+    }
     const origin = window.scrollY;
     if (reducedMotion.matches) {
       scrollInstantly(target);
@@ -1529,7 +1664,6 @@ function selectOption(label,value){
     const { openingVisibleAt, end } = measureScrollRange();
     const pinnedStart = Math.max(Math.min(origin, target), openingVisibleAt);
     const pinnedEnd = Math.min(Math.max(origin, target), end);
-    const pinnedWeight = 0.15;
     const toTravel = position => position -
       Math.max(0, Math.min(position, pinnedEnd) - pinnedStart) * (1 - pinnedWeight);
     const fromTravel = position => {
@@ -1543,7 +1677,7 @@ function selectOption(label,value){
     const finish = toTravel(target);
     const startedAt = performance.now();
     function advanceElevator(now) {
-      const progress = clamp((now - startedAt) / 700);
+      const progress = clamp((now - startedAt) / duration);
       scrollInstantly(progress === 1 ? target : fromTravel(start + (finish - start) * smooth(progress)));
       if (progress < 1) {
         segmentFrame = requestAnimationFrame(advanceElevator);
@@ -1563,21 +1697,6 @@ function selectOption(label,value){
     return window.scrollY + destination.getBoundingClientRect().top - margin - padding;
   }
 
-  frame.querySelector('.ownership-skip')?.addEventListener('click', event => {
-    if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-    const destination = document.getElementById('work');
-    if (!destination) return;
-
-    event.preventDefault();
-    returningFromSkip = true;
-    sequence.classList.toggle('is-guide-suspended', true);
-    animateFinalLeaves = false;
-    sequence.classList.toggle("is-skipping", true);
-    moveElevator(sectionScrollTop(destination), () => {
-      destination.focus({ preventScroll: true });
-    });
-  });
-
   // Handle the sticky logo before its normal scroll handler runs.
   document.addEventListener('click', event => {
     if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
@@ -1585,6 +1704,7 @@ function selectOption(label,value){
 
     event.preventDefault();
     event.stopPropagation();
+    cancelRestart();
     cancelAnimationFrame(segmentFrame);
     segmentRunning = false;
     returningFromSkip = false;
@@ -1600,6 +1720,12 @@ function selectOption(label,value){
   }, true);
 
   function syncMenuDestination() {
+    if (pausedScene) {
+      acceptedScrollY = window.scrollY;
+      returningFromSkip = false;
+      sequence.classList.remove('is-skipping');
+      return;
+    }
     cancelAnimationFrame(segmentFrame);
     segmentRunning = false;
     elevatorRunning = false;
@@ -1611,13 +1737,13 @@ function selectOption(label,value){
     acceptedScrollY = window.scrollY;
     returningFromSkip = acceptedScrollY >= measureScrollRange().end;
     sequence.classList.toggle('is-skipping', returningFromSkip);
-    finalStop = null;
     settlingScene = false;
     if (returningFromSkip) draw(true);
     else scheduleDraw();
   }
   document.addEventListener('site:elevator', event => {
     event.preventDefault();
+    cancelRestart();
     const destination = event.detail;
     const target = sectionScrollTop(destination);
     touchOwnsScroll = false;
@@ -1638,7 +1764,7 @@ function selectOption(label,value){
   addEventListener('resize', scheduleDraw);
   window.visualViewport?.addEventListener('resize', scheduleDraw);
   addEventListener('pagehide', () => {
-    sequence.classList.toggle('is-story-visible', false);
+    if (!sceneComplete && !pausedScene) sequence.classList.toggle('is-story-visible', false);
   });
   addEventListener('pageshow', event => {
     acceptedScrollY = window.scrollY;
@@ -1648,7 +1774,7 @@ function selectOption(label,value){
       document.getElementById(location.hash.slice(1)).scrollIntoView({ behavior: 'instant' });
       syncMenuDestination();
     }
-    if (event.persisted || navigation?.type === 'back_forward') {
+    if (!sceneComplete && !pausedScene && (event.persisted || navigation?.type === 'back_forward')) {
       const { start, end, openingVisibleAt } = measureScrollRange();
       cancelAnimationFrame(segmentFrame);
       segmentRunning = false;
