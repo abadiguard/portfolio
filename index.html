@@ -192,8 +192,9 @@
   border-radius: 50%;
   pointer-events: none;
   opacity: 0;
-  transform: translateX(calc(var(--active-index, 0) * (var(--step-size) + var(--step-gap))));
-  transition: transform 520ms cubic-bezier(.22,.61,.36,1), opacity 420ms ease;
+  translate: calc(var(--active-index, 0) * (var(--step-size) + var(--step-gap))) 0;
+  transform-origin: center center;
+  transition: translate 520ms cubic-bezier(.22,.61,.36,1), opacity 420ms ease;
 }
 .ownership-steps.has-active-step .step-marker { opacity: 1; }
 @media (prefers-reduced-motion: reduce) {
@@ -227,7 +228,7 @@
   grid-template: minmax(0, 1fr) / minmax(0, 1fr);
   width: 108px;
   height: clamp(135px, 23svh, 194.4px);
-  margin-bottom: 1.25rem;
+  margin-bottom: .5rem;
 }
 .ownership-sequence .art > svg {
   grid-area: 1 / 1;
@@ -1026,6 +1027,7 @@ function selectOption(label,value){
   let elevatorRunning = false;
   let returningFromSkip = false;
   let waitingForGesture = false;
+  let openingEnteredAt = null;
   let completedSegment = -1;
   let sceneComplete = false;
   let pausedScene = null;
@@ -1263,10 +1265,6 @@ function selectOption(label,value){
     lastInputWasForward = to > from;
     const { start, end, openingVisibleAt } = measureScrollRange();
     const openingStop = Math.ceil(start);
-    if (segmentRunning && playingStep === 3 && freshGesture) {
-      finishThirdStep(end, to > from);
-      return acceptedScrollY;
-    }
     if (to < from) {
       advanceQueued = false;
       if (to >= end) return null;
@@ -1297,7 +1295,16 @@ function selectOption(label,value){
     if (from < visibleAt) {
       if (to < visibleAt) return null;
       waitingForGesture = true;
+      openingEnteredAt = performance.now();
       return openingStop;
+    }
+    if (completedSegment < 0 && playingStep === null) {
+      if (openingEnteredAt === null) {
+        openingEnteredAt = now;
+        waitingForGesture = true;
+        return openingStop;
+      }
+      if (now - openingEnteredAt < 900 || !freshGesture) return from;
     }
     const stopFor = progress => Math.ceil(start + progress * (end - start));
     // Release native scrolling at the last frame, allowing for pixel rounding.
@@ -1459,7 +1466,22 @@ function selectOption(label,value){
     acceptedScrollY = window.scrollY;
   }
 
+  let completionPulseAnimation = null;
+  function pulseCompletedStep() {
+    if (reducedMotion.matches) return;
+    completionPulseAnimation?.cancel();
+    completionPulseAnimation = stepNav.querySelector('.step-marker').animate(
+      [
+        { transform: 'scale(1)' },
+        { transform: 'scale(1.15)', offset: 0.45 },
+        { transform: 'scale(1)' }
+      ],
+      { duration: 850, easing: 'ease-in-out' }
+    );
+  }
+
   function playSegment(from, segment, replayStart) {
+    completionPulseAnimation?.cancel();
     const segmentIndex = segments.indexOf(segment);
     const target = segment.end;
     playingStep = Math.min(3, segmentIndex + 1);
@@ -1522,6 +1544,7 @@ function selectOption(label,value){
         segmentRunning = false;
         waitingForGesture = Boolean(followingSegment);
         draw();
+        pulseCompletedStep();
         resumeSegment = null;
         if (!followingSegment) releaseCompletedScene();
       }
@@ -1559,19 +1582,6 @@ function selectOption(label,value){
     waitingForGesture = true;
     if (segmentRunning) resumeSegment?.();
     return position;
-  }
-
-  function finishThirdStep(end, revealArrow) {
-    cancelAnimationFrame(segmentFrame);
-    segmentRunning = false;
-    completedSegment = segments.length - 1;
-    playingStep = null;
-    resumeSegment = null;
-    settlingScene = false;
-    advanceQueued = false;
-    scrollInstantly(Math.ceil(end));
-    draw();
-    releaseCompletedScene(revealArrow);
   }
 
   function releaseCompletedScene(shouldRevealArrow = true) {
