@@ -1267,6 +1267,9 @@ function selectOption(label,value){
   function limitTravel(from, to, input = {}) {
     if (sceneComplete) return null;
     if (elevatorRunning) return from;
+    // Once the entire scene is above the viewport, later sections own native scrolling.
+    const sceneBottom = window.scrollY + frame.getBoundingClientRect().bottom - 64;
+    if (from >= sceneBottom && to >= sceneBottom) return null;
     if (pausedScene) return repinScene(from, to);
     if (from === to || reducedMotion.matches) return to;
 
@@ -1576,6 +1579,8 @@ function selectOption(label,value){
   }
 
   function repinScene(from, to) {
+    // Re-pin only when crossing the saved anchor, never from later sections.
+    if (!pausedScene.skipped && from > pausedScene.anchor + 1) return null;
     const returningUp = pausedScene.skipped && to < from && to <= pausedScene.anchor;
     if (!returningUp && (to <= from || to < pausedScene.anchor || pausedScene.skipped)) return null;
     const { progress, restartFirst } = pausedScene;
@@ -1671,6 +1676,11 @@ function selectOption(label,value){
 
   function onTouchStart(event) {
     if (sceneComplete && !elevatorRunning) cancelAnimationFrame(segmentFrame);
+    if (frame.getBoundingClientRect().bottom <= 64) {
+      touchY = null;
+      touchOwnsScroll = false;
+      return;
+    }
     if (sceneComplete || elevatorRunning || event.target.closest?.(".site-menu")) return;
     const touch = event.touches.length === 1 ? event.touches[0] : null;
     touchY = touch?.clientY ?? null;

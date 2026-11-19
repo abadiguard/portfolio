@@ -603,3 +603,10 @@ p { font-size: 16px !important; font-weight: 400 !important; }
 @media (prefers-reduced-motion: reduce) {
   .proof.mobile-proof-fade { opacity: 1; transition: none; }
 }
+
+/* Mobile article cards must shrink with the available content width. */
+@media (max-width: 768px) {
+  .posts { grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); }
+  .posts .post, .posts .pt, .posts .plink { min-width: 0; max-width: 100%; }
+  .posts .pt h3 { overflow-wrap: normal; word-break: normal; hyphens: none; text-wrap: wrap; }
+}
