@@ -560,3 +560,31 @@ p { font-size: 16px !important; font-weight: 400 !important; }
 
 /* The article metadata separator uses the same dark text color. */
 .pdot { opacity: 1; color: inherit; }
+
+/* Compact role/date grouping with equal gaps above and below. */
+@media (min-width: 769px) {
+  .proof .details { --role-copy-gap: 20px; }
+  .proof .role { margin-bottom: 4px; }
+  .proof .meta { padding-bottom: 0; }
+  .proof .desc { margin-top: var(--role-copy-gap); }
+  .proof .ach { bottom: calc(100% + var(--role-copy-gap)); }
+}
+
+/* Anchor every company's text to the same point below the company rail. */
+@media (min-width: 769px) {
+  .proof:not(.compact-layout) .details {
+    align-self: start;
+    top: calc(88px + clamp(.256rem,.512vw,.448rem));
+    padding-top: 0;
+    padding-bottom: calc(100px + 88px + clamp(.256rem,.512vw,.448rem));
+  }
+  .proof .role { min-height: 21.6px; }
+}
+
+/* Lower the fixed role-copy anchor by 50px. */
+@media (min-width: 769px) {
+  .proof:not(.compact-layout) .details {
+    top: calc(138px + clamp(.256rem,.512vw,.448rem));
+    padding-bottom: calc(100px + 138px + clamp(.256rem,.512vw,.448rem));
+  }
+}
