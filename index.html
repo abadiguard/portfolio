@@ -873,12 +873,11 @@ function show(i){
     var focusedIndex=boxes.indexOf(event.target);
     var focusedLogo=focusedIndex>=0;
     if(!direction&&(!focusedLogo||!["Home","End"].includes(event.key)))return;
-    if(!focusedLogo){
-      if(event.target.closest?.('a, button, input, textarea, select, [contenteditable], [role="combobox"], [role="listbox"]'))return;
-      var bounds=proof.getBoundingClientRect();
-      var midpoint=window.innerHeight*.5;
-      if(bounds.top>=midpoint||bounds.bottom<=midpoint)return;
-    }
+    var bounds=proof.getBoundingClientRect();
+    var midpoint=window.innerHeight*.5;
+    // A company button can retain focus after its section has scrolled away.
+    if(bounds.top>=midpoint||bounds.bottom<=midpoint)return;
+    if(!focusedLogo&&event.target.closest?.('input, textarea, select, [contenteditable], [role="combobox"], [role="listbox"]'))return;
     var activeIndex=boxes.findIndex(function(button){return button.getAttribute("aria-pressed")==="true"});
     var next=event.key==="Home"?0:event.key==="End"?boxes.length-1:Math.max(0,activeIndex)+direction;
     if(next<0||next>=boxes.length)next=(next+boxes.length)%boxes.length;
@@ -1457,12 +1456,11 @@ function selectOption(label,value){
 
     const focusedStep = stepButtons.includes(event.target);
     const focusedOpeningArrow = event.target === nextArrow && sequence.classList.contains('is-opening-frame');
-    if (!focusedStep && !focusedOpeningArrow &&
-        event.target.closest?.('a, button, input, textarea, select, [contenteditable], [role="combobox"], [role="listbox"]')) return;
+    if (event.target.closest?.('input, textarea, select, [contenteditable], [role="combobox"], [role="listbox"]')) return;
 
+    // Select the visible scene, rather than a link/button that kept keyboard focus.
     const bounds = frame.getBoundingClientRect();
-    if (!focusedStep && !focusedOpeningArrow &&
-        (bounds.top >= window.innerHeight * 0.5 || bounds.bottom <= window.innerHeight * 0.5)) return;
+    if (bounds.top >= window.innerHeight * 0.75 || bounds.bottom <= window.innerHeight * 0.25) return;
 
     if (horizontal) {
       const current = stepButtons.findIndex(button => button.hasAttribute('aria-current'));
