@@ -57,13 +57,7 @@
   padding: .35rem .75rem;
   color: inherit;
 }
-.ownership-sequence.is-opening-frame .ownership-next {
-  display: block;
-  position: absolute;
-  inset: auto auto 0 50%;
-  margin: 0;
-  transform: translateX(-50%);
-}
+
 .ownership-sequence.is-complete .ownership-next {
   display: block;
   margin-bottom: 0;
@@ -74,38 +68,27 @@
 @media (max-width: 768px) {
   .own:has(.ownership-sequence.is-complete) { padding-bottom: 1.2rem; }
 }
-.ownership-skip {
+.ownership-guide {
   position: absolute;
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
   margin: 0;
-  visibility: hidden;
-  opacity: 0;
+  width: max-content;
+  max-width: 100%;
   color: inherit;
-  font: 400 11pt/1.5 var(--f);
-  text-underline-offset: .2em;
+  font: 500 11pt/1.5 var(--f);
+  text-align: center;
 }
-.ownership-sequence.has-started:not(.is-complete) .ownership-skip {
-  visibility: visible;
-  opacity: 1;
-}
-.ownership-sequence.is-complete .ownership-skip { display: none; }
-@media (max-width: 768px) { .ownership-skip { font-size: 10pt; } }
+.ownership-skip { color: inherit; text-decoration: underline; text-underline-offset: .2em; }
+.ownership-sequence.is-complete .ownership-guide { display: none; }
+@media (max-width: 768px) { .ownership-guide { font-size: 10pt; } }
 .ownership-next svg { display: block; width: 56px; height: 92px; }
-.ownership-next .opening-arrow { display: none; width: 34px; height: 55px; }
-.ownership-sequence.is-opening-frame .opening-arrow { display: block; }
-.ownership-sequence.is-opening-frame .completion-arrow { display: none; }
 @media (prefers-reduced-motion: no-preference) {
   .ownership-next svg { animation: float 1.7s ease-in-out infinite; }
-  .ownership-sequence.is-opening-frame .ownership-next {
-    animation: reveal-opening-arrow 420ms ease-out 500ms both;
-  }
+
 }
-@keyframes reveal-opening-arrow {
-  from { opacity: 0; visibility: hidden; }
-  to { opacity: 1; visibility: visible; }
-}
+
 .ownership-sequence .copy {
   order: 1;
   display: grid;
@@ -197,7 +180,7 @@
 .ownership-sequence .ownership-steps button {
   width: var(--step-size);
   height: var(--step-size);
-  font: var(--weight-body) calc(var(--p) + 2pt)/1.2 var(--f);
+  font: var(--weight-body) var(--type-body)/1.2 var(--f);
 }
 .ownership-sequence .ownership-steps button::before { content: none; }
 .ownership-sequence .ownership-steps button:focus { outline: none; box-shadow: none; }
@@ -362,7 +345,7 @@
 
 <section class="proof" aria-labelledby="proof-h">
   <span class="pill">+12 years | 5 zero to ones</span>
-  <h2 id="proof-h">Always the<br>first &amp; sole hire</h2>
+  <h2 id="proof-h">FOUNDING PRODUCT<br>STRATEGY &amp; UX</h2>
   <div class="grp">
   <div class="logos" id="logos" role="group" aria-label="Companies"></div>
   <div class="portrait" aria-hidden="true">
@@ -409,11 +392,8 @@
       <button type="button" aria-label="Step 2: Define the right solution">2</button>
       <button type="button" aria-label="Step 3: Build to scale">3</button>
     </nav>
-    <a class="ownership-skip" href="#work">Skip</a>
+    <p class="ownership-guide">Scroll to play or <a class="ownership-skip" href="#work">skip</a></p>
     <a class="ownership-next" href="#work" aria-label="Continue to Case Studies">
-      <svg class="opening-arrow" viewBox="0 0 34 55" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M17 4c8 9 9 19 1 23-3 2-8 2-8-1 0-3 6-4 10-1 7 5 3 17-5 25m-5-13 5 13 12-9"/>
-      </svg>
       <svg class="completion-arrow" viewBox="0 0 30 48" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path vector-effect="non-scaling-stroke" d="M10 3c10 5 14 14 9 19-3 3-9 3-9-1 0-4 10-5 12 2 2 7-4 14-9 20m-2-10 2 10 10-4"/>
       </svg>
@@ -1112,7 +1092,7 @@ function selectOption(label,value){
     const atOpening = step === 0 && !returningFromSkip &&
       acceptedScrollY >= Math.floor(start) - 1 && acceptedScrollY < end;
     sequence.classList.toggle('is-opening-frame', atOpening);
-    nextArrow.setAttribute('aria-label', atOpening ? 'Start step 1' : 'Continue to Case Studies');
+    nextArrow.setAttribute('aria-label', 'Continue to Case Studies');
     const activeCopy = [openingCopy, firstCopy, secondCopy, finalCopy][step];
     // The caption names the action. Switch to the explanation once the step reaches its end pose.
     const showExplanation = step === 3
@@ -1352,31 +1332,29 @@ function selectOption(label,value){
     restartFades = [];
   }
 
-  async function chooseStep(index) {
+  function chooseStep(index) {
     cancelRestart();
     const request = restartRequest;
-    const { frameTop } = measureScrollRange();
-    const viewportHeight = window.visualViewport?.height || document.documentElement.clientHeight;
-    const framePadding = Math.max(16, Math.min(32, viewportHeight * 0.04));
-    const arrowSpace = nextArrow.offsetHeight + (parseFloat(getComputedStyle(nextArrow).marginTop) || 0);
-    const desiredTop = frameTop + (sceneComplete ? arrowSpace - framePadding : 0);
+    // Measure the destination layout without painting the expanded sticky range.
+    // Keep the current illustration and copy visible throughout the elevator.
+    const wasComplete = sequence.classList.contains('is-complete');
+    const wasPaused = sequence.classList.contains('is-paused');
+    sequence.classList.remove('is-complete', 'is-paused');
+    const desiredTop = measureScrollRange().frameTop;
+    sequence.classList.toggle('is-complete', wasComplete);
+    sequence.classList.toggle('is-paused', wasPaused);
     const distance = frame.getBoundingClientRect().top - desiredTop;
-    const needsElevator = index < 2 && !reducedMotion.matches && Math.abs(distance) > 3;
-    if (!needsElevator) {
+    if (Math.abs(distance) <= 3) {
       activateStep(index, request);
       return;
     }
 
     cancelAnimationFrame(segmentFrame);
-    const layers = frame.querySelectorAll('.art, .copy, .ownership-next, .ownership-steps');
-    restartFades = Array.from(layers, layer => layer.animate(
-      [{ opacity: 1 }, { opacity: 0 }], { duration: 380, easing: 'ease-in-out', fill: 'forwards' }
-    ));
-    await Promise.allSettled(restartFades.map(animation => animation.finished));
-    if (request !== restartRequest) return;
-    stepNav.classList.remove('has-active-step');
-    const target = Math.ceil(window.scrollY + frame.getBoundingClientRect().top - desiredTop);
-    moveElevator(target, () => activateStep(index, request, true), { duration: 1000, pinnedWeight: 1 });
+    const target = Math.max(0, window.scrollY + distance);
+    moveElevator(target, () => {
+      if (request !== restartRequest) return;
+      activateStep(index, request, true);
+    }, { duration: 1300, pinnedWeight: 1 });
   }
 
   function activateStep(index, request, alreadyAligned = false) {
@@ -1405,12 +1383,6 @@ function selectOption(label,value){
       if (request !== restartRequest) return;
       restartFades.forEach(animation => animation.cancel());
       restartFades = [];
-      if (alreadyAligned) {
-        // Commit the hidden numbers before the stage toggles their fade-in.
-        getComputedStyle(stepNav).opacity;
-        restartFades = Array.from(frame.querySelectorAll('.art, .copy'), layer =>
-          layer.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 580, easing: 'ease-in-out' }));
-      }
       openingReadyAt = 0;
       playSegment(acceptedScrollY, segments[index], previous);
       draw();
