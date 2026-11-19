@@ -328,9 +328,20 @@
 .ownership-sequence .ownership-guide { position: static; transform: none; order: 3; margin: 48px 0 0; font: 400 14px/1.6 var(--f); font-size: 14px !important; }
 .own:has(.ownership-sequence.is-complete) { padding-bottom: 100px; }
 
-.ownership-sequence .ownership-guide { transition: opacity 500ms ease-in-out; }
+.ownership-sequence .ownership-guide { transition: opacity 850ms ease-in-out; }
 .ownership-sequence.is-ending-guide .ownership-guide { opacity: 0; pointer-events: none; }
 @media (prefers-reduced-motion: reduce) { .ownership-sequence .ownership-guide { transition: none; } }
+
+/* Keep the instruction's space after its fade; reveal the arrow below the frame. */
+.ownership-sequence.is-complete .ownership-guide { display: block; visibility: hidden; }
+.ownership-sequence.is-complete .ownership-next {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 0;
+}
 </style>
   <script src="site.js?v=20261117-shared-elevator" defer></script>
   <!-- Google tag (gtag.js) -->
@@ -1619,7 +1630,7 @@ function selectOption(label,value){
     function finish(now) {
       lastRenderedAt = now;
       const elapsed = now - startedAt;
-      if (elapsed < 1200) {
+      if (elapsed < 1600) {
         segmentFrame = requestAnimationFrame(finish);
         return;
       }
