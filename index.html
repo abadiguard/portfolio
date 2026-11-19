@@ -327,6 +327,10 @@
 .ownership-sequence .ownership-steps { margin-top: 36px; }
 .ownership-sequence .ownership-guide { position: static; transform: none; order: 3; margin: 48px 0 0; font: 400 14px/1.6 var(--f); font-size: 14px !important; }
 .own:has(.ownership-sequence.is-complete) { padding-bottom: 100px; }
+
+.ownership-sequence .ownership-guide { transition: opacity 500ms ease-in-out; }
+.ownership-sequence.is-ending-guide .ownership-guide { opacity: 0; pointer-events: none; }
+@media (prefers-reduced-motion: reduce) { .ownership-sequence .ownership-guide { transition: none; } }
 </style>
   <script src="site.js?v=20261117-shared-elevator" defer></script>
   <!-- Google tag (gtag.js) -->
@@ -1353,7 +1357,7 @@ function selectOption(label,value){
     // Keep the current illustration and copy visible throughout the elevator.
     const wasComplete = sequence.classList.contains('is-complete');
     const wasPaused = sequence.classList.contains('is-paused');
-    sequence.classList.remove('is-complete', 'is-paused');
+    sequence.classList.remove('is-complete', 'is-paused', 'is-ending-guide');
     const desiredTop = measureScrollRange().frameTop;
     sequence.classList.toggle('is-complete', wasComplete);
     sequence.classList.toggle('is-paused', wasPaused);
@@ -1552,9 +1556,9 @@ function selectOption(label,value){
         segmentRunning = false;
         waitingForGesture = Boolean(followingSegment);
         draw();
-        pulseCompletedStep();
+        if (followingSegment) pulseCompletedStep();
         resumeSegment = null;
-        if (!followingSegment) releaseCompletedScene();
+        if (!followingSegment) finishCompletedScene();
       }
     }
 
@@ -1605,6 +1609,34 @@ function selectOption(label,value){
     return position;
   }
 
+  function finishCompletedScene() {
+    if (reducedMotion.matches) { releaseCompletedScene(); return; }
+    // Fade the instruction with the final explanation; lift only once both settle.
+    sequence.classList.add('is-ending-guide');
+    segmentRunning = true;
+    let startedAt = performance.now();
+    let lastRenderedAt = startedAt;
+    function finish(now) {
+      lastRenderedAt = now;
+      const elapsed = now - startedAt;
+      if (elapsed < 1200) {
+        segmentFrame = requestAnimationFrame(finish);
+        return;
+      }
+      segmentRunning = false;
+      resumeSegment = null;
+      pulseCompletedStep();
+      releaseCompletedScene();
+    }
+    resumeSegment = () => {
+      segmentFrame = requestAnimationFrame(now => {
+        startedAt += now - lastRenderedAt;
+        finish(now);
+      });
+    };
+    segmentFrame = requestAnimationFrame(finish);
+  }
+
   function releaseCompletedScene(shouldRevealArrow = true) {
     const previousTop = frame.getBoundingClientRect().top;
     sceneComplete = true;
@@ -1615,6 +1647,7 @@ function selectOption(label,value){
     // Keep the frame visually in place while releasing the sticky layout.
     scrollInstantly(window.scrollY + shift);
     if (!shouldRevealArrow) return;
+    if (!reducedMotion.matches) nextArrow.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 900, easing: 'ease-in-out' });
     const viewport = window.visualViewport;
     const viewportBottom = viewport ? viewport.height + viewport.offsetTop : window.innerHeight;
     const arrowBottom = nextArrow.getBoundingClientRect().bottom;
@@ -1624,7 +1657,7 @@ function selectOption(label,value){
     const origin = window.scrollY;
     const startedAt = performance.now();
     function revealArrow(now) {
-      const progress = clamp((now - startedAt) / 950);
+      const progress = clamp((now - startedAt) / 1300);
       scrollInstantly(origin + distance * smooth(progress));
       if (progress < 1) segmentFrame = requestAnimationFrame(revealArrow);
     }
