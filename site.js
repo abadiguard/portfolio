@@ -244,7 +244,7 @@
       <a href="index.html#home">Home</a>
       <a href="index.html#work">Case studies</a>
       <a href="deconstructed.html">Notes on UX</a>
-      <a href="faq.html">Question answered</a>
+      <a href="faq.html">Questions, answered</a>
       <a href="index.html#contact">Bring your challenge</a>
     </nav>`;
   document.body.append(trigger,menu);
