@@ -588,3 +588,18 @@ p { font-size: 16px !important; font-weight: 400 !important; }
     padding-bottom: calc(100px + 138px + clamp(.256rem,.512vw,.448rem));
   }
 }
+
+/* Restore the original responsive hero scale on narrow screens. */
+@media (max-width: 640px) {
+  .hero .hero-title { font-size: min(61.2px, 12vw) !important; }
+}
+
+/* Mobile hero handoff: shorter tail and a soft entrance for the next section. */
+@media (max-width: 768px) {
+  .hero { padding-bottom: 48px; }
+  .proof.mobile-proof-fade { opacity: 0; transition: opacity 900ms ease-out; }
+  .proof.mobile-proof-fade.mobile-proof-visible { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .proof.mobile-proof-fade { opacity: 1; transition: none; }
+}
