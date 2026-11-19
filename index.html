@@ -112,7 +112,7 @@
   margin: 0;
 }
 .ownership-sequence .copy :is(.stage-caption,.stage-description) {
-  max-width: 31em;
+  max-width: 400px;
   font: var(--weight-body) var(--type-body)/var(--line-body) var(--f);
   margin: 0;
 }
@@ -343,6 +343,9 @@
   margin: 0;
   padding: 0;
 }
+
+/* Keep the final explanation at the same fixed measure through completion. */
+.ownership-sequence .copy .final-copy .stage-description { width: min(100%, 400px); max-width: 400px; justify-self: center; }
 </style>
   <script src="site.js?v=20261117-shared-elevator" defer></script>
   <!-- Google tag (gtag.js) -->
@@ -1621,15 +1624,20 @@ function selectOption(label,value){
 
   function finishCompletedScene() {
     if (reducedMotion.matches) { releaseCompletedScene(); return; }
-    // Fade the instruction with the final explanation; lift only once both settle.
+    // The explanation fades in as the instruction fades out. Start reading time
+    // only after both transitions finish, rather than when they begin.
     sequence.classList.add('is-ending-guide');
     segmentRunning = true;
-    let startedAt = performance.now();
-    let lastRenderedAt = startedAt;
+    const explanation = finalCopy.querySelector('.stage-description');
+    const guide = frame.querySelector('.ownership-guide');
+    let readableAt = null;
+    let lastRenderedAt = performance.now();
     function finish(now) {
       lastRenderedAt = now;
-      const elapsed = now - startedAt;
-      if (elapsed < 1600) {
+      const explanationVisible = parseFloat(getComputedStyle(explanation).opacity) >= 0.99;
+      const guideHidden = parseFloat(getComputedStyle(guide).opacity) <= 0.01;
+      if (readableAt === null && explanationVisible && guideHidden) readableAt = now;
+      if (readableAt === null || now - readableAt < 1000) {
         segmentFrame = requestAnimationFrame(finish);
         return;
       }
@@ -1640,7 +1648,7 @@ function selectOption(label,value){
     }
     resumeSegment = () => {
       segmentFrame = requestAnimationFrame(now => {
-        startedAt += now - lastRenderedAt;
+        if (readableAt !== null) readableAt += now - lastRenderedAt;
         finish(now);
       });
     };
