@@ -21,7 +21,7 @@
 <script>try{if(window.IntersectionObserver&&!matchMedia("(prefers-reduced-motion: reduce)").matches)document.documentElement.className+=" js"}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600&family=Noto+Sans+Hebrew:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="styles.css?v=20261117-section-alignment">
+<link rel="stylesheet" href="styles.css?v=20261119-semantic-headings">
 <style id="ownership-garden-styles">
 .ownership-sequence {
   width: 100%;
@@ -316,6 +316,17 @@
 .ownership-sequence .sowing {
   transform: translateY(43.7px);
 }
+
+/* Fixed spacing for the three-step scene. */
+.ownership-sequence.is-enhanced .frame { padding-bottom: 0; overflow: visible; }
+.ownership-sequence .ownership-intro { margin-bottom: 36px; }
+.ownership-sequence .art { margin-bottom: 36px; }
+.ownership-sequence .copy { height: 51.2px; min-height: 51.2px; margin: 0; }
+.ownership-sequence .copy .col { width: 100%; }
+.ownership-sequence .copy :is(.stage-caption,.stage-description) { font: 400 16px/1.6 var(--f); }
+.ownership-sequence .ownership-steps { margin-top: 36px; }
+.ownership-sequence .ownership-guide { position: static; transform: none; order: 3; margin: 48px 0 0; font: 400 14px/1.6 var(--f); font-size: 14px !important; }
+.own:has(.ownership-sequence.is-complete) { padding-bottom: 100px; }
 </style>
   <script src="site.js?v=20261117-shared-elevator" defer></script>
   <!-- Google tag (gtag.js) -->
@@ -345,7 +356,7 @@
 
 <section class="proof" aria-labelledby="proof-h">
   <span class="pill">+12 years | 5 zero to ones</span>
-  <h2 id="proof-h">FOUNDING PRODUCT<br>STRATEGY &amp; UX</h2>
+  <h2 id="proof-h" class="section-title">FOUNDING PRODUCT<br>STRATEGY &amp; UX</h2>
   <div class="grp">
   <div class="logos" id="logos" role="group" aria-label="Companies"></div>
   <div class="portrait" aria-hidden="true">
@@ -367,7 +378,7 @@
   <div class="frame">
     <div class="ownership-intro">
       <span class="pill">Now Fractional</span>
-      <h2 id="own-h">Strategic UX <br>in 3 steps</h2>
+      <h2 id="own-h" class="section-title">Strategic UX <br>in 3 steps</h2>
     </div>
     <div class="copy sub">
       <div class="col opening-copy">
@@ -597,7 +608,7 @@
 </section>
 
 <section class="case" id="work" aria-labelledby="case-h" tabindex="-1">
-  <h2 id="case-h">Case studies</h2>
+  <h2 id="case-h" class="section-title">Case studies</h2>
   <div class="sub">Going way beyond pixels to solve actual challenges across every touchpoint</div>
   <div class="cards" id="case-cards">
     <a class="card case-embedding" href="guesty-mc-inbox.html" aria-label="Guesty: Embedding context where work happens">
@@ -610,7 +621,7 @@
     </a>
     <a class="card case-comedy" href="comedy.html" aria-label="Comedy.com: Wanna see something funny?">
       <div class="ph"><img loading="lazy" decoding="async" src="site-assets/case-comedy.jpg" alt="comedy.com logo over a softly blurred yellow background"></div>
-      <div class="card-copy"><h3>Wanna see<br>something<br>funny?</h3><p class="d">Shipping an app experience to VidCon in days with zero assets</p><div class="tgs"><span class="tg">ZeroToOne</span><span class="tg">CoFounding</span><span class="tg">Opportunity</span><span class="tg">SocialProof</span><span class="tg">BrandValue</span></div></div>
+      <div class="card-copy"><h3>Wanna see<br>something<br>funny?</h3><p class="d">Shipping an app experience to<br>VidCon in days with zero assets</p><div class="tgs"><span class="tg">ZeroToOne</span><span class="tg">CoFounding</span><span class="tg">Opportunity</span><span class="tg">SocialProof</span><span class="tg">BrandValue</span></div></div>
     </a>
     <a class="card case-onboarding" href="landau.html" aria-label="Landau: Onboarding beyond the screen">
       <div class="ph"><img loading="lazy" decoding="async" src="site-assets/case-landau.jpg" alt="Landau design logo over a softly blurred pink background"></div>
@@ -622,13 +633,13 @@
     </a>
     <a class="card case-growth" href="guesty-hr.html" aria-label="Guesty: Growth UX, reaching talent with zero spend">
       <div class="ph"><img loading="lazy" decoding="async" src="site-assets/case-guesty-hr.jpg" alt="Guesty logo over a softly blurred office building"></div>
-      <div class="card-copy"><h3>Growth UX:<br>Reaching talent<br>with $0 spend</h3><p class="d">An HR challenge led to an unexpected talent pool</p><div class="tgs"><span class="tg">ContextualTrigger</span><span class="tg">Nudge</span><span class="tg">Creative</span><span class="tg">FoundingTeam</span><span class="tg">CognitiveSalience</span></div></div>
+      <div class="card-copy"><h3>Growth UX:<br>Reaching talent<br>with $0 spend</h3><p class="d">An HR challenge led to an<br>unexpected talent pool</p><div class="tgs"><span class="tg">ContextualTrigger</span><span class="tg">Nudge</span><span class="tg">Creative</span><span class="tg">FoundingTeam</span><span class="tg">CognitiveSalience</span></div></div>
     </a>
   </div>
   <nav class="case-dots" aria-label="Choose a case study" hidden></nav>
 </section>
 <section class="dec" id="notes" aria-labelledby="dec-h">
-  <h2 id="dec-h">Notes on UX</h2>
+  <h2 id="dec-h" class="section-title">Notes on UX</h2>
   <div class="sub">What works, what doesn&rsquo;t, and the subtle decisions shaping digital products</div>
   <div class="posts">
     <div class="post"><a class="pimg" href="https://lnkd.in/p/dRuD8xNx" target="_blank" rel="noopener noreferrer" tabindex="-1" aria-hidden="true"><div class="ph"><img loading="lazy" decoding="async" id="dimg0" src="site-assets/image-31d594f938d74b20.jpeg" alt="Washing line strung along a balcony railing, with a hazy view of trees and rooftops behind it" width="730" height="481"></div></a>
@@ -653,7 +664,7 @@
 <section class="contact" id="contact" aria-label="Contact">
 <div class="lead-form-wrapper">
   <div class="form-header">
-    <h2 id="mainTitle" class="form-title">BRING YOUR CHALLENGE</h2>
+    <h2 id="mainTitle" class="form-title section-title">BRING YOUR CHALLENGE</h2>
     <p id="subTitle" class="form-subtitle">Tell me where you're at and where you want to go, I’ll review the details and reach out for a deep dive</p>
   </div>
   <div id="formStatus" class="sr-only" role="status" aria-live="polite"></div>
@@ -879,12 +890,12 @@ function show(i){
     });
   }
 
-  add(".proof .pill,.proof h2,.proof .sub",.1);
+  add(".proof .pill,.proof .section-title,.proof .sub",.1);
   add(".proof .grp,.proof .marq",0);
-  add(".own .pill,.own h2,.own .sub",.1);
-  add(".case h2,.case .sub",.1);
+  add(".own .pill,.own .section-title,.own .sub",.1);
+  add(".case .section-title,.case .sub",.1);
   add(".case .card",0);
-  add(".dec h2,.dec .sub",.1);
+  add(".dec .section-title,.dec .sub",.1);
   add(".dec .post",0);
   add(".dp .more",0);
   document.querySelectorAll(".dec .post").forEach(function(el,i){el.style.setProperty("--d",((i%3)*.12)+"s")});
@@ -1696,6 +1707,7 @@ function selectOption(label,value){
   }
 
   function onScroll() {
+    if (restoringArticleReturn) { acceptedScrollY = window.scrollY; return; }
     if (elevatorRunning) return;
     const actual = window.scrollY;
     if (actual !== acceptedScrollY && !pausedScene && (touchOwnsScroll || (segmentRunning && lastInputWasTouch))) {
@@ -1860,6 +1872,25 @@ function selectOption(label,value){
     });
   });
 
+  // Restore the section the reader left, independently of the garden's sticky height.
+  let restoringArticleReturn = performance.getEntriesByType?.('navigation')[0]?.type === 'back_forward' && Boolean(history.state?.articleReturn);
+  const notesLink = document.querySelector('.dec > .more[href="deconstructed.html"]');
+  notesLink?.addEventListener('click', event => {
+    if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+    const notes = document.getElementById('dec-h').closest('section');
+    history.replaceState({ ...history.state, articleReturn: { offset: notes.getBoundingClientRect().top } }, '');
+  });
+  function finishArticleReturn() {
+    if (!restoringArticleReturn) return;
+    restoringArticleReturn = false;
+    acceptedScrollY = window.scrollY;
+  }
+  addEventListener('wheel', finishArticleReturn, { passive: true, capture: true });
+  addEventListener('touchstart', finishArticleReturn, { passive: true, capture: true });
+  addEventListener('keydown', event => {
+    if (['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '].includes(event.key)) finishArticleReturn();
+  }, { capture: true });
+
   addEventListener('wheel', limitWheel, { passive: false, capture: true });
   addEventListener('touchstart', onTouchStart, { passive: true });
   addEventListener('touchmove', onTouchMove, { passive: false, capture: true });
@@ -1874,6 +1905,20 @@ function selectOption(label,value){
   addEventListener('pageshow', event => {
     acceptedScrollY = window.scrollY;
     const navigation = performance.getEntriesByType?.('navigation')[0];
+    if ((event.persisted || navigation?.type === 'back_forward') && history.state?.articleReturn) {
+      restoringArticleReturn = true;
+      cancelAnimationFrame(segmentFrame);
+      segmentRunning = false;
+      elevatorRunning = false;
+      const restoreNotes = () => {
+        if (!restoringArticleReturn) return;
+        const notes = document.getElementById('dec-h').closest('section');
+        scrollInstantly(window.scrollY + notes.getBoundingClientRect().top - history.state.articleReturn.offset);
+      };
+      restoreNotes();
+      requestAnimationFrame(() => requestAnimationFrame(restoreNotes));
+      return;
+    }
     if (!event.persisted && navigation?.type !== 'back_forward' &&
         ['#work', '#contact'].includes(location.hash)) {
       document.getElementById(location.hash.slice(1)).scrollIntoView({ behavior: 'instant' });

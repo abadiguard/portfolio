@@ -13,12 +13,12 @@
 .case-study__image-section--contained .case-study__image{width:min(100%,860px);margin-inline:auto}
 .case-study__image-section--audit{padding-block:var(--section-media-gap)}
 .case-study__content-section{display:flex;flex-direction:column;align-items:center;text-align:center;background:var(--bg);padding:clamp(4rem,9vw,6.5rem) 1.5rem var(--section-media-gap)}
-.case-study__content-section h2{max-width:14em;margin:var(--heading-stack-gap) 0 0;font:var(--weight-heading) var(--type-heading)/var(--line-heading) var(--f);text-transform:uppercase;color:inherit}
+.case-study__content-section :is(h1,h2){max-width:14em;margin:var(--heading-stack-gap) 0 0;font:var(--weight-heading) var(--type-heading)/var(--line-heading) var(--f);text-transform:uppercase;color:inherit}
 .case-study__body{max-width:37em;margin:var(--heading-stack-gap) auto 0;font:var(--weight-body) var(--type-body)/var(--line-body) var(--f);color:var(--ink)}
 .case-study__feature-section{display:flex;flex-direction:column;align-items:center;text-align:center;background:var(--gray);color:#fff;padding:var(--section-copy-top-space) 1.5rem var(--section-media-gap)}
 .case-study__feature-copy{width:min(100%,37em)}
-.case-study__feature-copy h2,.case-study__calendar-copy h2{margin:0;font:var(--weight-heading) var(--type-heading)/var(--line-heading) var(--f);text-transform:uppercase;color:inherit}
-.case-study__feature-copy h2 span,.case-study__calendar-copy h2 span{display:block}
+.case-study__feature-copy :is(h1,h2),.case-study__calendar-copy :is(h1,h2){margin:0;font:var(--weight-heading) var(--type-heading)/var(--line-heading) var(--f);text-transform:uppercase;color:inherit}
+.case-study__feature-copy :is(h1,h2) span,.case-study__calendar-copy :is(h1,h2) span{display:block}
 .case-study__feature-copy p,.case-study__calendar-copy p{margin:var(--heading-stack-gap) 0 0;font:var(--weight-body) var(--type-body)/var(--line-body) var(--f);color:inherit}
 .case-study__feature-media{width:min(100%,1100px);margin:var(--results-content-gap) 0 0;line-height:0;background:var(--gray)}
 .case-study__feature-media img{display:block;width:100%;height:auto}
@@ -35,7 +35,7 @@
 .case-study__results-arrow{color:#fff}
 .case-study__results-arrow .arrow-container{padding:12px}
 .case-study__results-arrow svg{width:60px;height:auto;display:block;overflow:visible}
-.case-study__results-section>h2{margin:var(--heading-stack-gap) 0 0;font:var(--weight-heading) var(--type-heading)/var(--line-heading) var(--f);text-transform:uppercase;color:inherit}
+.case-study__results-section>:is(h1,h2){margin:var(--heading-stack-gap) 0 0;font:var(--weight-heading) var(--type-heading)/var(--line-heading) var(--f);text-transform:uppercase;color:inherit}
 .case-study__results-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2rem;width:min(100%,1150px);margin-top:var(--results-content-gap)}
 .case-study__spotted-image-frame{width:min(100%,520px);margin:var(--results-content-gap) 0 0;line-height:0}
 .case-study__spotted-image{display:block;width:100%;height:auto;border-radius:var(--radius-card)}
@@ -55,7 +55,7 @@
 .case-study__image-overlay>img{position:absolute;z-index:-2;inset:0;display:block;width:100%;height:100%;object-fit:cover;object-position:center}
 .case-study__image-overlay::after{content:"";position:absolute;z-index:-1;inset:0;background:rgba(0,0,0,.3)}
 .case-study__image-overlay-copy{width:min(100%,1100px);padding:var(--section-copy-top-space) 1.5rem;color:#fff}
-.case-study__image-overlay-copy h2{max-width:14em;margin:0 auto;font:var(--weight-heading) var(--type-heading)/var(--line-heading) var(--f);text-transform:uppercase;color:inherit}
+.case-study__image-overlay-copy :is(h1,h2){max-width:14em;margin:0 auto;font:var(--weight-heading) var(--type-heading)/var(--line-heading) var(--f);text-transform:uppercase;color:inherit}
 .case-study__image-overlay-copy .case-study__body{max-width:37em;color:inherit}
 @media(max-width:640px){.case-study__image-overlay{min-height:42rem}.case-study__image-overlay>img{object-position:58% center}.case-study__image-overlay-copy{padding-inline:1.25rem}}
 
@@ -66,7 +66,7 @@
 .case-study--landau .case-study__client-logo{width:calc(clamp(115.2px,18vw,144px) * .62)}
 .case-study__quote-section{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:clamp(18rem,31vw,24rem);padding:6.75rem 1.5rem;text-align:center;background:#f00078;color:#fff}
 .case-study__quote-kicker{margin:0;font:var(--weight-body) var(--type-body)/var(--line-body) var(--f);color:inherit}
-.case-study__quote-section h2{width:100%;max-width:800px;margin:var(--heading-stack-gap) 0 0;font:var(--weight-heading) var(--type-display)/var(--line-heading) var(--f);letter-spacing:0;text-wrap:balance;text-transform:uppercase;color:inherit}
+.case-study__quote-section :is(h1,h2){width:100%;max-width:800px;margin:var(--heading-stack-gap) 0 0;font:var(--weight-heading) var(--type-display)/var(--line-heading) var(--f);letter-spacing:0;text-wrap:balance;text-transform:uppercase;color:inherit}
 .case-study__results-section--landau{padding-bottom:3.5rem}
 .case-study__landau-media{width:min(100%,1100px);margin:var(--results-content-gap) 0 0;line-height:0}
 .case-study__content-section+.case-study__landau-media{margin-top:0}
@@ -103,12 +103,12 @@
    reserve side gutters so long uppercase words stay centered and visible. */
 @media(max-width:640px){
   .case-study__hero h1,
-  .case-study__content-section h2,
-  .case-study__feature-section h2,
-  .case-study__calendar-section h2,
-  .case-study__results-section>h2,
-  .case-study__image-overlay-copy h2,
-  .case-study__quote-section h2{
+  .case-study__content-section :is(h1,h2),
+  .case-study__feature-section :is(h1,h2),
+  .case-study__calendar-section :is(h1,h2),
+  .case-study__results-section>:is(h1,h2),
+  .case-study__image-overlay-copy :is(h1,h2),
+  .case-study__quote-section :is(h1,h2){
     box-sizing:border-box;
     display:block;
     width:100%;
@@ -122,7 +122,7 @@
   .case-study__hero h1{font-size:min(var(--type-display),12vw)}
   .case-study__jpegmini-title{font-size:min(var(--type-display),9vw);overflow-wrap:normal;word-break:normal}
   .case-study__jpegmini-title span{white-space:nowrap}
-  .case-study__quote-section h2{font-size:min(var(--type-display),11vw)}
+  .case-study__quote-section :is(h1,h2){font-size:min(var(--type-display),11vw)}
 }
 
 /* Enlarge every client logo by the same factor on mobile, including the
@@ -144,3 +144,29 @@
     object-position:center;
   }
 }
+
+/* Section boundaries share the site's 100px content inset. */
+.case-study__hero,.case-study__content-section,.case-study__feature-section,.case-study__calendar-section,.case-study__results-section,.case-study__quote-section { padding-top: 100px; padding-bottom: 100px; }
+
+.case-study__calendar-section--flush-after-media,.case-study__results-section--landau,.case-study__results-section--image { padding-bottom: 100px; }
+
+/* Case-study reading links, credits and boundary spacing. */
+.case-study__results-nav-link { font: 400 14px/1.6 var(--f); }
+.case-study__photo-credit { font: 400 14px/1.6 var(--f); font-size: 14px !important; }
+.case-study__calendar-section--flush-after-media { padding-bottom: 0; }
+#landau-promise-quote { font-size: 72px !important; font-weight: 500; }
+.case-study__content-section > h1 { margin-top: 0; }
+.case-study__image-section--contained { padding-bottom: 100px; }
+
+#case-study-calendar-title { text-wrap: balance; overflow-wrap: normal; word-break: normal; }
+
+/* Shared paragraph measure, independent of heading/container width. */
+.case-study { --case-study-paragraph-width: 37em; }
+.case-study :is(.case-study__intro, .case-study__summary, .case-study__body, .case-study__results-summary),
+.case-study__feature-copy > p,
+.case-study__calendar-copy > p {
+  max-width: var(--case-study-paragraph-width);
+  margin-inline: auto;
+}
+
+.case-study__jpegmini-feedback figcaption { font: 400 14px/1.4 var(--f); }
