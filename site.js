@@ -37,8 +37,16 @@
     var origin=window.scrollY;
     var viewport=window.visualViewport;
     var bottom=viewport?viewport.height+viewport.offsetTop:window.innerHeight;
-    var distance=Math.max(96,arrow.getBoundingClientRect().bottom+24-bottom);
-    var target=Math.min(origin+distance,document.documentElement.scrollHeight-window.innerHeight);
+    var arrowBottom=arrow.getBoundingClientRect().bottom;
+    var distance=Math.max(96,arrowBottom+24-bottom);
+    if(matchMedia('(max-width: 768px)').matches){
+      // Reveal only the missing part; never let the next section enter the viewport.
+      var missing=Math.max(0,arrowBottom-bottom);
+      var available=Math.max(0,hero.getBoundingClientRect().bottom-bottom);
+      distance=missing>0?Math.min(missing+10,available):0;
+    }
+    var target=Math.max(origin,Math.min(origin+distance,document.documentElement.scrollHeight-window.innerHeight));
+    if(target-origin<1){window.setTimeout(releaseScroll,780);return}
     var startedAt=performance.now();
     function advance(now){
       if(document.querySelector(".site-menu[open]")){releaseScroll();return}
