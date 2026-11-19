@@ -30,21 +30,41 @@
   }
   if(window.location.hash&&window.location.hash!=="#home"){showFinalState();return}
   try{if(sessionStorage.getItem(introStateKey)==="1"){showFinalState();return}}catch(e){}
+  function liftHeroToArrow(){
+    // Preserve the frame height while the mobile intro releases its viewport lock.
+    hero.style.minHeight=hero.getBoundingClientRect().height+"px";
+    pendingScroll=0;
+    var origin=window.scrollY;
+    var viewport=window.visualViewport;
+    var bottom=viewport?viewport.height+viewport.offsetTop:window.innerHeight;
+    var distance=Math.max(96,arrow.getBoundingClientRect().bottom+24-bottom);
+    var target=Math.min(origin+distance,document.documentElement.scrollHeight-window.innerHeight);
+    var startedAt=performance.now();
+    function advance(now){
+      if(document.querySelector(".site-menu[open]")){releaseScroll();return}
+      var progress=Math.min(1,(now-startedAt)/1400);
+      var eased=progress*progress*(3-2*progress);
+      window.scrollTo({top:origin+(target-origin)*eased,behavior:"instant"});
+      if(progress<1)requestAnimationFrame(advance);else releaseScroll();
+    }
+    requestAnimationFrame(advance);
+  }
   function revealArrow(){
     hero.classList.add("arrow-reveal");
-    if(!reduceMotion){
-      arrow.classList.add("draw-reveal");
-      arrow.style.setProperty("--d","0s");
-      requestAnimationFrame(function(){arrow.classList.add("in")});
-      window.setTimeout(releaseScroll,1000);
-    }
-    if(reduceMotion)return;
+    if(reduceMotion){releaseScroll();return}
+    arrow.classList.add("draw-reveal");
+    arrow.style.setProperty("--d","0s");
+    requestAnimationFrame(function(){
+      arrow.classList.add("in");
+      window.setTimeout(liftHeroToArrow,220);
+    });
   }
   function finish(){
     hero.classList.add("copy-reveal");
     requestAnimationFrame(function(){requestAnimationFrame(function(){
       hero.classList.add("copy-visible");
-      revealArrow();
+      // Give the paragraph and menu their entrance before drawing the arrow.
+      window.setTimeout(revealArrow,950);
     })});
   }
   function begin(){
