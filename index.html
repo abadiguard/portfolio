@@ -326,7 +326,8 @@
 .ownership-sequence .copy :is(.stage-caption,.stage-description) { font: 400 16px/1.6 var(--f); }
 .ownership-sequence .ownership-steps { margin-top: 36px; }
 .ownership-sequence .ownership-guide { position: static; transform: none; order: 3; margin: 48px 0 0; font: 400 14px/1.6 var(--f); font-size: 14px !important; }
-.own:has(.ownership-sequence.is-complete) { padding-bottom: 100px; }
+.own:has(.ownership-sequence.is-complete) { padding-bottom: 192px; }
+@media (max-width: 768px) { .own:has(.ownership-sequence.is-complete) { padding-bottom: 140px; } }
 
 .ownership-sequence .ownership-guide { transition: opacity 850ms ease-in-out; }
 .ownership-sequence.is-ending-guide .ownership-guide { opacity: 0; pointer-events: none; }
@@ -418,7 +419,7 @@
       <button type="button" aria-label="Step 2: Define the right solution">2</button>
       <button type="button" aria-label="Step 3: Build to scale">3</button>
     </nav>
-    <p class="ownership-guide">Scroll to play or <a class="ownership-skip" href="#work">skip</a></p>
+    <p class="ownership-guide">Scroll down to play or <a class="ownership-skip" href="#work">skip</a></p>
     <a class="ownership-next" href="#work" aria-label="Continue to Case Studies">
       <svg class="completion-arrow" viewBox="0 0 30 48" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path vector-effect="non-scaling-stroke" d="M10 3c10 5 14 14 9 19-3 3-9 3-9-1 0-4 10-5 12 2 2 7-4 14-9 20m-2-10 2 10 10-4"/>
