@@ -11,8 +11,9 @@
   var answerPanel=main.querySelector('.fit-answer-panel, .fit-sector-panel');
   if(!options.length&&answerPanel)options=[answerPanel];
   var navigation=main.querySelector('.fit-navigation');
-  var progress=main.querySelector('.fit-progress-second, .fit-progress-third, .fit-progress-fourth, .fit-progress-fifth');
-  var nodes=[header].concat(options,[navigation]).filter(Boolean);
+  var progress=main.querySelector('.fit-progress');
+  var headingNodes=header?Array.from(header.children).filter(function(node){return !node.classList.contains('fit-progress');}):[];
+  var nodes=headingNodes.concat(options,[navigation]).filter(Boolean);
   var reduced=matchMedia('(prefers-reduced-motion: reduce)');
   var animations=[];
   var stopped=false;
@@ -22,6 +23,7 @@
     nodes.forEach(function(node){node.style.removeProperty('opacity');node.inert=false;});
     root.classList.remove('fit-sequence-pending');
     if(progress)progress.classList.add('is-progress-advanced');
+    if(window.FitProgressMotion)window.FitProgressMotion.play();
   }
   if(!root.classList.contains('fit-sequenced')||reduced.matches){revealEverything();return;}
   nodes.forEach(function(node){node.style.opacity='0';node.inert=true;});
@@ -38,13 +40,14 @@
       if(document.fonts)await document.fonts.ready;
       if(stopped)return;
       document.dispatchEvent(new Event('fit:before-enter'));
-      await fade(header,550);
+      await Promise.all(headingNodes.map(function(node,index){return fade(node,550,index*80);}));
       if(stopped)return;
       if(progress){
         progress.classList.add('is-progress-advanced');
         var matchRays=main.classList.contains('fit-sector-result')&&progress.querySelector('.fit-match-rays:not([hidden])');
         // Final result waits for both the marker travel (760ms) and rays (720ms).
-        await wait(matchRays?1480:780);
+        var moved=window.FitProgressMotion?window.FitProgressMotion.play():true;
+        await wait(matchRays?1480:(moved?780:0));
         if(stopped)return;
       }
       await Promise.all(options.map(function(option,index){return fade(option,480,index*180);}));

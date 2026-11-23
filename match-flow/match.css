@@ -730,3 +730,41 @@ html:has(.fit-site-menu[open]) { overflow:hidden; }
     border-radius:4px;
   }
 }
+
+/* The progress stays visible while only the surrounding content fades. */
+.fit-sequence-pending .fit-question .fit-question-heading { opacity:1; visibility:visible; }
+.fit-sequence-pending .fit-question .fit-question-heading > :not(.fit-progress) { opacity:0; visibility:hidden; }
+.fit-question .fit-progress { view-transition-name:fit-progress; }
+@view-transition { navigation:auto; }
+::view-transition-old(fit-progress), ::view-transition-new(fit-progress) { animation:none; mix-blend-mode:normal; }
+.fit-question .fit-progress::after { transition:none; }
+
+/* Recovery from look-only keeps the already-selected third step still. */
+.fit-progress-held .fit-progress-marker, .fit-progress-held::after { transition:none !important; }
+
+/* One moving marker in either direction; destination circles never flash yellow. */
+.fit-question .fit-progress-managed li:not(.fit-progress-marker) {
+  background:#fff; border-color:#D3D8E4; box-shadow:none; transition:none;
+}
+.fit-question .fit-progress-managed li.fit-dot-completed { background:var(--yellow); border-color:var(--yellow); }
+.fit-question .fit-progress-managed .fit-progress-marker { left:-2px; transition:none !important; }
+.fit-question .fit-progress-managed::after {
+  content:''; position:absolute; left:6px; top:7px; height:2px;
+  width:var(--fit-completed-width,0px); background:var(--yellow); transform:none; transition:none;
+}
+.fit-look .fit-progress-managed li:nth-child(4),.fit-look .fit-progress-managed li:nth-child(5) { border-color:#f2f3f6; }
+
+/* The moving marker overlays the five dots; it never occupies a sixth slot. */
+.fit-question .fit-progress-managed .fit-progress-marker {
+  position:absolute; left:-2px; top:0; z-index:2;
+  width:16px; height:16px; margin:0; padding:0;
+  border:0; border-radius:50%; background:var(--yellow);
+  box-shadow:none; pointer-events:none; transition:none !important;
+}
+
+/* The filled track follows precisely the same reversed timeline as the marker. */
+.fit-question .fit-progress-managed::after { display:none; }
+.fit-progress-moving-line {
+  position:absolute; left:6px; top:7px; height:2px;
+  background:var(--yellow); pointer-events:none;
+}
