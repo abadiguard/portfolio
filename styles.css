@@ -610,3 +610,6 @@ p { font-size: 16px !important; font-weight: 400 !important; }
 }
 
 :root { color-scheme:light; }
+
+/* Suppress native touch-tap overlays; keyboard focus styles remain intact. */
+html { -webkit-tap-highlight-color:transparent; }
