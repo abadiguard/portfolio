@@ -610,3 +610,12 @@ p { font-size: 16px !important; font-weight: 400 !important; }
 }
 
 :root { color-scheme:light; }
+
+/* Suppress native touch-tap overlays; keyboard focus styles remain intact. */
+html { -webkit-tap-highlight-color:transparent; }
+
+/* Touch feedback never uses the browser's blue overlay. */
+*, *::before, *::after { -webkit-tap-highlight-color:rgba(0,0,0,0); }
+:where(a,button,[tabindex]):focus:not(:focus-visible) { outline:none; }
+:where(a,button,[tabindex]):focus-visible { outline-color:#24272d; }
+section[tabindex="-1"]:focus { outline:none; }
