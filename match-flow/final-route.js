@@ -1,0 +1,1 @@
+(function(){'use strict';var query=new URLSearchParams(location.search);var stage=query.get('stage')||'starting';var link=document.querySelector('.fit-continue');if(link)link.href='audience.html?stage='+encodeURIComponent(stage)+'&approach=look-only';})();

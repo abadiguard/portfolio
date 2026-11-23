@@ -1,0 +1,11 @@
+/* Homepage entry to the separate product-fit questionnaire. */
+#contact.match-entry { background:#f7f7f7; color:#24272d; padding:100px 24px; display:flex; flex-direction:column; align-items:center; text-align:center; }
+.match-entry .fit-heading { display:flex; flex-direction:column; align-items:center; width:100%; }
+.match-entry .pill { display:inline-flex; align-items:center; justify-content:center; }
+.match-entry .section-title { margin:36px 0 0; }
+.match-entry .fit-subtitle { max-width:440px; margin:36px 0 0; font:400 16px/1.6 var(--f); }
+.match-entry .fit-subtitle > span { display:block; text-wrap:balance; }
+.match-entry .fit-action { display:flex; justify-content:center; width:100%; margin-top:72px; }
+.match-entry .fit-start { display:inline-flex; align-items:center; justify-content:center; width:max-content; max-width:100%; height:60px; margin:0; padding:0 30px; gap:12px; color:#24272d; text-decoration:none; font:500 16px/1.4 var(--f); }
+.match-entry .fit-button-arrow { display:inline-flex; line-height:0; }
+.match-entry .fit-button-arrow svg { width:18px; height:13px; display:block; }
