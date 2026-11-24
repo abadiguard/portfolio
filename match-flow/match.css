@@ -80,7 +80,7 @@ a.fit-start { text-decoration: none; color: var(--gray); }
 @media (max-width: 768px) { .fit-options { grid-template-columns: 1fr; gap: 48px; max-width: 400px; } .fit-question { padding: 100px 24px; } }
 
 /* Gentle entrances and page handoffs, scoped to the standalone flow. */
-@view-transition { navigation: none; }
+
 .fit-navigation { flex-direction: row; justify-content: center; gap: 64px; }
 .fit-back { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 44px; padding: 8px 0; color: var(--gray); font: 500 16px/1.4 var(--f); text-decoration: none; }
 .fit-back-arrow { display: inline-flex; line-height: 0; }
@@ -734,9 +734,7 @@ html:has(.fit-site-menu[open]) { overflow:hidden; }
 /* The progress stays visible while only the surrounding content fades. */
 .fit-sequence-pending .fit-question .fit-question-heading { opacity:1; visibility:visible; }
 .fit-sequence-pending .fit-question .fit-question-heading > :not(.fit-progress) { opacity:0; visibility:hidden; }
-.fit-question .fit-progress { view-transition-name:fit-progress; }
-@view-transition { navigation:auto; }
-::view-transition-old(fit-progress), ::view-transition-new(fit-progress) { animation:none; mix-blend-mode:normal; }
+.fit-question .fit-progress {  }
 .fit-question .fit-progress::after { transition:none; }
 
 /* Recovery from look-only keeps the already-selected third step still. */
@@ -829,15 +827,10 @@ html:has(.fit-site-menu[open]) { overflow:hidden; }
 .fit-look .fit-progress li:nth-child(3):not(.fit-progress-marker) { border-color:#f2f3f6; background:#fff; }
 
 /* Keep site navigation separate from the questionnaire's page crossfade. */
-.fit-site-header { view-transition-name:fit-site-navigation; }
+.fit-site-header {  }
 .fit-site-logo > svg { display:block; width:95.04px; height:32.4px; }
-::view-transition-group(fit-site-navigation) { animation-duration:0s; }
-::view-transition-old(fit-site-navigation),
-::view-transition-new(fit-site-navigation) { animation:none; mix-blend-mode:normal; }
-::view-transition-old(fit-site-navigation) { visibility:hidden; }
 
 .fit-site-logo, .fit-site-logo:visited, .fit-site-logo:hover, .fit-site-logo:active { color:#000; }
 
-/* Retain the outgoing navigation snapshot for the entire page transition. */
-::view-transition-old(fit-site-navigation) { visibility:visible; opacity:1; z-index:1; }
-::view-transition-new(fit-site-navigation) { visibility:hidden; }
+/* Use only the flow's explicit animations; no browser page crossfade. */
+@view-transition { navigation:none; }
