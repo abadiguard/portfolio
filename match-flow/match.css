@@ -837,3 +837,7 @@ html:has(.fit-site-menu[open]) { overflow:hidden; }
 ::view-transition-old(fit-site-navigation) { visibility:hidden; }
 
 .fit-site-logo, .fit-site-logo:visited, .fit-site-logo:hover, .fit-site-logo:active { color:#000; }
+
+/* Retain the outgoing navigation snapshot for the entire page transition. */
+::view-transition-old(fit-site-navigation) { visibility:visible; opacity:1; z-index:1; }
+::view-transition-new(fit-site-navigation) { visibility:hidden; }
