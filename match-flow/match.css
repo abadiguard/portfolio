@@ -824,7 +824,7 @@ html:has(.fit-site-menu[open]) { overflow:hidden; }
 .fit-domain-wave-new { opacity:0; }
 
 /* Visual-only mismatch ends at step two; subsequent steps are subdued. */
-.fit-look .fit-progress li:nth-child(3):not(.fit-progress-marker) { border-color:#f2f3f6; background:#fff; }
+
 
 /* Keep site navigation separate from the questionnaire's page crossfade. */
 .fit-site-header {  }
@@ -834,3 +834,11 @@ html:has(.fit-site-menu[open]) { overflow:hidden; }
 
 /* Use only the flow's explicit animations; no browser page crossfade. */
 @view-transition { navigation:none; }
+
+/* Only the final two steps are muted on the visual-only response. */
+.fit-look .fit-progress::before { background:linear-gradient(to right,#D3D8E4 50%,#f2f3f6 50%); }
+.fit-look .fit-progress-managed li:nth-child(3):not(.fit-progress-marker) { border-color:#D3D8E4; background:#fff; }
+
+/* Visual-only response: all remaining steps (3–5) are subdued. */
+.fit-look .fit-progress::before { background:linear-gradient(to right,#D3D8E4 25%,#f2f3f6 25%); }
+.fit-look .fit-progress-managed li:nth-child(3):not(.fit-progress-marker) { border-color:#f2f3f6; background:#fff; }
