@@ -768,3 +768,23 @@ html:has(.fit-site-menu[open]) { overflow:hidden; }
   position:absolute; left:6px; top:7px; height:2px;
   background:var(--yellow); pointer-events:none;
 }
+
+/* Match navigation mirrors the case-study arrow choreography exactly. */
+@media (prefers-reduced-motion:no-preference) {
+  :is(.fit-next,.fit-back) > span:not(.fit-button-arrow):not(.fit-back-arrow) {
+    display:inline-block; transition:transform .2s ease;
+  }
+  :is(.fit-next .fit-button-arrow,.fit-back .fit-back-arrow) {
+    overflow:visible; transform:translateX(0); transition:transform .2s ease .2s;
+  }
+  .fit-next:not(:disabled):not([aria-disabled="true"]):is(:hover,:focus-visible) > span:not(.fit-button-arrow) { transform:translateX(-2px); }
+  .fit-back:is(:hover,:focus-visible) > span:not(.fit-back-arrow) { transform:translateX(2px); }
+  .fit-next:not(:disabled):not([aria-disabled="true"]):is(:hover,:focus-visible) .fit-button-arrow {
+    transform:translateX(2px); animation:fit-nav-arrow-forward .9s ease-in-out .4s infinite;
+  }
+  .fit-back:is(:hover,:focus-visible) .fit-back-arrow {
+    transform:translateX(-2px); animation:fit-nav-arrow-back .9s ease-in-out .4s infinite;
+  }
+  @keyframes fit-nav-arrow-forward { 0%,100%{transform:translateX(2px)} 50%{transform:translateX(4px)} }
+  @keyframes fit-nav-arrow-back { 0%,100%{transform:translateX(-2px)} 50%{transform:translateX(-4px)} }
+}
