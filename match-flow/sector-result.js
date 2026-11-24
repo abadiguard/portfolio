@@ -22,4 +22,7 @@
   document.getElementById('sector-result-calendar').href=window.MATCH_FLOW_CONFIG.calendarUrl;
   document.getElementById('sector-result-back').href='sector.html'+query;
   document.title=copy.title+' — Liat Abadi';
+  var canonical=document.querySelector('link[rel="canonical"]');
+  if(!canonical){canonical=document.createElement('link');canonical.rel='canonical';document.head.appendChild(canonical);}
+  canonical.href='https://www.abadiguard.com/match-flow/sector-result.html?sector='+encodeURIComponent(sector);
 })();

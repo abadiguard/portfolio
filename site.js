@@ -269,11 +269,11 @@
       <img src="site-assets/menu-close.svg" width="12" height="12" alt="">
     </button>
     <nav aria-label="Main navigation">
-      <a href="index.html#home">Home</a>
-      <a href="index.html#work">Case studies</a>
+      <a href="https://www.abadiguard.com/#home">Home</a>
+      <a href="https://www.abadiguard.com/#work">Case studies</a>
       <a href="deconstructed.html">Notes on UX</a>
       <a href="faq.html">Questions, answered</a>
-      <a href="index.html#contact">Are we a good fit?</a>
+      <a href="https://www.abadiguard.com/#contact">Are we a good fit?</a>
     </nav>`;
   document.body.append(trigger,menu);
 
@@ -501,4 +501,17 @@
   observer.observe(proof);
   readiness.observe(hero,{attributes:true,attributeFilter:['class']});
   reveal();
+})();
+
+// Local-file previews resolve the public homepage URL to this local website copy.
+(function(){
+  if(location.protocol!=='file:')return;
+  function localize(){
+    var base=new URL('.',location.href);
+    if(location.pathname.indexOf('/match-flow/')!==-1)base=new URL('../',base);
+    document.querySelectorAll('a[href^="https://www.abadiguard.com/"]').forEach(function(link){
+      var url=new URL(link.href);link.href=new URL((url.pathname==='/'?'index.html':url.pathname.slice(1))+url.search+url.hash,base).href;
+    });
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',localize);else localize();
 })();
