@@ -1817,7 +1817,15 @@ function show(i){
   notesLink?.addEventListener('click', event => {
     if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
     const notes = document.getElementById('dec-h').closest('section');
-    history.replaceState({ ...history.state, articleReturn: { offset: notes.getBoundingClientRect().top } }, '');
+    if (!notes.id) notes.id = 'notes-return-section';
+    history.replaceState({ ...history.state, articleReturn: { sectionId: notes.id || 'notes-return-section', offset: notes.getBoundingClientRect().top } }, '');
+  });
+  document.querySelectorAll('#case-cards a.card[href]').forEach(link => {
+    link.addEventListener('click', event => {
+      if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0 || link.target === '_blank') return;
+      const section = document.getElementById('work');
+      history.replaceState({ ...history.state, articleReturn: { sectionId: 'work', offset: section.getBoundingClientRect().top } }, '');
+    });
   });
   function finishArticleReturn() {
     if (!restoringArticleReturn) return;
@@ -1851,8 +1859,9 @@ function show(i){
       elevatorRunning = false;
       const restoreNotes = () => {
         if (!restoringArticleReturn) return;
-        const notes = document.getElementById('dec-h').closest('section');
-        scrollInstantly(window.scrollY + notes.getBoundingClientRect().top - history.state.articleReturn.offset);
+        const saved = history.state.articleReturn;
+        const section = document.getElementById(saved.sectionId) || document.getElementById('dec-h').closest('section');
+        scrollInstantly(window.scrollY + section.getBoundingClientRect().top - saved.offset);
       };
       restoreNotes();
       requestAnimationFrame(() => requestAnimationFrame(restoreNotes));
