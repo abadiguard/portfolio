@@ -827,3 +827,13 @@ html:has(.fit-site-menu[open]) { overflow:hidden; }
 
 /* Visual-only mismatch ends at step two; subsequent steps are subdued. */
 .fit-look .fit-progress li:nth-child(3):not(.fit-progress-marker) { border-color:#f2f3f6; background:#fff; }
+
+/* Keep site navigation separate from the questionnaire's page crossfade. */
+.fit-site-header { view-transition-name:fit-site-navigation; }
+.fit-site-logo > svg { display:block; width:95.04px; height:32.4px; }
+::view-transition-group(fit-site-navigation) { animation-duration:0s; }
+::view-transition-old(fit-site-navigation),
+::view-transition-new(fit-site-navigation) { animation:none; mix-blend-mode:normal; }
+::view-transition-old(fit-site-navigation) { visibility:hidden; }
+
+.fit-site-logo, .fit-site-logo:visited, .fit-site-logo:hover, .fit-site-logo:active { color:#000; }
