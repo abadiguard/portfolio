@@ -173,3 +173,14 @@
 
 /* Guesty sidebar sketches meet the following section without bottom spacing. */
 .case-study__image-section--contained.case-study__image-section--flush-bottom { padding-bottom:0; margin-bottom:0; }
+
+/* Landau's pink quote scales to phone width; desktop retains its 72px title. */
+@media (max-width:719.98px) {
+  #landau-promise-quote {
+    font-size:clamp(28px,8.5vw,40px) !important;
+    line-height:1.15;
+    max-width:100%;
+    overflow-wrap:normal;
+    text-wrap:balance;
+  }
+}

@@ -24,7 +24,7 @@
     try{var target=new URL(link.href,window.location.href);if(target.origin===window.location.origin&&target.pathname!==window.location.pathname)saveFinalState()}catch(e){}
   },true);
   function showFinalState(){
-    lines[0].textContent="DESIGN IS";lines[1].textContent="ABOUT SHAPING";lines[2].textContent="BEHAVIOR";
+    lines[0].textContent="DESIGN IS";lines[1].textContent="ABOUT SOLVING";lines[2].textContent="PROBLEMS";
     hero.classList.add("copy-reveal","copy-visible","arrow-reveal","intro-ready");
     completed=true;
   }
@@ -94,7 +94,7 @@
     moveCaret(third);
     setTimeout(function(){
       eraseLine(third,0,function(){eraseLine(second,0,function(){eraseLine(first,"DESIGN IS".length,function(){
-        setTimeout(function(){typeLine(second,"ABOUT SHAPING",function(){typeLine(third,"BEHAVIOR",function(){title.classList.remove("is-typing");caret.remove();setTimeout(finish,550)})})},420);
+        setTimeout(function(){typeLine(second,"ABOUT SOLVING",function(){typeLine(third,"PROBLEMS",function(){title.classList.remove("is-typing");caret.remove();setTimeout(finish,550)})})},420);
       })})});
     },1500);
   }
