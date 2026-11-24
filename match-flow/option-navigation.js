@@ -90,3 +90,38 @@
     });
   });
 })();
+
+
+/* A selected answer gently cues the next action across all radio screens. */
+(function(){
+  'use strict';
+  var reduced=matchMedia('(prefers-reduced-motion: reduce)');
+  document.querySelectorAll('.fit-question-form').forEach(function(form){
+    var next=form.querySelector('.fit-next');
+    if(!next)return;
+    var pulse=null,pending=null;
+    function stop(){
+      if(pending!==null)window.clearTimeout(pending);
+      pending=null;
+      if(pulse)pulse.cancel();
+      pulse=null;
+    }
+    function cue(attempt){
+      pending=null;
+      if(reduced.matches||next.disabled||next.getAttribute('aria-disabled')==='true'||typeof next.animate!=='function')return;
+      if(next.closest('[inert]')){
+        if(attempt<30)pending=window.setTimeout(function(){cue(attempt+1);},80);
+        return;
+      }
+      pulse=next.animate([{transform:'scale(1)'},{transform:'scale(1.1)',offset:.5},{transform:'scale(1)'}],{duration:700,easing:'ease-in-out'});
+    }
+    form.addEventListener('change',function(event){
+      if(!event.target.matches('.fit-option-input[type="radio"]'))return;
+      stop();
+      // Let the page's selection handler update Next before checking its state.
+      pending=window.setTimeout(function(){cue(0);},500);
+    });
+    window.addEventListener('pagehide',stop);
+    reduced.addEventListener('change',stop);
+  });
+})();
