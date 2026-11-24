@@ -788,3 +788,39 @@ html:has(.fit-site-menu[open]) { overflow:hidden; }
   @keyframes fit-nav-arrow-forward { 0%,100%{transform:translateX(2px)} 50%{transform:translateX(4px)} }
   @keyframes fit-nav-arrow-back { 0%,100%{transform:translateX(-2px)} 50%{transform:translateX(-4px)} }
 }
+
+/* Domain selection replaces the old dropdown with the shared illustrated radios. */
+.fit-sector:has(.fit-domain-rail) .fit-question-form { max-width:none; }
+.fit-domain-rail { position:relative; width:100%; max-width:1328px; margin:0 auto; padding-inline:40px; }
+.fit-sector .fit-domain-options { max-width:none; width:100%; margin-inline:0; }
+.fit-domain-page { position:absolute; z-index:3; top:50%; transform:translateY(-50%); width:32px; height:44px; display:grid; place-items:center; border:0; background:none; color:#9a9ea8; cursor:pointer; padding:0; }
+.fit-domain-page[hidden] { display:none; }
+.fit-domain-page-prev { left:0; }
+.fit-domain-page-prev svg { transform:scaleX(-1); }
+.fit-domain-page-next { right:0; }
+.fit-domain-page:hover { color:var(--gray); }
+.fit-domain-page:focus-visible { outline:2px solid var(--gray); outline-offset:2px; border-radius:4px; }
+@media (min-width:1136px) {
+  .fit-sector .fit-domain-options {
+    grid-auto-columns:calc((100% - 57.6px)/4);
+    column-gap:19.2px; padding-inline:0; scroll-padding-inline:0;
+    scroll-snap-type:x mandatory;
+  }
+  .fit-sector .fit-domain-options .fit-option { width:auto; }
+  .fit-sector .fit-domain-options .fit-option-body { width:100%; }
+}
+@media (max-width:1135px) {
+  .fit-domain-rail { padding-inline:0; }
+  .fit-domain-page { display:none; }
+  .fit-sector .fit-domain-options { width:calc(100% + 48px); margin-inline:-24px; }
+}
+.fit-domain-data-top,.fit-domain-data-bottom,.fit-domain-flow-start,.fit-domain-flow-upper,.fit-domain-flow-lower,
+.fit-domain-handle-back,.fit-domain-handle-front,.fit-domain-nfc,.fit-domain-shape-one,.fit-domain-shape-two,.fit-domain-shape-three { transform-box:fill-box; transform-origin:center; }
+.fit-domain-controller { transform-box:view-box; transform-origin:80px 130px; }
+.fit-domain-cap { transform-box:fill-box; transform-origin:center; }
+
+/* Preserve complete silhouettes throughout domain hover transformations. */
+.fit-domain-options .fit-option-icon { overflow:visible; }
+.fit-domain-options .fit-option-art { overflow:visible; }
+.fit-domain-options :is(.fit-domain-wave-0,.fit-domain-wave-1,.fit-domain-wave-2,.fit-domain-wave-3,.fit-domain-wave-new) { transform-box:fill-box; transform-origin:center; }
+.fit-domain-wave-new { opacity:0; }

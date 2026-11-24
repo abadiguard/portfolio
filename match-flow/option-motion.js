@@ -31,6 +31,28 @@
       add('.fit-audience-chart',[{transform:'translate(0px,0px)'},{transform:'translate(1.4px,-1.3px)'}],950);
       add('.fit-audience-copy',[{transform:'translate(0px,0px)',offset:0},{transform:'translate(0px,0px)',offset:.15},{transform:'translate(2.2px,.3px)'}],1000);
       add('.fit-audience-button',[{transform:'translate(0px,0px)',offset:0},{transform:'translate(0px,0px)',offset:.25},{transform:'translate(-1.2px,-1.4px)'}],1100);
+    }else if(kind==='ai-automation-productivity'){
+      add('.fit-domain-flow-start',[{transform:'translate(0,0)'},{transform:'translate(-2px,0)'}],750);
+      add('.fit-domain-flow-upper',[{transform:'translate(0,0)'},{transform:'translate(1px,-2px)'}],750);
+      add('.fit-domain-flow-lower',[{transform:'translate(0,0)'},{transform:'translate(1px,2px)'}],750);
+    }else if(kind==='fintech-insurtech'){
+      add('.fit-domain-wave-new',[{opacity:0,transform:'translateX(-3px) scaleY(.35)'},{opacity:1,transform:'translateX(0) scaleY(1)'}],800);
+      [0,1,2].forEach(function(i){add('.fit-domain-wave-'+i,[{transform:'translateX(0) scaleY(1)'},{transform:'translateX(3.6px) scaleY(1.3)'}],800);});
+      add('.fit-domain-wave-3',[{opacity:1,transform:'translateX(0)'},{opacity:0,transform:'translateX(3.6px)'}],800);
+    }else if(kind==='cybersecurity-data'){
+      add('.fit-domain-data-top',[{transform:'translateY(0)'},{transform:'translateY(-3px)'}],750);
+      add('.fit-domain-data-bottom',[{transform:'translateY(0)'},{transform:'translateY(3px)'}],750);
+    }else if(kind==='ecommerce-marketplaces'){
+      add('.fit-domain-handle-back',[{transform:'translate(0,0)'},{transform:'translate(1.5px,-1px)'}],750);
+      add('.fit-domain-handle-front',[{transform:'translate(0,0)'},{transform:'translate(-1.5px,1px)'}],750);
+    }else if(kind==='gaming-entertainment'){
+      add('.fit-domain-controller',[{transform:'rotate(0deg)'},{transform:'rotate(-3deg)',offset:.32},{transform:'rotate(3deg)',offset:.72},{transform:'rotate(0deg)'}],1100);
+    }else if(kind==='healthtech-medtech'){
+      add('.fit-domain-cap-grooves',[{transform:'translateX(0px)'},{transform:'translateX(3.15px)'}],850);
+    }else if(kind==='other'){
+      add('.fit-domain-shape-one',[{transform:'translate(0,0)'},{transform:'translate(-1.5px,-1.5px)'}],800);
+      add('.fit-domain-shape-two',[{transform:'translate(0,0)'},{transform:'translate(1.5px,-1.5px)'}],800);
+      add('.fit-domain-shape-three',[{transform:'translateY(0)'},{transform:'translateY(2px)'}],800);
     }else if(['exactly','smaller-scope','look-only'].includes(kind)){
       add('.fit-tool-ruler',[{transform:'rotate(0deg)'},{transform:'rotate(-2deg)'}],650);
       add('.fit-tool-scissors',[{transform:'rotate(0deg)'},{transform:'rotate(1.7deg)'}],700);
