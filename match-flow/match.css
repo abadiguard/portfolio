@@ -842,3 +842,11 @@ html:has(.fit-site-menu[open]) { overflow:hidden; }
 /* Visual-only response: all remaining steps (3–5) are subdued. */
 .fit-look .fit-progress::before { background:linear-gradient(to right,#D3D8E4 25%,#f2f3f6 25%); }
 .fit-look .fit-progress-managed li:nth-child(3):not(.fit-progress-marker) { border-color:#f2f3f6; background:#fff; }
+
+/* Fade the remaining track and circles instead of switching their colors. */
+.fit-question .fit-progress-managed::before { background:#D3D8E4; }
+.fit-look .fit-progress-managed li:nth-child(n+3):not(.fit-progress-marker) { border-color:#D3D8E4; }
+.fit-progress-tail-mask { position:absolute; left:44px; top:7px; width:114px; height:2px; background:#fff; z-index:0; pointer-events:none; }
+.fit-progress-moving-line { z-index:1; }
+.fit-question .fit-progress-managed li:not(.fit-progress-marker) { z-index:2; }
+.fit-question .fit-progress-managed .fit-progress-marker { z-index:3; }

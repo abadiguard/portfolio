@@ -17,6 +17,7 @@
   var reduced=matchMedia('(prefers-reduced-motion: reduce)');
   var animations=[];
   var stopped=false;
+  var epoch=0;
   function revealEverything(){
     stopped=true;
     animations.forEach(function(animation){animation.cancel();});
@@ -36,28 +37,41 @@
   }
   function wait(duration){return new Promise(function(resolve){window.setTimeout(resolve,duration);});}
   async function enter(){
+    var token=++epoch;
     try{
       if(document.fonts)await document.fonts.ready;
-      if(stopped)return;
+      if(stopped||token!==epoch)return;
       document.dispatchEvent(new Event('fit:before-enter'));
       await Promise.all(headingNodes.map(function(node,index){return fade(node,550,index*80);}));
-      if(stopped)return;
+      if(stopped||token!==epoch)return;
       if(progress){
         progress.classList.add('is-progress-advanced');
         var matchRays=main.classList.contains('fit-sector-result')&&progress.querySelector('.fit-match-rays:not([hidden])');
         // Final result waits for both the marker travel (760ms) and rays (720ms).
         var moved=window.FitProgressMotion?window.FitProgressMotion.play():true;
         await wait(matchRays?1480:(moved?780:0));
-        if(stopped)return;
+        if(stopped||token!==epoch)return;
       }
       await Promise.all(options.map(function(option,index){return fade(option,480,index*180);}));
-      if(stopped)return;
+      if(stopped||token!==epoch)return;
       await wait(120);
-      if(stopped)return;
+      if(stopped||token!==epoch)return;
       if(navigation)await fade(navigation,420);
-    }catch(error){revealEverything();}
+    }catch(error){if(!stopped&&token===epoch)revealEverything();}
   }
   enter();
   reduced.addEventListener('change',function(){if(reduced.matches)revealEverything();});
-  window.addEventListener('pageshow',function(event){if(event.persisted)revealEverything();});
+  window.addEventListener('pagehide',function(){
+    stopped=true;epoch++;
+    animations.forEach(function(animation){animation.cancel();});animations=[];
+    nodes.forEach(function(node){node.style.opacity='0';node.inert=true;});
+  });
+  window.addEventListener('pageshow',function(event){
+    if(!event.persisted)return;
+    if(window.FitProgressMotion)window.FitProgressMotion.prepare();
+    if(reduced.matches){revealEverything();return;}
+    animations.forEach(function(animation){animation.cancel();});animations=[];stopped=false;
+    nodes.forEach(function(node){node.style.opacity='0';node.inert=true;});
+    enter();
+  });
 })();
