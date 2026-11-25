@@ -850,3 +850,6 @@ html:has(.fit-site-menu[open]) { overflow:hidden; }
 .fit-progress-moving-line { z-index:1; }
 .fit-question .fit-progress-managed li:not(.fit-progress-marker) { z-index:2; }
 .fit-question .fit-progress-managed .fit-progress-marker { z-index:3; }
+
+/* Readable unselected answer text; illustration colors and selected states are unchanged. */
+.fit-option:has(.fit-option-input:not(:checked)) :is(.fit-option-title,.fit-option-copy) { color:#707580; }
