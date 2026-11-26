@@ -15,3 +15,6 @@
   .match-entry .fit-subtitle > span { display:inline; text-wrap:inherit; }
   .match-entry .fit-subtitle > span + span::before { content:' '; }
 }
+
+/* The homepage fit section follows the grey case studies on a white background. */
+#contact.match-entry--home { background:#fff; }
