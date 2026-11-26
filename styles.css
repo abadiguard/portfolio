@@ -619,3 +619,57 @@ html { -webkit-tap-highlight-color:transparent; }
 :where(a,button,[tabindex]):focus:not(:focus-visible) { outline:none; }
 :where(a,button,[tabindex]):focus-visible { outline-color:#24272d; }
 section[tabindex="-1"]:focus { outline:none; }
+
+/* Notes post titles and summaries share a comfortable 24px line height. */
+.posts .pt h3, .posts .pt p { line-height:24px; }
+
+/* Hebrew post tags align right and balance naturally across available rows. */
+.ptags[lang="he"] { direction:rtl; justify-content:flex-start; }
+.ptags[lang="he"] .ptag { font-family:"Noto Sans Hebrew",var(--f); letter-spacing:0; }
+
+/* Notes on UX: refined badges, semibold post titles and metadata spacing. */
+.posts .ptag { font-size:12px; }
+.posts .pt h3 { font-size:22px; line-height:28px; font-weight:600; }
+.posts .pmeta { margin-bottom:18px; }
+
+/* Notes cards: image-to-metadata spacing and consistent content rhythm. */
+.posts .pt {padding-top:24px}
+.posts .pmeta {margin-bottom:20px;min-height:16px}
+.posts .pmeta--linkedin .psrc {flex-direction:row-reverse;gap:12px;direction:ltr}
+.posts .plinkedin,.posts .plinkedin svg {display:block;width:16px;height:16px;flex-shrink:0}
+.posts .pst {display:inline-flex;align-items:center;gap:4px;direction:ltr;opacity:1;line-height:16px}
+.posts .pst svg {width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.2;stroke-linecap:round;stroke-linejoin:round}
+.posts .plink {display:flex;flex-direction:column;gap:20px}
+.posts .pt h3,.posts .pt p {margin:0}
+.posts .pt p {font-size:14px!important;line-height:24px}
+.posts .ptags {margin-top:20px}
+.posts .ptag {font-weight:500}
+
+/* Keep linked post indicators visually consistent with the metadata row. */
+.posts a.pmeta--linkedin {color:inherit;text-decoration:none}
+
+/* Notes tags wrap naturally; spacing adapts only when needed for two rows. */
+.posts .ptags {display:flex;flex-direction:row;flex-wrap:wrap;justify-content:flex-start;align-items:center;column-gap:var(--notes-tag-gap,8px);row-gap:8px;direction:rtl}
+.posts .ptags .ptag {padding-inline:var(--notes-tag-padding,11px)}
+
+/* Notes on UX post tag background. */
+.posts .ptag {background:#f7f7f7}
+
+/* Outline stays outside the tag without affecting wrapping. */
+.posts .ptag {outline:1px solid #e8ebf0;outline-offset:0}
+
+/* Publication indicators share the LinkedIn metadata typography and icon sizing. */
+.posts .pmeta {font-family:var(--f);font-size:14px;font-weight:400}
+.posts a.pmeta--collective {color:inherit;text-decoration:none;flex-direction:row}
+.posts .pmeta--collective .psrc {direction:ltr;gap:16px}
+.posts .post-publication {display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.posts .post-publication img {display:block;width:16px;height:16px;object-fit:contain;flex-shrink:0}
+
+/* English UX Collective cards: align metadata and tag rows to the left. */
+.posts .pt[dir="ltr"] {text-align:left}
+.posts .pt[dir="ltr"] .pmeta--collective {justify-content:flex-start;direction:ltr}
+.posts .pt[dir="ltr"] .ptags {direction:ltr;justify-content:flex-start}
+
+/* Keep each summary arrow with its final word, with a small visual gap. */
+.posts .post-ending {white-space:nowrap}
+.posts .post-arrow-gap {display:inline-block;margin-inline-start:6px}
