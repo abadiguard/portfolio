@@ -7,6 +7,86 @@
       "source": "/index.html",
       "destination": "/",
       "permanent": true
+    },
+    {
+      "source": "/comedy",
+      "destination": "/comedy.html",
+      "permanent": true
+    },
+    {
+      "source": "/deconstructed",
+      "destination": "/deconstructed.html",
+      "permanent": true
+    },
+    {
+      "source": "/faq",
+      "destination": "/faq.html",
+      "permanent": true
+    },
+    {
+      "source": "/guesty-hr",
+      "destination": "/guesty-hr.html",
+      "permanent": true
+    },
+    {
+      "source": "/guesty-mc-inbox",
+      "destination": "/guesty-mc-inbox.html",
+      "permanent": true
+    },
+    {
+      "source": "/index",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/jpegmini",
+      "destination": "/jpegmini.html",
+      "permanent": true
+    },
+    {
+      "source": "/landau",
+      "destination": "/landau.html",
+      "permanent": true
+    },
+    {
+      "source": "/lexense-intake",
+      "destination": "/lexense-intake.html",
+      "permanent": true
+    },
+    {
+      "source": "/match-flow/approach",
+      "destination": "/match-flow/approach.html",
+      "permanent": true
+    },
+    {
+      "source": "/match-flow/audience",
+      "destination": "/match-flow/audience.html",
+      "permanent": true
+    },
+    {
+      "source": "/match-flow/look",
+      "destination": "/match-flow/look.html",
+      "permanent": true
+    },
+    {
+      "source": "/match-flow/sector-result",
+      "destination": "/match-flow/sector-result.html",
+      "permanent": true
+    },
+    {
+      "source": "/match-flow/sector",
+      "destination": "/match-flow/sector.html",
+      "permanent": true
+    },
+    {
+      "source": "/match-flow/stage-response",
+      "destination": "/match-flow/stage-response.html",
+      "permanent": true
+    },
+    {
+      "source": "/match-flow/stage",
+      "destination": "/match-flow/stage.html",
+      "permanent": true
     }
   ]
 }

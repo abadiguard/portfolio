@@ -673,3 +673,13 @@ section[tabindex="-1"]:focus { outline:none; }
 /* Keep each summary arrow with its final word, with a small visual gap. */
 .posts .post-ending {white-space:nowrap}
 .posts .post-arrow-gap {display:inline-block;margin-inline-start:6px}
+
+/* Keep UX Collective metadata in a left-to-right row, including page overrides. */
+.posts .pt[dir="ltr"] a.pmeta--collective {display:flex;flex-direction:row;direction:ltr;justify-content:flex-start;text-align:left}
+
+/* Summary arrows use the site's existing delayed, gentle navigation motion. */
+@media (prefers-reduced-motion:no-preference) {
+ .posts .post-arrow-gap {transform:translateX(0);transition:transform .2s ease .2s}
+ .posts .pt[dir="rtl"] .plink:is(:hover,:focus-visible) .post-arrow-gap {transform:translateX(-2px);animation:more-arrow-wiggle-back .9s ease-in-out .4s infinite}
+ .posts .pt[dir="ltr"] .plink:is(:hover,:focus-visible) .post-arrow-gap {transform:translateX(2px);animation:more-arrow-wiggle .9s ease-in-out .4s infinite}
+}
