@@ -15,7 +15,7 @@
     },
     {
       "source": "/deconstructed",
-      "destination": "/deconstructed.html",
+      "destination": "/notes",
       "permanent": true
     },
     {
@@ -87,6 +87,22 @@
       "source": "/match-flow/stage",
       "destination": "/match-flow/stage.html",
       "permanent": true
+    },
+    {
+      "source": "/deconstructed.html",
+      "destination": "/notes",
+      "permanent": true
+    },
+    {
+      "source": "/notes.html",
+      "destination": "/notes",
+      "permanent": true
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/notes",
+      "destination": "/deconstructed.html"
     }
   ]
 }

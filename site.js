@@ -271,7 +271,7 @@
     <nav aria-label="Main navigation">
       <a href="https://www.abadiguard.com/#home">Home</a>
       <a href="https://www.abadiguard.com/#work">Case studies</a>
-      <a href="deconstructed.html">Notes on UX</a>
+      <a href="${location.protocol === 'file:' ? 'deconstructed.html' : '/notes'}">Notes on UX</a>
       <a href="faq.html">Questions, answered</a>
       <a href="https://www.abadiguard.com/#contact">Are we a good fit?</a>
     </nav>`;
