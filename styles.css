@@ -643,14 +643,14 @@ section[tabindex="-1"]:focus { outline:none; }
 .posts .pt h3,.posts .pt p {margin:0}
 .posts .pt p {font-size:14px!important;line-height:24px}
 .posts .ptags {margin-top:20px}
-.posts .ptag {font-weight:500}
+.posts .ptag {font-weight:400}
 
 /* Keep linked post indicators visually consistent with the metadata row. */
 .posts a.pmeta--linkedin {color:inherit;text-decoration:none}
 
-/* Notes tags wrap naturally; spacing adapts only when needed for two rows. */
-.posts .ptags {display:flex;flex-direction:row;flex-wrap:wrap;justify-content:flex-start;align-items:center;column-gap:var(--notes-tag-gap,8px);row-gap:8px;direction:rtl}
-.posts .ptags .ptag {padding-inline:var(--notes-tag-padding,11px)}
+/* Notes tags wrap naturally with fixed, equal horizontal padding and gaps. */
+.posts .ptags {display:flex;flex-direction:row;flex-wrap:wrap;justify-content:flex-start;align-items:center;column-gap:8px;row-gap:8px;direction:rtl}
+.posts .ptags .ptag {padding-inline:11px;flex-shrink:0}
 
 /* Notes on UX post tag background. */
 .posts .ptag {background:#f7f7f7}
@@ -683,3 +683,95 @@ section[tabindex="-1"]:focus { outline:none; }
  .posts .pt[dir="rtl"] .plink:is(:hover,:focus-visible) .post-arrow-gap {transform:translateX(-2px);animation:more-arrow-wiggle-back .9s ease-in-out .4s infinite}
  .posts .pt[dir="ltr"] .plink:is(:hover,:focus-visible) .post-arrow-gap {transform:translateX(2px);animation:more-arrow-wiggle .9s ease-in-out .4s infinite}
 }
+
+/* English topic labels retain each card's existing text-side alignment. */
+.posts .ptags[lang="en"] {direction:ltr}
+.posts .pt[dir="rtl"] .ptags[lang="en"] {justify-content:flex-end}
+.posts .pt[dir="ltr"] .ptags[lang="en"] {justify-content:flex-start}
+.posts .ptags[lang="en"] .ptag {font-family:var(--f);letter-spacing:0}
+
+/* One topic-chip definition for posts, active filters and the filter dialog. */
+:root {--notes-topic-size:12px;--notes-topic-weight:400;--notes-topic-py:5px;--notes-topic-px:11px;--notes-topic-gap:8px}
+.notes-topic,.posts .ptags .notes-topic {
+ box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;gap:6px;
+ margin:0;padding:var(--notes-topic-py) var(--notes-topic-px);min-height:28px;
+ font:var(--notes-topic-weight) var(--notes-topic-size)/18px var(--f);letter-spacing:0;
+ color:var(--gray,#24272d);background:#f7f7f7;border:0;border-radius:999px;
+ outline:1px solid #e8ebf0;outline-offset:0;white-space:nowrap;flex-shrink:0;
+ transition:background-color .22s ease,outline-color .22s ease,color .22s ease;
+}
+button.notes-topic {cursor:pointer}
+.notes-topic.is-selected {background:var(--yellow,#ffdf6b);outline-color:#f5c83d}
+.notes-topic-remove {display:none;align-items:center;justify-content:center;width:10px;height:12px;flex:none}
+.notes-topic.is-selected .notes-topic-remove {display:inline-flex}
+.notes-topic:focus-visible {outline:2px solid #24272d;outline-offset:3px}
+.notes-page .ptags {gap:var(--notes-topic-gap)}
+.notes-page .post[hidden],.notes-active-tags[hidden],.notes-filter-count[hidden],.notes-filter-empty[hidden] {display:none}
+.notes-filter-toolbar {width:100%;max-width:1155px;margin-top:64px;display:flex;flex-direction:column;align-items:center;gap:24px}
+.notes-filter-trigger {border:0;background:none;padding:10px 12px;color:var(--gray,#24272d);font:500 16px/24px var(--f);display:inline-flex;align-items:center;gap:12px;cursor:pointer;border-radius:6px;transition:background-color .2s ease}
+.notes-filter-trigger img {display:block;width:20px;height:auto}
+.notes-filter-count {font:400 12px/18px var(--f)}
+.notes-active-tags {display:flex;flex-wrap:wrap;justify-content:center;gap:var(--notes-topic-gap);width:100%}
+.notes-page .posts {margin-top:64px}
+.notes-filter-empty {font:400 16px/24px var(--f);margin:40px auto 0}
+body.notes-filter-open {overflow:hidden}
+.notes-filter-dialog {
+ box-sizing:border-box;padding:0;border:0;border-radius:8px;width:min(624px,calc(100vw - 48px));
+ max-width:none;max-height:calc(100dvh - 64px);margin:auto;background:white;color:#24272d;
+ box-shadow:0 20px 70px #0002;text-align:left;overflow:hidden;
+}
+.notes-filter-dialog::backdrop {background:rgb(0 0 0 / 24%);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+.notes-filter-panel {display:grid;grid-template-rows:auto minmax(0,1fr) auto;max-height:calc(100dvh - 64px)}
+.notes-filter-head {margin:0 32px;padding:32px 0;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #d4d9e3;gap:16px}
+.notes-filter-head h2 {margin:0;font:500 18px/24px var(--f);text-transform:none}
+.notes-filter-close {border:0;background:none;color:inherit;width:32px;height:32px;margin:-4px -8px -4px 0;display:grid;place-items:center;cursor:pointer;border-radius:4px}
+.notes-filter-options {min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:32px;scrollbar-width:thin;scrollbar-color:#d4d9e3 transparent}
+.notes-filter-group {margin:0;padding:0;text-align:left}
+.notes-filter-group + .notes-filter-group {margin-top:32px}
+.notes-filter-group h3 {margin:0 0 16px;font:500 14px/20px var(--f);text-transform:none}
+.notes-filter-tags {display:flex;flex-wrap:wrap;gap:var(--notes-topic-gap);align-items:center;direction:ltr}
+.notes-filter-actions {display:flex;align-items:center;justify-content:space-between;gap:24px;padding:32px 32px 32px;margin:0;background:#fff;box-shadow:0 -12px 22px #ffffffed;position:relative;z-index:1}
+.notes-filter-clear {font:400 14px/20px var(--f);color:inherit;border:0;background:none;padding:12px 0;cursor:pointer;white-space:nowrap}
+.notes-filter-clear:disabled {opacity:.45;cursor:default}
+.notes-filter-apply {display:inline-flex;align-items:center;justify-content:center;gap:12px;background:var(--yellow,#ffdf6b);color:#24272d;border:0;border-radius:8px;padding:18px 24px;min-height:58px;cursor:pointer;font:500 14px/22px var(--f)}
+.notes-filter-arrow {display:inline-flex;transition:transform .2s ease .2s}
+.notes-filter-apply:focus-visible,.notes-filter-clear:focus-visible,.notes-filter-close:focus-visible,.notes-filter-trigger:focus-visible {outline:2px solid #24272d;outline-offset:4px}
+@media(hover:hover) {.notes-filter-trigger:hover,.notes-filter-close:hover {background:#f7f7f7}button.notes-topic:not(.is-selected):hover {background:#eceef2}}
+@media(prefers-reduced-motion:no-preference) {
+ .notes-filter-dialog[open] {animation:notes-dialog-enter .28s cubic-bezier(.22,.61,.36,1) both}
+ .notes-filter-dialog[open]::backdrop {animation:notes-backdrop-enter .24s ease both}
+ .notes-filter-dialog.is-closing {animation:notes-dialog-exit .18s ease both}
+ .notes-filter-dialog.is-closing::backdrop {animation:notes-backdrop-exit .18s ease both}
+ .notes-filter-apply:is(:hover,:focus-visible) .notes-filter-arrow {transform:translateX(2px);animation:more-arrow-wiggle .9s ease-in-out .4s infinite}
+ @keyframes notes-dialog-enter {from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+ @keyframes notes-dialog-exit {to{opacity:0;transform:translateY(6px)}}
+ @keyframes notes-backdrop-enter {from{background:rgb(0 0 0 / 0%);backdrop-filter:blur(0)}to{background:rgb(0 0 0 / 24%);backdrop-filter:blur(3px)}}
+ @keyframes notes-backdrop-exit {to{background:rgb(0 0 0 / 0%);backdrop-filter:blur(0)}}
+}
+@media(max-width:720px) {
+ .notes-filter-toolbar {margin-top:40px;gap:20px}
+ .notes-page .posts {margin-top:48px}
+ .notes-filter-dialog {width:100%;height:100dvh;max-height:100dvh;border-radius:0;margin:0}
+ .notes-filter-panel {height:100%;max-height:100dvh}
+ .notes-filter-head {margin:0 24px;padding:calc(24px + env(safe-area-inset-top)) 0 24px}
+ .notes-filter-options {padding:28px 24px}
+ .notes-filter-actions {padding:32px 24px calc(24px + env(safe-area-inset-bottom));gap:16px}
+ .notes-filter-apply {padding:16px 20px;min-height:54px}
+}
+@media(prefers-reduced-motion:reduce) {.notes-topic,.notes-filter-trigger,.notes-filter-arrow {transition:none}}
+
+/* Fade the last visible topics into the fixed actions while more remain below. */
+.notes-filter-actions {box-shadow:none}
+.notes-filter-actions::before {
+ content:"";position:absolute;left:0;right:0;bottom:100%;height:48px;
+ background:linear-gradient(to bottom,rgba(247,247,247,0),rgba(247,247,247,.88) 72%,#f7f7f7);
+ pointer-events:none;opacity:0;transition:opacity .22s ease;
+}
+.notes-filter-dialog.has-more-topics .notes-filter-actions::before {opacity:1}
+@media(prefers-reduced-motion:reduce) {.notes-filter-actions::before {transition:none}}
+
+/* Align topic text with the chip and removal icon without moving either. */
+.notes-topic-label {display:inline-block;transform:translateY(-1px)}
+
+/* Fill result rows from the right and preserve card widths after filtering. */
+.notes-page .posts {direction:rtl;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr))}
