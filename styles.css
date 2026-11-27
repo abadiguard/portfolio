@@ -775,3 +775,6 @@ body.notes-filter-open {overflow:hidden}
 
 /* Fill result rows from the right and preserve card widths after filtering. */
 .notes-page .posts {direction:rtl;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr))}
+
+/* Slightly more breathing room between topic rows. */
+.notes-page .ptags,.notes-filter-tags {row-gap:9px}
